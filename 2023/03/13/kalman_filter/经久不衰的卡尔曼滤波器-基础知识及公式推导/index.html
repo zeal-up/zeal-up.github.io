@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="一、卡尔曼滤波器的应用场景 卡尔曼滤波器之前被广泛用来做动态系统的状态估计、预测。主要的目的就是用来从带噪声的观测量，比如各种传感器的观测（IMU、GPS、里程计等）估计出最优的系统状态（state）。不过要明确强调的是，由于测量都带有噪声，也就是随机性，所以真正准确的状态是无法获知的。 最小二乘法可以从一长串的测量值回归出一个最为匹配的模型。卡尔曼滤波相比于最小二乘法，采用了一种递归的计算方式，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="经久不衰的卡尔曼滤波器-基础知识及公式推导">
+<meta property="og:url" content="https://zeal-up.github.io/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="一、卡尔曼滤波器的应用场景 卡尔曼滤波器之前被广泛用来做动态系统的状态估计、预测。主要的目的就是用来从带噪声的观测量，比如各种传感器的观测（IMU、GPS、里程计等）估计出最优的系统状态（state）。不过要明确强调的是，由于测量都带有噪声，也就是随机性，所以真正准确的状态是无法获知的。 最小二乘法可以从一长串的测量值回归出一个最为匹配的模型。卡尔曼滤波相比于最小二乘法，采用了一种递归的计算方式，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/imgs/framework.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/imgs/gaussian.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/imgs/joint_gaussian.png">
+<meta property="article:published_time" content="2023-03-13T09:59:59.000Z">
+<meta property="article:modified_time" content="2023-03-13T10:06:45.611Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="KalmanFilter">
+<meta property="article:tag" content="filter">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/imgs/framework.png">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/","path":"2023/03/13/kalman_filter/经久不衰的卡尔曼滤波器-基础知识及公式推导/","title":"经久不衰的卡尔曼滤波器-基础知识及公式推导"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>经久不衰的卡尔曼滤波器-基础知识及公式推导 | Zeal's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">一、卡尔曼滤波器的应用场景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8%E7%9A%84%E4%B8%A4%E4%B8%AA%E6%AD%A5%E9%AA%A4%E5%AE%8F%E8%A7%82%E8%AE%A4%E8%AF%86"><span class="nav-number">2.</span> <span class="nav-text">二、卡尔曼滤波器的两个步骤——宏观认识</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E7%9A%84%E5%87%A0%E5%A4%A7%E6%A6%82%E5%BF%B5"><span class="nav-number">3.</span> <span class="nav-text">三、卡尔曼滤波的几大概念</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E5%90%91%E9%87%8Fstate-vector"><span class="nav-number">3.1.</span> <span class="nav-text">1、状态向量State Vector</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E6%96%B9%E7%A8%8B%E9%A2%84%E6%B5%8B%E6%96%B9%E7%A8%8B"><span class="nav-number">3.2.</span> <span class="nav-text">2、状态方程&amp;&amp;预测方程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8A%B6%E6%80%81%E6%96%B9%E7%A8%8B"><span class="nav-number">3.2.1.</span> <span class="nav-text">状态方程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E6%B5%8B%E6%96%B9%E7%A8%8B"><span class="nav-number">3.2.2.</span> <span class="nav-text">预测方程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%90%86%E8%A7%A3%E9%A2%84%E6%B5%8B%E6%96%B9%E7%A8%8B"><span class="nav-number">3.2.3.</span> <span class="nav-text">理解预测方程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E9%87%8F%E6%96%B9%E7%A8%8B%E6%B5%8B%E9%87%8F%E4%BC%B0%E8%AE%A1%E6%96%B9%E7%A8%8B"><span class="nav-number">3.3.</span> <span class="nav-text">3、测量方程&amp;&amp;测量估计方程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E9%87%8F%E6%96%B9%E7%A8%8B"><span class="nav-number">3.3.1.</span> <span class="nav-text">测量方程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E9%87%8F%E4%BC%B0%E8%AE%A1%E6%96%B9%E7%A8%8B"><span class="nav-number">3.3.2.</span> <span class="nav-text">测量估计方程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E9%87%8F%E6%9B%B4%E6%96%B0%E6%96%B9%E7%A8%8B"><span class="nav-number">3.4.</span> <span class="nav-text">4、测量更新方程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B%E8%AF%AF%E5%B7%AE%E5%92%8C%E5%8D%8F%E6%96%B9%E5%B7%AE%E7%9F%A9%E9%98%B5"><span class="nav-number">4.</span> <span class="nav-text">四、误差和协方差矩阵</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94%E6%9B%B4%E6%96%B0%E6%96%B9%E7%A8%8B%E7%9A%84%E6%8E%A8%E5%AF%BC"><span class="nav-number">5.</span> <span class="nav-text">五、更新方程的推导</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">六、总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BD%AC%E8%BD%BD%E9%A1%BB%E7%9F%A5"><span class="nav-number">7.</span> <span class="nav-text">转载须知</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="经久不衰的卡尔曼滤波器-基础知识及公式推导 | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          经久不衰的卡尔曼滤波器-基础知识及公式推导
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-03-13 17:59:59 / 修改时间：18:06:45" itemprop="dateCreated datePublished" datetime="2023-03-13T17:59:59+08:00">2023-03-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/%E6%BB%A4%E6%B3%A2/" itemprop="url" rel="index"><span itemprop="name">滤波</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/%E6%BB%A4%E6%B3%A2/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2/" itemprop="url" rel="index"><span itemprop="name">卡尔曼滤波</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="一卡尔曼滤波器的应用场景">一、卡尔曼滤波器的应用场景</h1>
+<p>卡尔曼滤波器之前被广泛用来做动态系统的状态估计、预测。主要的目的就是用来从带噪声的观测量，比如各种传感器的观测（IMU、GPS、里程计等）估计出最优的系统状态（state）。不过要明确强调的是，由于测量都带有噪声，也就是随机性，所以真正准确的状态是无法获知的。</p>
+<p>最小二乘法可以从一长串的测量值回归出一个最为匹配的模型。卡尔曼滤波相比于最小二乘法，采用了一种递归的计算方式，也就是每一时刻只需要保存上一时刻的状态。因此可以被用来处理实时任务。</p>
+<p>虽然卡尔曼滤波器从美国阿波罗登月计划到如今已有几十年，且目前有更先进的因子图（Factor Graph）算法，但是在很多领域依旧可以看到卡尔曼滤波器的身影，特别是在自动驾驶的各个模块，比如：从IMU的数据（三轴加速度，三轴角速度）计算出运动物体的当前位置。</p>
+<h1 id="二卡尔曼滤波器的两个步骤宏观认识">二、卡尔曼滤波器的两个步骤——宏观认识</h1>
+<p>卡尔曼滤波包含两个步骤</p>
+<ol type="1">
+<li>预测（prediction）—— Dynamic model</li>
+<li>更新（correction/measurment update）—— Observation model</li>
+</ol>
+<p>所谓<strong>预测</strong>，就是用一个数学模型，根据当前的传感器输入，直接计算此时系统的状态。可以理解为一个方程的计算就行。</p>
+<p>所谓的<strong>更新</strong>，就是在某些时刻或者每一时刻，获取一些系统的状态输入（可以同样是传感器的值），甚至是<strong>预测</strong>阶段中同样的传感器的值，将其当作真值，我们将这个值叫做<strong>测量值</strong>。比较此刻<strong>预测</strong>的系统状态和<strong>测量</strong>的系统状态，对<strong>预测</strong>出的系统状态进行修正，因此也叫<strong>测量更新</strong>（measurment update）。</p>
+<figure>
+<img src="./imgs/framework.png" alt="" /><figcaption>framework</figcaption>
+</figure>
+<h1 id="三卡尔曼滤波的几大概念">三、卡尔曼滤波的几大概念</h1>
+<h2 id="状态向量state-vector">1、状态向量State Vector</h2>
+<p>系统的状态向量包含了系统中我们关心的状态变量，比如速度<span class="math inline">\(\textbf{v}=[v_x, v_y,v_z]\)</span>，距离<span class="math inline">\(\textbf{d}=[d_x, d_y,d_z]\)</span>，加速度<span class="math inline">\(\textbf{a}=[a_x,a_y,a_z]\)</span>等。我们用<span class="math inline">\(\textbf{x}\)</span>表示系统向量 <span class="math display">\[ \textbf{x} = \begin{bmatrix} \textbf{d}\\ \textbf{v}\\ \textbf{a} \end{bmatrix}\\\]</span></p>
+<p>因为卡尔曼滤波有两个步骤，我们先以每个时刻都进行测量和修正这两个步骤作为讲解。那么，每一时刻的两个步骤的输出对应两个系统向量，一个是预测的系统向量<span class="math inline">\(\textbf{x}^-\)</span>，一个是修正后的系统向量<span class="math inline">\(\textbf{x}^+\)</span>。</p>
+<p><strong><em><strong>ps</strong>:大写字母表示矩阵；小写加粗字母表示向量；小写字母表示变量</em></strong></p>
+<h2 id="状态方程预测方程">2、状态方程&amp;&amp;预测方程</h2>
+<h3 id="状态方程">状态方程</h3>
+<p><strong>状态方程</strong>描述了将上一时刻的状态向量<span class="math inline">\(\textbf{x}_{t-1}\)</span>映射到当前的系统状态<span class="math inline">\(\textbf{x}_t\)</span> <span class="math display">\[ \textbf{x}_t = A_t\textbf{x}_{t-1}+ B_t\textbf{u}_t+\textbf{w}_t \tag{1}\]</span></p>
+<p>其中，矩阵<span class="math inline">\(A\)</span>称为转换矩阵（Transition Matrix），<span class="math inline">\(\textbf{u}_t\)</span>是当前时刻的系统输入，矩阵<span class="math inline">\(B\)</span>称为控制矩阵（Control Matrix）反映了系统输入到系统状态的映射关系，<span class="math inline">\(\textbf{w}_t\)</span>是过程噪声，我们假定其符合均值为0，协方差矩阵为<span class="math inline">\(Q_t\)</span>的高斯噪声。这里要注意的有几点：</p>
+<ol type="1">
+<li>矩阵<span class="math inline">\(A、B\)</span>都随着时间演进进行更新</li>
+<li>从公式1的形式可以看出，卡尔曼滤波的数学建模形式是线性方程，这也是卡尔曼滤波的限制之一。扩展卡尔曼滤波器（Extended Kalman Filter）支持非线性模型。</li>
+<li>这里的状态方程是一个“准确”的表达，因为不准确的部分已经放在噪声项中，要跟下面的预测方程区分开来。这个“准确”的表达由于有噪声（随机向量），所以我们没办法使用它作为输出，只能用它来分析、推导。</li>
+</ol>
+<h3 id="预测方程">预测方程</h3>
+<p><strong>预测方程</strong>跟状态方程基本一样，要强调的一点是，噪声<span class="math inline">\(\textbf{w}_t\)</span>是均值为0的高斯噪声，因此最大概率对应的值为0，因此我们在预测状态向量的时候其实不用管最后一项 <span class="math display">\[ \hat{\textbf{x}}^-_t = \textbf{A}_t\hat{\textbf{x}}^+_{t-1} + \textbf{B}_t\textbf{u}_t\tag{2}\]</span></p>
+<p>这里对系统状态向量上面加上一个帽子表示这是一个估计量，也就是我们实际输出的量。其中<span class="math inline">\(\hat{\textbf{x}}^+ _{t-1}\)</span>表示上一时刻执行完步骤二<strong>更新</strong>后的状态向量，<span class="math inline">\(\hat{\textbf{x}}^- _{t}\)</span>表示当前时候只执行了步骤1<strong>预测</strong>的状态向量。</p>
+<h3 id="理解预测方程">理解预测方程</h3>
+<p>预测方程（公式2）从形式上看只是把状态方程（公式1）去掉了噪声项，但其中包含了很多含义。其中，要时刻记得的是我们把系统状态当作一个随机向量处理，严格的表述需要引入随机过程的相关知识，但其实没太大必要。由于公式（1）中状态向量是一个随机向量，且噪声项是均值为0的高斯噪声，那么状态向量<span class="math inline">\(\textbf{x}_t\)</span>也满足高斯分布，其最大概率的地方就对应这噪声为0的地方，因此我们有理由将这个概率最大处对应的值当作我们的<strong>预测</strong>。</p>
+<figure>
+<img src="./imgs/gaussian.png" alt="" /><figcaption>gaussian</figcaption>
+</figure>
+<h2 id="测量方程测量估计方程">3、测量方程&amp;&amp;测量估计方程</h2>
+<h3 id="测量方程">测量方程</h3>
+<p><strong>测量方程</strong>反映了系统的测量值和系统状态向量之间的关系 <span class="math display">\[ \textbf{z}_t=H_t\textbf{x}_t+v_t\tag{3}\]</span></p>
+<p>其中，<span class="math inline">\(\textbf{z}_t\)</span>是当前时刻的测量值，<span class="math inline">\(H_t\)</span>称为测量矩阵（Measurement Matrix），描述了从系统状态到测量值的转换关系（举一个最简单的关系，系统状态是物体的直线距离，测量值是使用激光笔测出来的光从原点到物体的时间，那么<span class="math inline">\(H\)</span>就是光速的倒数）, <span class="math inline">\(\textbf{v}_t\)</span>是测量噪声，我们假定其符合均值为0，协方差为<span class="math inline">\(R_t\)</span>的高斯噪声。注意这里无论是状态向量还是测量向量都没有加帽子（<span class="math inline">\(\hat{.}\)</span>），表示这是个"准确"的表达式。</p>
+<h3 id="测量估计方程">测量估计方程</h3>
+<p>同样，我们如果忽略噪声项，就变成了对此时测量量的估计（注意状态向量的上标和角标）：</p>
+<p><span class="math display">\[ \hat{\textbf{z}}_t=H_t\hat{\textbf{x}}^-_t\tag{4}\]</span></p>
+<h2 id="测量更新方程">4、测量更新方程</h2>
+<p>上面给出了对测量量的估计，但是现在的情况是，我们有了一个测量值（通过某些测量方式或者传感器数据），这是一个不需要计算得到的量，我们如何用这个测量得出的量来更新我们对状态向量的估计？这就涉及到测量更新方程，这也是卡尔曼滤波里最难的部分，这里先给出更新方程的形式。</p>
+<p><span class="math display">\[ \hat{\textbf{x}}^+_t=\hat{\textbf{x}}^-_t+K_t(z_t-H_t\hat{\textbf{x}}^-_t)\tag{5}\]</span> <span class="math display">\[ K_t=\frac{P^-_tH_t^T}{H_tP^-_tH_t^T+R_t}\tag{6}\]</span></p>
+<p>其中，<span class="math inline">\(K_t\)</span>叫做卡尔曼增益；<span class="math inline">\(P^-_t\)</span>是系统测量值<span class="math inline">\(\hat{\textbf{x}}^-_t\)</span>的误差协方差矩阵。</p>
+<h1 id="四误差和协方差矩阵">四、误差和协方差矩阵</h1>
+<p>根据公式（1）减去公式（2），我们可以得出误差的协方差矩阵的表达形式</p>
+<p><span class="math display">\[ e^-_t \triangleq \textbf{x}_t - \hat{\textbf{x}}^-_t\\\]</span> <span class="math display">\[ P^-_t = \mathbb{E}[\textbf{e}^-_t {\textbf{e}^{-}_{t}}^T]\\\]</span></p>
+<p>把公式（1）和（2）带入误差表达式，可以推导出系统状态的协方差矩阵的递归表达形式</p>
+<p><span class="math display">\[
+\begin{split}
+P^-_t&amp;=\mathbb{E}[\big((A_tx_{t-1}+w_t)-A_tx_{t-1}^+\big)\big((A_tx_{t-1}+w_t)-A_tx_{t-1}^+\big)^T]\\&amp;=\mathbb{E}[\big(A_t(x_{t-1}-x_{t-1}^+)+w_t\big)\big(A_t(x_{t-1}-x_{t-1}^+)+w_t\big)^T]\\ &amp;=\mathbb{E}[A_t(x_{t-1}-x_{t-1}^+)(x_{t-1}-x_{t-1}^+)^TA_t^T]+\mathbb{E}[w_tw_t^T]\\ &amp;=A_tP_{t-1}^+A_t^T+Q_t
+\end{split}\\\]</span></p>
+<p>其中，从第二个等号到第三个等号利用了状态向量和随机噪声 的无关性（协方差为0）。因此我们可以得到下面的公式（7）</p>
+<p><span class="math display">\[P^-_t=A_tP^+_{t-1}A^T_t+Q_t\tag{7}\]</span></p>
+<h1 id="五更新方程的推导">五、更新方程的推导</h1>
+<p>现在我们进行到了这样的情况，我们使用预测方程公式（2）得到了<span class="math inline">\(t\)</span>时刻的系统状态预测量<span class="math inline">\(\textbf{x}_t^-\)</span>；同时，我们在这个时刻得到了一个测量值，且根据测量方程，我们认为它与此时的状态向量满足公式（3）：<span class="math inline">\(\textbf{z}_t=H_t\textbf{x}_t+v_t\)</span> 。那么其实我们可以从公式（3）也得到此时系统状态的另一个估计，由公式（3）将 移动到等式左侧，可以得到：</p>
+<p><span class="math display">\[\textbf{x}^2_t = \textbf{H}_t^{-1}\textbf{z}_t\\\]</span></p>
+<p>这里之所以没有把噪声<span class="math inline">\(\textbf{v}_t\)</span>表示出来，是因为这里将 当作一个随机向量处理，其均值为<span class="math inline">\(\bar{z}_t\)</span>，也就是当前时刻测量得出的量；其方差为<span class="math inline">\(R_t\)</span>（在公式3中给出）</p>
+<p>我们的状态方程也给出了状态向量的一个等式 <span class="math display">\[ \textbf{x}^1_t = \textbf{A}_t\textbf{x}_{t-1}+ \textbf{B}_t\textbf{u}_t+w_t\]</span></p>
+<p>这里用<strong>上标1和2</strong>表示状态向量的两个来源。要强调的是，这两个等式里面都包含了一个随机噪声，因此$^1_t 、^2_t $都是随机向量。同时，他们的分布都符合高斯分布。它们的均值和方差分别是：</p>
+<p><span class="math display">\[
+\begin{split} &amp;\mu_1=x_t^-\\ &amp;\sigma_1^2=P_t^-\\ &amp;\mu_2=H_t^{-1}\bar{z}_t\\ &amp;\sigma_2^2=H_t^{-1}R_t(H_t^{-1})^T\\  \end{split}\\\]</span></p>
+<p>现在有了两个关于状态向量的概率分布，那接下来的事情就简单了。因为这两个状态向量的来源我们可以认为是独立的，因此他们的联合概率分布是各自概率分布的乘积。重点是，高斯分布的乘积依旧是高斯分布！！！！新的高斯分布的均值和方差有如下表达形式：</p>
+<figure>
+<img src="./imgs/joint_gaussian.png" alt="" /><figcaption>joint gaussian</figcaption>
+</figure>
+<p>用上面的式子代入，可以得到联合概率分布的均值和方差： <strong>均值</strong> <span class="math display">\[ \begin{split} \mu_{fused}&amp;=\frac{\mu_1\sigma_2^2+\mu_2\sigma_1^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=\mu_1+\frac{(\mu_2-\mu_1)\sigma_1^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=x_t^-+\frac{(H_t^{-1}\bar{z}_t-x_t^-)P_t^-}{P_t^-+H_t^{-1}R_t(H_t^{-1})^T}\\ &amp;=x_t^-+\frac{P_t^-H_t^T}{H_tP_t^-H_t^T+R_t}(\bar{z}_t-H_tx_t^-)\\ &amp;=x_t^-+K_t(\bar{z}_t-H_tx_t^-) \end{split}\\\]</span></p>
+<p><strong>方差</strong></p>
+<p><span class="math display">\[
+\begin{split} \sigma_{fused}^2 &amp;=\frac{\sigma_1^2\sigma_2^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=\sigma_1^2-\frac{\sigma_1^4}{\sigma_1^2+\sigma_2^2}\\ &amp;=P_t^--\frac{P_t^-H_t^TH_tP_t^-}{H_tP_t^-H_t^T+R_t}\\ &amp;=P_t^--K_tH_tP_t^- \end{split}\\\]</span></p>
+<p>这个<span class="math inline">\(\sigma_{fused}^2\)</span>就是更新后的系统状态误差的协方差矩阵，也就是得到下面的式子</p>
+<p><span class="math display">\[ P^+_{t}=P^-_t-K_tH_tP^-_t\tag{8}\]</span></p>
+<h1 id="六总结">六、总结</h1>
+<p><strong>预测方程</strong> <span class="math display">\[ \hat{\textbf{x}}^-_t = \textbf{A}_t\hat{\textbf{x}}^+_{t-1} + \textbf{B}_t\textbf{u}(t)\tag{2}\]</span> <span class="math display">\[P^-_t=A_tP^+_{t-1}A^T_t+Q_t\tag{7}\]</span></p>
+<p><strong>更新方程</strong> <span class="math display">\[ \hat{\textbf{x}}^+_t=\hat{\textbf{x}}^-_t+K_t(z_t-H_t\hat{\textbf{x}}^-_t)\tag{5}\]</span> <span class="math display">\[ K_t=\frac{P^-_tH_t^T}{H_tP^-_tH_t^T+R_t}\tag{6} \]</span> <span class="math display">\[ P^+_{t}=P^-_t-K_tH_tP^-_t\tag{8} \]</span></p>
+<hr />
+<h1 id="转载须知">转载须知</h1>
+<ol type="1">
+<li>请于文章标题注明转载</li>
+<li>请于文章起始位置注明原始链接</li>
+<li>请在推文文末的【阅读原文】链接上原始链接</li>
+<li>感谢~</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/" title="经久不衰的卡尔曼滤波器-基础知识及公式推导">https://zeal-up.github.io/2023/03/13/kalman_filter/经久不衰的卡尔曼滤波器-基础知识及公式推导/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/KalmanFilter/" rel="tag"># KalmanFilter</a>
+              <a href="/tags/filter/" rel="tag"># filter</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/03/13/kalman_filter/%E6%89%A9%E5%B1%95%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2-%E5%90%AB%E4%BE%8B%E5%AD%90%E5%8F%8A%E4%BB%A3%E7%A0%81/" rel="prev" title="扩展卡尔曼滤波-含例子及代码">
+                  <i class="fa fa-chevron-left"></i> 扩展卡尔曼滤波-含例子及代码
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/" rel="next" title="FastDDS关键概念">
+                  FastDDS关键概念 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
