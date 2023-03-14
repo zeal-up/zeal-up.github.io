@@ -300,7 +300,7 @@ mjx-container[display="true"] + br {
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2023-03-14 19:49:06 / 修改时间：21:35:43" itemprop="dateCreated datePublished" datetime="2023-03-14T19:49:06+08:00">2023-03-14</time>
+      <time title="创建时间：2023-03-14 19:49:06 / 修改时间：23:26:04" itemprop="dateCreated datePublished" datetime="2023-03-14T19:49:06+08:00">2023-03-14</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -344,7 +344,12 @@ mjx-container[display="true"] + br {
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="运行环境搭建">运行环境搭建</h2>
+          <ul>
+<li>:heart_decoration: <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>:six_pointed_star: <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>:pisces: <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="运行环境搭建">运行环境搭建</h2>
 <p>本项目提供基于<code>ROS2-humble</code>的镜像，并提供脚本可直接在镜像中启动可视化程序 ### 数据 本项目同时提供转为<code>rosbag2</code>格式的数据包，<a href="">下载地址</a> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> DATA_DIR=/path/to/download/ros2bag/dir</span><br></pre></td></tr></table></figure> 本项目中默认的配置文件<code>params_default.yaml</code>可以直接运行下面的数据： - park_dataset - walking_dataset - garden_dataset</p>
 <h3 id="环境部署">环境部署</h3>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> git@github.com:zeal-up/Simple-LIO-SAM.git</span><br><span class="line"><span class="built_in">cd</span> Simple-LIO-SAM</span><br><span class="line">./docker_run.sh -h  <span class="comment"># show help message</span></span><br><span class="line">./docker_run.sh -c /path/to/code/repo -d <span class="variable">$DATA_DIR</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ./docker_into.sh  # enter the container next time</span></span><br></pre></td></tr></table></figure>
@@ -447,7 +452,7 @@ mjx-container[display="true"] + br {
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-14 21:34:11" itemprop="dateModified" datetime="2023-03-14T21:34:11+08:00">2023-03-14</time>
+      <time title="修改时间：2023-03-14 23:26:14" itemprop="dateModified" datetime="2023-03-14T23:26:14+08:00">2023-03-14</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -491,7 +496,12 @@ mjx-container[display="true"] + br {
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="liosam介绍">LIOSAM介绍</h2>
+          <ul>
+<li>:heart_decoration: <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>:six_pointed_star: <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>:pisces: <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="liosam介绍">LIOSAM介绍</h2>
 <p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光——惯性里程计历程方法。 作者<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan" title="作者Github">TixiaoShan</a>是SLAM届大神，在LIOSAM之前发表过LeGO-LOAM，在LIOSAM之后发布了LVI-SAM，在LIOSAM基础上又加入了语义定位因子。 由于网上关于<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>的解读已经有很多了，这里不会进行太过详细的复述，具体的内容解析会放在后面讲解代码的时候慢慢仔细阐述。</p>
 <p>简单来说，LIOSAM整体的框架与其他方法区别在与： 1. 使用因子图作为后端优化框架，将IMU预积分与雷达点云匹配及回环检测等紧耦合 1. 使用当前帧-局部地图匹配而不是对全局地图匹配来加速点云匹配速度 1. 基于位置关系选择回环帧，并使用点云匹配计算回环因子 1. 使用高频IMU并进行简单积分对点云做运动畸变校正</p>
 <p>另外，LIOSAM作者的工程功底很好，LIOSAM代码库被github上很多SLAM开源项目作为code base</p>

@@ -19,16 +19,16 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="运行环境搭建 本项目提供基于ROS2-humble的镜像，并提供脚本可直接在镜像中启动可视化程序 ### 数据 本项目同时提供转为rosbag2格式的数据包，下载地址 1export DATA_DIR&#x3D;&#x2F;path&#x2F;to&#x2F;download&#x2F;ros2bag&#x2F;dir 本项目中默认的配置文件params_default.yaml可以直接运行下面的数据： - park_dataset - walking_d">
+    <meta name="description" content=":heart_decoration: Zeal&#39;s Blog :six_pointed_star: 知乎专栏 :pisces: 项目仓库  运行环境搭建 本项目提供基于ROS2-humble的镜像，并提供脚本可直接在镜像中启动可视化程序 ### 数据 本项目同时提供转为rosbag2格式的数据包，下载地址 1export DATA_DIR&#x3D;&#x2F;path&#x2F;to&#x2F;download&#x2F;ros2bag&#x2F;di">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Simple-LIO-SAM——环境搭建与运行">
 <meta property="og:url" content="https://zeal-up.github.io/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
-<meta property="og:description" content="运行环境搭建 本项目提供基于ROS2-humble的镜像，并提供脚本可直接在镜像中启动可视化程序 ### 数据 本项目同时提供转为rosbag2格式的数据包，下载地址 1export DATA_DIR&#x3D;&#x2F;path&#x2F;to&#x2F;download&#x2F;ros2bag&#x2F;dir 本项目中默认的配置文件params_default.yaml可以直接运行下面的数据： - park_dataset - walking_d">
+<meta property="og:description" content=":heart_decoration: Zeal&#39;s Blog :six_pointed_star: 知乎专栏 :pisces: 项目仓库  运行环境搭建 本项目提供基于ROS2-humble的镜像，并提供脚本可直接在镜像中启动可视化程序 ### 数据 本项目同时提供转为rosbag2格式的数据包，下载地址 1export DATA_DIR&#x3D;&#x2F;path&#x2F;to&#x2F;download&#x2F;ros2bag&#x2F;di">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/imgs/runtime.gif">
 <meta property="article:published_time" content="2023-03-14T11:49:06.000Z">
-<meta property="article:modified_time" content="2023-03-14T13:35:43.304Z">
+<meta property="article:modified_time" content="2023-03-14T15:26:04.453Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
@@ -196,7 +196,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2023-03-14 19:49:06 / 修改时间：21:35:43" itemprop="dateCreated datePublished" datetime="2023-03-14T19:49:06+08:00">2023-03-14</time>
+      <time title="创建时间：2023-03-14 19:49:06 / 修改时间：23:26:04" itemprop="dateCreated datePublished" datetime="2023-03-14T19:49:06+08:00">2023-03-14</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -240,7 +240,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h2 id="运行环境搭建">运行环境搭建</h2>
+        <ul>
+<li>:heart_decoration: <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>:six_pointed_star: <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>:pisces: <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="运行环境搭建">运行环境搭建</h2>
 <p>本项目提供基于<code>ROS2-humble</code>的镜像，并提供脚本可直接在镜像中启动可视化程序 ### 数据 本项目同时提供转为<code>rosbag2</code>格式的数据包，<a href="">下载地址</a> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> DATA_DIR=/path/to/download/ros2bag/dir</span><br></pre></td></tr></table></figure> 本项目中默认的配置文件<code>params_default.yaml</code>可以直接运行下面的数据： - park_dataset - walking_dataset - garden_dataset</p>
 <h3 id="环境部署">环境部署</h3>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> git@github.com:zeal-up/Simple-LIO-SAM.git</span><br><span class="line"><span class="built_in">cd</span> Simple-LIO-SAM</span><br><span class="line">./docker_run.sh -h  <span class="comment"># show help message</span></span><br><span class="line">./docker_run.sh -c /path/to/code/repo -d <span class="variable">$DATA_DIR</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ./docker_into.sh  # enter the container next time</span></span><br></pre></td></tr></table></figure>

@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="LIOSAM介绍 LIOSAM（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光——惯性里程计历程方法。 作者TixiaoShan是SLAM届大神，在LIOSAM之前发表过LeGO-LOAM，在LIOSAM之后发布了LVI-SAM，在LIOSAM基础上又加入了语义定位因子。 由于网上关于LIOSAM的解">
+    <meta name="description" content=":heart_decoration: Zeal&#39;s Blog :six_pointed_star: 知乎专栏 :pisces: 项目仓库  LIOSAM介绍 LIOSAM（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光——惯性里程计历程方法。 作者TixiaoShan是SLAM届大神，在LIOSAM">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Simple-LIO-SAM——项目简介">
 <meta property="og:url" content="https://zeal-up.github.io/2023/03/13/lio_sam/intro/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
-<meta property="og:description" content="LIOSAM介绍 LIOSAM（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光——惯性里程计历程方法。 作者TixiaoShan是SLAM届大神，在LIOSAM之前发表过LeGO-LOAM，在LIOSAM之后发布了LVI-SAM，在LIOSAM基础上又加入了语义定位因子。 由于网上关于LIOSAM的解">
+<meta property="og:description" content=":heart_decoration: Zeal&#39;s Blog :six_pointed_star: 知乎专栏 :pisces: 项目仓库  LIOSAM介绍 LIOSAM（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光——惯性里程计历程方法。 作者TixiaoShan是SLAM届大神，在LIOSAM">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/13/lio_sam/intro/imgs/org_files.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/13/lio_sam/intro/imgs/org_rqtgraph.png">
@@ -36,7 +36,7 @@
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/13/lio_sam/intro/imgs/Design-imageProjection_top0.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/13/lio_sam/intro/imgs/Design-imageProjection_top1.png">
 <meta property="article:published_time" content="2023-03-13T11:45:58.000Z">
-<meta property="article:modified_time" content="2023-03-14T13:34:11.256Z">
+<meta property="article:modified_time" content="2023-03-14T15:26:14.581Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
@@ -210,7 +210,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-14 21:34:11" itemprop="dateModified" datetime="2023-03-14T21:34:11+08:00">2023-03-14</time>
+      <time title="修改时间：2023-03-14 23:26:14" itemprop="dateModified" datetime="2023-03-14T23:26:14+08:00">2023-03-14</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -254,7 +254,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h2 id="liosam介绍">LIOSAM介绍</h2>
+        <ul>
+<li>:heart_decoration: <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>:six_pointed_star: <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>:pisces: <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="liosam介绍">LIOSAM介绍</h2>
 <p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光——惯性里程计历程方法。 作者<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan" title="作者Github">TixiaoShan</a>是SLAM届大神，在LIOSAM之前发表过LeGO-LOAM，在LIOSAM之后发布了LVI-SAM，在LIOSAM基础上又加入了语义定位因子。 由于网上关于<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>的解读已经有很多了，这里不会进行太过详细的复述，具体的内容解析会放在后面讲解代码的时候慢慢仔细阐述。</p>
 <p>简单来说，LIOSAM整体的框架与其他方法区别在与： 1. 使用因子图作为后端优化框架，将IMU预积分与雷达点云匹配及回环检测等紧耦合 1. 使用当前帧-局部地图匹配而不是对全局地图匹配来加速点云匹配速度 1. 基于位置关系选择回环帧，并使用点云匹配计算回环因子 1. 使用高频IMU并进行简单积分对点云做运动畸变校正</p>
 <p>另外，LIOSAM作者的工程功底很好，LIOSAM代码库被github上很多SLAM开源项目作为code base</p>
