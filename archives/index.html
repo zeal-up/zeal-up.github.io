@@ -40,6 +40,8 @@
 <title>Zeal's Blog</title>
   
 
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
 
 
 
@@ -234,12 +236,12 @@ mjx-container[display="true"] + br {
   <nav class="site-state">
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -259,6 +261,289 @@ mjx-container[display="true"] + br {
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/" class="post-title-link" itemprop="url">Simple-LIO-SAM——环境搭建与运行</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-03-14 19:49:06 / 修改时间：21:35:43" itemprop="dateCreated datePublished" datetime="2023-03-14T19:49:06+08:00">2023-03-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——环境搭建与运行" href="/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::b824fa070f036b85c958cacd75daa48f" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="运行环境搭建">运行环境搭建</h2>
+<p>本项目提供基于<code>ROS2-humble</code>的镜像，并提供脚本可直接在镜像中启动可视化程序 ### 数据 本项目同时提供转为<code>rosbag2</code>格式的数据包，<a href="">下载地址</a> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> DATA_DIR=/path/to/download/ros2bag/dir</span><br></pre></td></tr></table></figure> 本项目中默认的配置文件<code>params_default.yaml</code>可以直接运行下面的数据： - park_dataset - walking_dataset - garden_dataset</p>
+<h3 id="环境部署">环境部署</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> git@github.com:zeal-up/Simple-LIO-SAM.git</span><br><span class="line"><span class="built_in">cd</span> Simple-LIO-SAM</span><br><span class="line">./docker_run.sh -h  <span class="comment"># show help message</span></span><br><span class="line">./docker_run.sh -c /path/to/code/repo -d <span class="variable">$DATA_DIR</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ./docker_into.sh  # enter the container next time</span></span><br></pre></td></tr></table></figure>
+<h3 id="编译">编译</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> Simple-LIO-SAM</span><br><span class="line">./docker_into.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下面命令在镜像中执行</span></span><br><span class="line"><span class="built_in">cd</span> ~/ros_ws/</span><br><span class="line"><span class="built_in">mkdir</span> src &amp;&amp; <span class="built_in">cd</span> src &amp;&amp;<span class="built_in">ln</span> -s /home/splsam/codes ./</span><br><span class="line"><span class="built_in">cd</span> ..</span><br><span class="line"><span class="built_in">source</span> /opt/ros/humble/setup.bash</span><br><span class="line">colcon build --packages-select spl_lio_sam</span><br></pre></td></tr></table></figure>
+<h3 id="运行">运行</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker镜像下运行</span></span><br><span class="line"><span class="built_in">cd</span> ~/ros_ws</span><br><span class="line"><span class="built_in">source</span> ./install/setup.bash</span><br><span class="line">ros2 launch spl_lio_sam run.launch.py </span><br><span class="line"></span><br><span class="line"><span class="comment"># 新开终端</span></span><br><span class="line"><span class="built_in">cd</span> Simple-LIO-SAM</span><br><span class="line">./docker_into.sh</span><br><span class="line"><span class="built_in">cd</span> data/ros2/</span><br><span class="line">ros2 bag play ./park_dataset/ --topics /points_raw /imu_raw</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>运行时画面： <img src="./imgs/runtime.gif" alt="SplRunParkDataset" /></p>
+<h2 id="开发环境搭建">开发环境搭建</h2>
+<p>由于本项目作者在使用<code>vscode</code>开发<code>c++</code>时经常会遇到无法快捷跳转问题（其实笔者发现有很多人在使用vscode开发时都会有这个问题）， 因此一并把解决方案写入项目中。</p>
+<h3 id="vscode-cpp函数快捷跳转">vscode Cpp函数快捷跳转</h3>
+<ol type="1">
+<li>安装cpp扩展 vscode侧边栏进入扩展选项（ctrl+shift+x)，搜索<code>c++</code>，安装<code>C/C++ Extension Pack</code></li>
+<li>打开项目 &gt; File-&gt;Open Folder</li>
+<li>保存为工作区 &gt; File-&gt;Save Workspace as 选择目标目录及文件（默认以<code>.code-workspace</code>结尾）</li>
+<li>打开刚才保存的工作区文件 &gt; File-&gt;Open File 选择刚才打开的工作区文件</li>
+<li>对工作区添加<code>c++</code>库检索路径 在刚才打开的工作区文件中，参考以下格式编辑 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">&quot;folders&quot;:</span> [</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="attr">&quot;path&quot;:</span> <span class="string">&quot;../Simple-LIO-SAM&quot;</span></span><br><span class="line">		&#125;,</span><br><span class="line">	],</span><br><span class="line">	<span class="attr">&quot;settings&quot;:</span> &#123;</span><br><span class="line">		<span class="attr">&quot;C_Cpp.default.includePath&quot;:</span> [</span><br><span class="line">			<span class="string">&quot;$&#123;default&#125;&quot;</span>,</span><br><span class="line">			<span class="string">&quot;/usr/include/**&quot;</span>,</span><br><span class="line">			<span class="string">&quot;/usr/include/c++/9/&quot;</span>,</span><br><span class="line">			<span class="string">&quot;/usr/lib/gcc/x86_64-linux-gnu/8/include/&quot;</span>,</span><br><span class="line">			<span class="string">&quot;/opt/ros/humble/include/**&quot;</span>,</span><br><span class="line"></span><br><span class="line">			<span class="string">&quot;$&#123;workspaceFolder&#125;/include&quot;</span>,</span><br><span class="line"></span><br><span class="line">            <span class="string">//</span> <span class="string">重点！！这里的路径要设置为ros2工作空间下spl_lio_sam编译出来的头文件</span></span><br><span class="line">			<span class="string">&quot;/path/to/ros2_ws/install/spl_lio_sam/include/spl_lio_sam&quot;</span></span><br><span class="line"></span><br><span class="line">		],</span><br><span class="line">		<span class="attr">&quot;C_Cpp.files.exclude&quot;:</span> &#123;</span><br><span class="line">			<span class="string">&quot;**/.vscode&quot;</span><span class="string">:</span> <span class="literal">true</span>,</span><br><span class="line">			<span class="string">&quot;**/.vs&quot;</span><span class="string">:</span> <span class="literal">true</span></span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="attr">&quot;C_Cpp.default.cStandard&quot;:</span> <span class="string">&quot;c17&quot;</span>,</span><br><span class="line">		<span class="attr">&quot;C_Cpp.default.cppStandard&quot;:</span> <span class="string">&quot;c++17&quot;</span>,</span><br><span class="line">		<span class="attr">&quot;python.analysis.include&quot;:</span> [</span><br><span class="line">			<span class="string">&quot;/opt/ros/humble/lib/python3.10/site-packages&quot;</span>,</span><br><span class="line">		],</span><br><span class="line">		<span class="attr">&quot;python.autoComplete.extraPaths&quot;:</span> [</span><br><span class="line">			<span class="string">&quot;/opt/ros/humble/lib/python3.10/site-packages&quot;</span>,</span><br><span class="line">		],</span><br><span class="line">		<span class="attr">&quot;python.analysis.extraPaths&quot;:</span> [</span><br><span class="line">			<span class="string">&quot;/opt/ros/humble/lib/python3.10/site-packages&quot;</span>,</span><br><span class="line">		],</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="对工作区文件的解释">对工作区文件的解释</h3>
+<p>其实主要起作用的是工作区文件中<code>settings-&gt;C_Cpp.default.includePath</code>字段内容，vscode的cpp扩展会读取该工作空间文件下 的这个字段，并将里面的路径进行解析加到头文件解析路径中。</p>
+<p>这里有两个路径要注意的</p>
+<ol type="1">
+<li><code>"$&#123;workspaceFolder&#125;/include"</code>，也就是Simple-LIO-SAM仓库下的include路径</li>
+<li><code>"/path/to/ros2_ws/install/spl_lio_sam/include/spl_lio_sam"</code>，这个要设置成你的ros工作空间对应的路径</li>
+</ol>
+<p>另外，如果发现自己路径设置完成，但是有些函数还提示下划线，要看看是不是那些函数是<code>c++17</code>或者更高的标准才支持的特性，在上面的配置文件中 设置c++/c标准为17</p>
+<h3 id="其余注意">其余注意</h3>
+<ol type="1">
+<li>尽量不要用<code>/path/**</code>的格式添加include路径，虽然看起来很省事，但会影响检索效率</li>
+<li>刚设置完路径需要等待vscode检索构建数据库，在vscode右下方状态条会提示正在进行检索</li>
+<li>上面配置文件中<code>"python.analysis.extraPaths","python.autoComplete.extraPaths","python.analysis.include"</code>是设置python语法提示器的 库检索路径，不同的python提示器插件会使用不同的路径。</li>
+</ol>
+<h2 id="reference">Reference</h2>
+<ol type="1">
+<li><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIO-SAM</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258">LIO-SAM paper</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">This Project</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/chennuo0125-HIT/LIO-SAM-note">LIO-SAM-note</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/smilefacehh/LIO-SAM-DetailedNote">LIO-SAM-DetailedNote</a></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/lio_sam/intro/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/13/lio_sam/intro/" class="post-title-link" itemprop="url">Simple-LIO-SAM——项目简介</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-13 19:45:58" itemprop="dateCreated datePublished" datetime="2023-03-13T19:45:58+08:00">2023-03-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-14 21:34:11" itemprop="dateModified" datetime="2023-03-14T21:34:11+08:00">2023-03-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——项目简介" href="/2023/03/13/lio_sam/intro/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::d227db67a0df8ebb129db6bbfad2da40" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="liosam介绍">LIOSAM介绍</h2>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光——惯性里程计历程方法。 作者<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan" title="作者Github">TixiaoShan</a>是SLAM届大神，在LIOSAM之前发表过LeGO-LOAM，在LIOSAM之后发布了LVI-SAM，在LIOSAM基础上又加入了语义定位因子。 由于网上关于<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>的解读已经有很多了，这里不会进行太过详细的复述，具体的内容解析会放在后面讲解代码的时候慢慢仔细阐述。</p>
+<p>简单来说，LIOSAM整体的框架与其他方法区别在与： 1. 使用因子图作为后端优化框架，将IMU预积分与雷达点云匹配及回环检测等紧耦合 1. 使用当前帧-局部地图匹配而不是对全局地图匹配来加速点云匹配速度 1. 基于位置关系选择回环帧，并使用点云匹配计算回环因子 1. 使用高频IMU并进行简单积分对点云做运动畸变校正</p>
+<p>另外，LIOSAM作者的工程功底很好，LIOSAM代码库被github上很多SLAM开源项目作为code base</p>
+<h2 id="本项目目的及特点介绍">本项目目的及特点介绍</h2>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>源代码虽然不能说庞大，甚至可以说简单，因为整个代码库主要只要5个文件。 <img src="./imgs/org_files.png" alt="原始src目录" /> 但是里面每个模块都通过ROS的topic与其他模块有紧密的联系。 整个的流程对新手十分不友好，下图是LIOSAM原本运行时的<code>rqt_graph</code></p>
+<figure>
+<img src="./imgs/org_rqtgraph.png" alt="" /><figcaption>原始rqt_graph</figcaption>
+</figure>
+<p>第二个复杂之处在与LIOSAM框架设计到的知识点和工具较多，至少要熟悉<code>ROS,gtsam,pcl</code>几个库，算法层面需要熟悉<code>点云匹配、IMU积分、因子图、三维转换</code>等。 对于熟悉SLAM的人来说可能较为简单上手，但是对于新入门的人来说则一开始会一头雾水。</p>
+<p>基于上述这些原因，笔者进行了<a href="Simple%20Lio%20Sam">SPL-LIO-SAM</a>项目，希望能够以最大幅度帮助初学者理解<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>框架及里面的算法细节。 本项目对<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>做了如下改进</p>
+<h3 id="基于最新的ros2-humble实现">基于最新的ROS2-humble实现</h3>
+<p>虽然LIOSAM源码中有一个ros2分支，但该分支的维护者并不是原作者，而且已经长时间没有人维护，且该分支存在一些bug没有被修复。为了能够在进行本项目的学习过程中 熟悉最新的ROS2框架，笔者在LIOSAM的ros2分支基础上，修复了存在的bug，同时将功能较为独立的<code>Transformfusion</code>类抽取成独立的类。</p>
+<p>为了便于上手及部署，笔者同时准备了适配的docker镜像供学习者使用。</p>
+<h3 id="简化">简化</h3>
+<h4 id="话题发布的简化">话题发布的简化</h4>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>原始代码中有很多中间结果的发布，这些中间结果可以用来可视化及调试程序，但是对于学习者和开发者而言不仅意义不大，而且会在初始学习源码阶段误导学习者。 本项目在话题发布上进行<code>大幅度简化</code>，简化后的设计如下： <img src="./imgs/Design-Node%26%26Topics.png" alt="节点及话题设计" /></p>
+<p>简化后运行时的<code>rqt_graph</code>: <img src="./imgs/spl_liosam_rosgraph.png" alt="简化后的ros—grpah" /></p>
+<h4 id="坐标系简化">坐标系简化</h4>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>中实用的坐标系并不复杂，但是作者提供的<code>urdf</code>包含了太多为了兼容性考虑的坐标系，这些坐标系对于实际运行和理解并没有用。因此，本项目基于ROS对坐标系的约束，将 坐标系关系树简化为如下： <img src="./imgs/Design-CoordinateSystem.png" alt="简化后的坐标系关系" /></p>
+<h4 id="保留算法及定义完整性">保留算法及定义完整性</h4>
+<p>虽然本项目去除了很多非必要话题，同时对于一些非必要代码也进行了简化，但对一些学习算法有帮助的细节依旧保留。比如激光里程计在发布的时候有<code>mapping/odometry</code>和<code>mapping/odometry_incremental</code>两个话题，两个话题虽然类似但是背后却有很不同的函数，但同时两者合一又不影响算法的运行。因此采取的做法时在代码中保留这部分代码，同时加以解释，但发布时只发布其中一个话题。</p>
+<h3 id="完善的注释及流程图">完善的注释及流程图</h3>
+<p>网上其实对<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>源码的注释并不少，比如<a target="_blank" rel="noopener" href="https://github.com/chennuo0125-HIT/LIO-SAM-note" title="LIO-SAM-note">LIO-SAM-note</a>和<a target="_blank" rel="noopener" href="https://github.com/smilefacehh/LIO-SAM-DetailedNote" title="LIO-SAM-DetailedNote">LIO-SAM-DetailedNote</a>，还有一些blog也对源码做了解释，但是都不太完美，同时缺少流程性的组织。本项目借鉴了一些开源项目的注释，并加以完善，可以说，本项目是目前对<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>注释最完善的开源项目。 <img src="./imgs/comments.png" alt="部分注释图" /></p>
+<p>为了最为清晰的展示<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>算法不同模块的流程，该项目还对各个模块流程进行梳理，建立了完善的流程图设计 <img src="./imgs/Design-Pipelines.png" alt="Pipeline" /> <img src="./imgs/Design-imageProjection_top0.png" alt="imageProjection_top0" /> <img src="./imgs/Design-imageProjection_top1.png" alt="imageProjection_top0" /></p>
+<h2 id="后续章节">后续章节</h2>
+<ol type="1">
+<li>节一：开发环境搭建及运行</li>
+<li>节二：总体流程及utility文件</li>
+<li>节三：激光雷达运动畸变矫正模块</li>
+<li>节四：点云特征提取模块</li>
+<li>节五：Gtsam快速认识</li>
+<li>节六：IMU预积分模块</li>
+<li>节七：激光里程计模块</li>
+<li>节八：坐标系发布模块</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -314,6 +599,20 @@ mjx-container[display="true"] + br {
         </span>
     </span>
 
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="FastDDS关键概念" href="/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::73f7a0f706535d55ad531611b3af6c03" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
   
 </div>
 
@@ -439,6 +738,20 @@ mjx-container[display="true"] + br {
         </span>
     </span>
 
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="经久不衰的卡尔曼滤波器-基础知识及公式推导" href="/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::485da1f1f8066e1c77d786731c1e5117" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
   
 </div>
 
@@ -613,6 +926,20 @@ P^-_t&amp;=\mathbb{E}[\big((A_tx_{t-1}+w_t)-A_tx_{t-1}^+\big)\big((A_tx_{t-1}+w_
     </span>
 
   
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="扩展卡尔曼滤波-含例子及代码" href="/2023/03/13/kalman_filter/%E6%89%A9%E5%B1%95%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2-%E5%90%AB%E4%BE%8B%E5%AD%90%E5%8F%8A%E4%BB%A3%E7%A0%81/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::625693331e78b31e9faa26065f21d020" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 </div>
 
         </div>
@@ -773,6 +1100,20 @@ v_t\\
     </span>
 
   
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="形象化理解卡尔曼滤波—最小例子及代码" href="/2023/03/13/kalman_filter/%E5%BD%A2%E8%B1%A1%E5%8C%96%E7%90%86%E8%A7%A3%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E2%80%94%E6%9C%80%E5%B0%8F%E4%BE%8B%E5%AD%90%E5%8F%8A%E4%BB%A3%E7%A0%81/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::a8df2ba48cf5d3db361fc08425f74c01" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 </div>
 
         </div>
@@ -925,6 +1266,20 @@ H_t=
         </span>
     </span>
 
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="基础卡尔曼滤波到互补卡尔曼滤波" href="/2023/03/13/kalman_filter/%E4%BB%8E%E5%9F%BA%E7%A1%80%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%88%B0%E4%BA%92%E8%A1%A5%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::18b7a7bc6d454bf755b5417ecc9b8d92" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
   
 </div>
 
@@ -1146,6 +1501,8 @@ H_t=
 <script src="/js/third-party/math/mathjax.js"></script>
 
 
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
 
 </body>
 </html>
