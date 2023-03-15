@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏  问题背景 由于工作需要，需要开发一个程序，根据记录的信息，从rosbag2保存的数据包根据打点的时间戳，提取出一段段单独的数据包。 为了存储空间考虑，保存时以及提取时都指定了使用压缩的方式进行存储。压缩器和压缩模式如下： 12compression_format: zstdcompression_mode: message rosbag">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次解决rosbag2内存错误问题过程">
+<meta property="og:url" content="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏  问题背景 由于工作需要，需要开发一个程序，根据记录的信息，从rosbag2保存的数据包根据打点的时间戳，提取出一段段单独的数据包。 为了存储空间考虑，保存时以及提取时都指定了使用压缩的方式进行存储。压缩器和压缩模式如下： 12compression_format: zstdcompression_mode: message rosbag">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/imgs/backtraces.png">
+<meta property="article:published_time" content="2023-03-15T10:28:01.000Z">
+<meta property="article:modified_time" content="2023-03-15T14:01:12.525Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="ros">
+<meta property="article:tag" content="rosbag2">
+<meta property="article:tag" content="development">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/imgs/backtraces.png">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/","path":"2023/03/15/ros/记一次解决rosbag2内存错误问题过程/","title":"记一次解决rosbag2内存错误问题过程"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>记一次解决rosbag2内存错误问题过程 | Zeal's Blog</title>
+  
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">问题背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83"><span class="nav-number">2.</span> <span class="nav-text">开发环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-number">3.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%A4%8D%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">问题复现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%AE%9A%E4%BD%8D"><span class="nav-number">5.</span> <span class="nav-text">问题定位</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A2%9E%E5%8A%A0%E6%97%A5%E5%BF%97"><span class="nav-number">5.1.</span> <span class="nav-text">增加日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E6%AF%94%E4%B8%8D%E5%90%8C%E7%9A%84writer"><span class="nav-number">5.2.</span> <span class="nav-text">对比不同的writer</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B8%A6%E5%8E%8B%E7%BC%A9%E7%9A%84writer%E5%8D%B3rosbag2_compressionsequentialcompressionwriter"><span class="nav-number">5.2.1.</span> <span class="nav-text">带压缩的writer即rosbag2_compression::SequentialCompressionWriter</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E6%9F%A5%E7%9C%8B%E8%B0%83%E7%94%A8api%E7%9A%84%E4%BB%A3%E7%A0%81"><span class="nav-number">5.2.2.</span> <span class="nav-text">重新查看调用API的代码</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E5%A4%8D"><span class="nav-number">6.</span> <span class="nav-text">修复</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">7.</span> <span class="nav-text">其他</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95aubuntu-core%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90"><span class="nav-number">8.</span> <span class="nav-text">附录A：ubuntu core文件生成</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="记一次解决rosbag2内存错误问题过程 | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          记一次解决rosbag2内存错误问题过程
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-03-15 18:28:01 / 修改时间：22:01:12" itemprop="dateCreated datePublished" datetime="2023-03-15T18:28:01+08:00">2023-03-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/ROS/" itemprop="url" rel="index"><span itemprop="name">ROS</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="记一次解决rosbag2内存错误问题过程" href="/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::73e4783c1a71c1ae17cdb35318885253" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+</ul>
+<h2 id="问题背景">问题背景</h2>
+<p>由于工作需要，需要开发一个程序，根据记录的信息，从<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble" title="rosbag2 repo">rosbag2</a>保存的数据包根据打点的时间戳，提取出一段段单独的数据包。 为了存储空间考虑，保存时以及提取时都指定了使用<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble#recording-with-compression">压缩的方式</a>进行存储。压缩器和压缩模式如下： <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">compression_format:</span> <span class="string">zstd</span></span><br><span class="line"><span class="attr">compression_mode:</span> <span class="string">message</span></span><br></pre></td></tr></table></figure></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble" title="rosbag2 repo">rosbag2</a>不仅有命令行工具，同时还开放API给开发者使用。<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble" title="rosbag2 repo">rosbag2</a>还提供了<code>convert</code>功能，可以对录下来的bagfile进行<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble#converting-bags">二次提取</a>。因此开发这部分功能可以参考源码里面的<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/humble/rosbag2_transport/src/rosbag2_transport/bag_rewrite.cpp">bag_rewriter.cpp</a></p>
+<h2 id="开发环境">开发环境</h2>
+<blockquote>
+<p>ROS: ROS2-humble OS: ubuntu 22.04 language: cpp17 rosbag2: 0.15.4-2jammy.20230118.031755</p>
+</blockquote>
+<h2 id="问题描述">问题描述</h2>
+<p>完成上述数据提取功能后进行测试，发现提取的时候如果同时提取多个目标（构建多个writer，读取message后进行写操作，<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/14bf3dcc2170ebe5bd73ed0cf83bb4077b3e36b4/rosbag2_transport/src/rosbag2_transport/bag_rewrite.cpp#L135">rosbag2源码参考部分</a>，并且都进行压缩的时候，会有<code>core dump</code>，错误信息： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">corrupted size vs. prev_size</span><br><span class="line">[ros2run]: Aborted</span><br></pre></td></tr></table></figure></p>
+<p>然而在其他情况：1.同时提取多个目标，但是不进行压缩；2.提取一个目标，进行压缩；的时候，程序都可以正常运行</p>
+<p>为了确保不是自己编写的程序导致的问题，又使用<code>rosbag2 cli</code>进行类似的尝试。根据<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble#converting-bags">converting-bags</a>的说明，我使用下面的<code>output_options.yaml</code>进行数据转换： <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">output_bags:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">uri:</span> <span class="string">out_bag01</span></span><br><span class="line">  <span class="attr">all:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">compression_format:</span> <span class="string">zstd</span></span><br><span class="line">  <span class="attr">compression_mode:</span> <span class="string">message</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">uri:</span> <span class="string">out_bag02</span></span><br><span class="line">  <span class="attr">all:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">compression_format:</span> <span class="string">zstd</span></span><br><span class="line">  <span class="attr">compression_mode:</span> <span class="string">message</span></span><br></pre></td></tr></table></figure></p>
+<p>然后使用如下命令进行提取 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ros2 bag convert -i ./path/to/bag/file -o output_options.yaml</span><br></pre></td></tr></table></figure></p>
+<p>果不其然，直接使用<code>rosbag2</code>的包也会有<code>core</code>问题，不过报的信息会有区别，不同次运行报的信息还不一样，主要是类似下面这样： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">malloc(): unsorted double linked list corrupted</span><br><span class="line">free(): corrupted unsorted chunks</span><br><span class="line">corrupted double-linked list</span><br></pre></td></tr></table></figure></p>
+<h2 id="问题复现">问题复现</h2>
+<p>简单起见可以直接使用<code>rosbag2 cli</code>复现这个问题 1. 准备一个ros2的bag包 2. 新建一个配置文件命名为：<code>output_options.yaml</code>，并填入下面内容： <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">output_bags:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">uri:</span> <span class="string">out_bag01</span></span><br><span class="line">  <span class="attr">all:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">compression_format:</span> <span class="string">zstd</span></span><br><span class="line">  <span class="attr">compression_mode:</span> <span class="string">message</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">uri:</span> <span class="string">out_bag02</span></span><br><span class="line">  <span class="attr">all:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">compression_format:</span> <span class="string">zstd</span></span><br><span class="line">  <span class="attr">compression_mode:</span> <span class="string">message</span></span><br></pre></td></tr></table></figure> 3. 执行数据转换命令 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">source</span> /opt/ros/humble/setup.bash</span><br><span class="line">ros2 bag convert -i ./path/to/bag/file -o output_options.yaml</span><br></pre></td></tr></table></figure></p>
+<h2 id="问题定位">问题定位</h2>
+<h3 id="增加日志">增加日志</h3>
+<p>由于已经确认不是自己写的程序的问题，所以其实可以跳过这一步 ### gdb检查 cpp程序排查还是需要上gdb，不要自己瞎折腾瞎改代码。<a href="#appendA">文末记录</a>如何在<code>ubuntu</code>上生成<code>core文件</code>。 运行一次程序，生成<code>core文件</code>后使用gdb检查错误堆栈 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gdb ros_ws/install/package/lib/package/excutable /path/to/corefile</span><br><span class="line"></span><br><span class="line">bt  <span class="comment"># gdb命令，打印错误堆栈</span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到如下的报错信息</p>
+<figure>
+<img src="./imgs/backtraces.png" alt="" /><figcaption>backtraces</figcaption>
+</figure>
+<p>虽然是在子线程中出错，但是大概也能看到是在<code>rosbag2_compression::SequentialCompressonWriter::compression_thread_fn()</code>函数中出错。 这也符合了现象，只在进行压缩的时候会出错。</p>
+<p>同时，从错误堆栈里可以看出应该是<code>rosbag2_compression_zstd::ZstdCompressor</code>在进行压缩处理的时候调用<code>rcutils_uint8_array_resize</code>函数出错。</p>
+<h3 id="对比不同的writer">对比不同的writer</h3>
+<p>由于在进行多个<code>writers</code>写数据，但是不执行压缩的时候并没有相关问题发生，所以可以对比一下普通的<code>writer</code>和<code>SequentialCompressonWriter</code>在写函数中的区别 #### 普通的writer，即rosbag2_cpp::SequentialWriter 普通的<code>writer</code>，即<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/humble/rosbag2_cpp/src/rosbag2_cpp/writers/sequential_writer.cpp">rosbag2_cpp::SequentialWriter</a>中，<code>void SequentialWriter::write(std::shared_ptr&lt;rosbag2_storage::SerializedBagMessage&gt; message)</code>函数比较简单，<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/14bf3dcc2170ebe5bd73ed0cf83bb4077b3e36b4/rosbag2_cpp/src/rosbag2_cpp/writers/sequential_writer.cpp#L328-L337">核心代码</a>是这几行 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (storage_options_.max_cache_size == <span class="number">0u</span>) &#123;</span><br><span class="line"><span class="comment">// If cache size is set to zero, we write to storage directly</span></span><br><span class="line">storage_-&gt;<span class="built_in">write</span>(converted_msg);</span><br><span class="line">++topic_information-&gt;message_count;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line"><span class="comment">// Otherwise, use cache buffer</span></span><br><span class="line">message_cache_-&gt;<span class="built_in">push</span>(converted_msg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>由于<code>bag_rewrite</code>在调用<code>writer</code>的时候，<code>max_cache_size</code>始终<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/14bf3dcc2170ebe5bd73ed0cf83bb4077b3e36b4/rosbag2_transport/src/rosbag2_transport/bag_rewrite.cpp#L191">设置为0</a>，因此执行的是<code>if</code>分支，也就是直接调用底层的数据库封装类直接写入硬盘。</p>
+<h4 id="带压缩的writer即rosbag2_compressionsequentialcompressionwriter">带压缩的writer即rosbag2_compression::SequentialCompressionWriter</h4>
+<p>带压缩功能的writer这部分的逻辑增加了一个单独线程做压缩处理，函数<code>void SequentialCompressionWriter::write(   std::shared_ptr&lt;rosbag2_storage::SerializedBagMessage&gt; message)</code>的核心部分主要是<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/14bf3dcc2170ebe5bd73ed0cf83bb4077b3e36b4/rosbag2_compression/src/rosbag2_compression/sequential_compression_writer.cpp#L317-L321">这几行</a> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">std::lock_guard&lt;std::mutex&gt; <span class="title">lock</span><span class="params">(compressor_queue_mutex_)</span></span>;</span><br><span class="line"><span class="keyword">while</span> (compressor_message_queue_.<span class="built_in">size</span>() &gt; compression_options_.compression_queue_size) &#123;</span><br><span class="line">    compressor_message_queue_.<span class="built_in">pop</span>();</span><br><span class="line">&#125;</span><br><span class="line">compressor_message_queue_.<span class="built_in">push</span>(message);</span><br><span class="line">compressor_condition_.<span class="built_in">notify_one</span>();</span><br></pre></td></tr></table></figure></p>
+<p>其中的<code>compressor_message_queue_</code>在另一个线程，即函数<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/14bf3dcc2170ebe5bd73ed0cf83bb4077b3e36b4/rosbag2_compression/src/rosbag2_compression/sequential_compression_writer.cpp#L63">void SequentialCompressionWriter::compression_thread_fn()</a>被处理。 这里面有一个对传入的<code>SerializedMessageSharedPtr</code>对象中的<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/14bf3dcc2170ebe5bd73ed0cf83bb4077b3e36b4/rosbag2_compression/src/rosbag2_compression/sequential_compression_writer.cpp#L96">内存直接进行处理</a></p>
+<h4 id="重新查看调用api的代码">重新查看调用API的代码</h4>
+<p>调用<code>rosbag2 API</code>进行数据写操作的主要过程如下： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// create rosbag2_storage::StorageOptions</span></span><br><span class="line">rosbag2_storage::StorageOptions storageOptions;</span><br><span class="line"><span class="comment">// create reader</span></span><br><span class="line"><span class="keyword">auto</span> inputReader = rosbag2_transport::ReaderWriterFactory::<span class="built_in">make_reader</span>(storageOptions);</span><br><span class="line"><span class="comment">// open file</span></span><br><span class="line">inputReader-&gt;<span class="built_in">open</span>(storageOptions);</span><br><span class="line"></span><br><span class="line"><span class="comment">// create multiplt writers</span></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">// perform write</span></span><br><span class="line"><span class="keyword">while</span> (inputReader-&gt;<span class="built_in">has_next</span>())</span><br><span class="line">&#123;</span><br><span class="line">    std::shared_ptr&lt;rosbag2_storage::SerializedBagMessage&gt; nextMsg = <span class="literal">nullptr</span>;</span><br><span class="line">    nextMsg = inputReader-&gt;<span class="built_in">read_next</span>();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> &amp; writer : outputWriters):</span><br><span class="line">    &#123;</span><br><span class="line">        writer-&gt;<span class="built_in">write</span>(nextMsg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">    </span><br></pre></td></tr></table></figure></p>
+<p><strong>可以看到，我们从<code>reader</code>中拿到的<code>SerializedBagMessage</code>是以共享指针的形式使用，当我们把共享指针传给不同的<code>writer</code>时，不同的<code>writer</code>内部同时对同一块内存进行数据压缩处理，因此也就导致了不同线程操作同一块地址空间的错误。</strong></p>
+<h2 id="修复">修复</h2>
+<p>由于不想更改<code>rosbag2</code>的代码，因此想办法在调用层解决。既然问题共享指针指向的内存被不同线程同时处理，那么我们就在每一次调用<code>writer-&gt;write(nextMsg)</code>的时候对<code>nextMsg</code>执行一次深拷贝，让不同的<code>writer</code>操作不同内存即可。 这里比较复杂的是<code>SerializedBagMessage</code>中使用一个指向<code>rcutils_uint8_array_t</code>的指针对内存进行管理。而<code>rcutils_uint8_array_t</code>里面又使用一个裸<code>uint8_t*</code>指针指向管理的内存。同时<code>rcutils</code>的文档不够详细，也没有提供函数对<code>rcutils_uint8_array_t</code>执行深拷贝操作。不过只要能够明白上面的内存管理关系，修复起来不太困难，关于<code>rcutils_uint8_array_t</code>的操作可以参考<code>rosbag2</code>里面的代码，最终修复的代码如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">...create reader &amp;&amp; writer</span><br><span class="line"><span class="comment">// perform write</span></span><br><span class="line"><span class="keyword">while</span> (inputReader-&gt;<span class="built_in">has_next</span>())</span><br><span class="line">&#123;</span><br><span class="line">    std::shared_ptr&lt;rosbag2_storage::SerializedBagMessage&gt; nextMsg = <span class="literal">nullptr</span>;</span><br><span class="line">    nextMsg = inputReader-&gt;<span class="built_in">read_next</span>();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> &amp; writer : outputWriters):</span><br><span class="line">    &#123;</span><br><span class="line">        std::shared_ptr&lt;rosbag2_storage::SerializedBagMessage&gt; nextMsg_copy = std::<span class="built_in">make_shared</span>&lt;rosbag2_storage::SerializedBagMessage&gt;();</span><br><span class="line">        <span class="comment">// 新建rcutils_uint8_array_t需要按照下面这样的操作</span></span><br><span class="line">        nextMsg_copy-&gt;serialized_data = std::<span class="built_in">shared_ptr</span>&lt;<span class="type">rcutils_uint8_array_t</span>&gt;(</span><br><span class="line">        <span class="keyword">new</span> <span class="type">rcutils_uint8_array_t</span>,</span><br><span class="line">        [](<span class="type">rcutils_uint8_array_t</span> * msg) &#123;</span><br><span class="line">        <span class="keyword">auto</span> fini_return = <span class="built_in">rcutils_uint8_array_fini</span>(msg);</span><br><span class="line">        <span class="keyword">delete</span> msg;</span><br><span class="line">        <span class="keyword">if</span> (fini_return != RCUTILS_RET_OK) &#123;</span><br><span class="line">            <span class="built_in">RCLCPP_ERROR_STREAM</span>(</span><br><span class="line">            rclcpp::<span class="built_in">get_logger</span>(<span class="string">&quot;rosbag2_cpp&quot;</span>),</span><br><span class="line">            <span class="string">&quot;Failed to destroy serialized message: &quot;</span> &lt;&lt; <span class="built_in">rcutils_get_error_string</span>().str);</span><br><span class="line">        &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 新建后需要执行内存初始化</span></span><br><span class="line">        <span class="type">rcutils_allocator_t</span> allocator = <span class="built_in">rcutils_get_default_allocator</span>();</span><br><span class="line">        <span class="keyword">auto</span> ret = <span class="built_in">rcutils_uint8_array_init</span>(</span><br><span class="line">            nextMsg_copy-&gt;serialized_data.<span class="built_in">get</span>(),</span><br><span class="line">            nextMsg-&gt;serialized_data-&gt;buffer_capacity,</span><br><span class="line">            &amp;allocator);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 检查是否初始化成功</span></span><br><span class="line">        <span class="keyword">if</span> (ret != RCUTILS_RET_OK)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">RCLCPP_ERROR</span>(<span class="built_in">get_logger</span>(), <span class="string">&quot;Init arrry failed with ret code = %d&quot;</span>, ret);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 复制内容</span></span><br><span class="line">        nextMsg_copy-&gt;topic_name = nextMsg-&gt;topic_name;</span><br><span class="line">        nextMsg_copy-&gt;time_stamp = nextMsg-&gt;time_stamp;</span><br><span class="line">        nextMsg_copy-&gt;serialized_data-&gt;buffer_capacity = nextMsg-&gt;serialized_data-&gt;buffer_capacity;</span><br><span class="line">        nextMsg_copy-&gt;serialized_data-&gt;buffer_length = nextMsg-&gt;serialized_data-&gt;buffer_length;</span><br><span class="line">        <span class="comment">// 复制内存</span></span><br><span class="line">        <span class="built_in">memcpy</span>((<span class="type">void</span>*)nextMsg_copy-&gt;serialized_data-&gt;buffer,</span><br><span class="line">                (<span class="type">void</span>*)nextMsg-&gt;serialized_data-&gt;buffer, nextMsg-&gt;serialized_data-&gt;buffer_length);</span><br><span class="line">        writer-&gt;<span class="built_in">write</span>(nextMsg_copy);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="其他">其他</h2>
+<p>这个bug同时提交到<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble" title="rosbag2 repo">rosbag2</a>仓库<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/issues/1262">issues中</a>，看看后面有没有机会修复并提交PR</p>
+<h2 id="附录aubuntu-core文件生成">附录A：ubuntu core文件生成</h2>
+<div id="appendA">
+
+</div>
+<ol type="1">
+<li><p>ubuntu有一个默认的错误搜集系统apport，必须要关掉之后才能生成core文件 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo service apport status</span><br><span class="line">sudo service apport stop</span><br><span class="line">sudo systemctl apport disble  <span class="comment"># 似乎无法关闭开机启动，每次需要的时候需要手工确认是否关闭</span></span><br></pre></td></tr></table></figure></p></li>
+<li><p>设置core文件大小，默认是0，所以不会生成core文件 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ulimit</span> -c  <span class="comment"># 若结果是0，则不会生成core文件</span></span><br><span class="line"><span class="built_in">ulimit</span> -c unlimited  <span class="comment"># 不限制core文件大小</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;ulimit -c unlimited&quot;</span> &gt;&gt; ~/.bashrc  <span class="comment"># 选择当前使用的终端</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;ulimit -c unlimited&quot;</span> &gt;&gt; ~/.zshrc</span><br></pre></td></tr></table></figure></p></li>
+<li><p>设置corefile路径(注意，路径必须普通用户可读！） <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo <span class="built_in">mkdir</span> /corefile</span><br><span class="line">sudo <span class="built_in">chmod</span> 777 /corefile</span><br><span class="line">sysctl -w kernel.core_pattern=/corefile/core-%e-%p-%t</span><br></pre></td></tr></table></figure></p></li>
+<li><p><code>CMakeLists.txt加上``Debug模式</code>下不进行编译器优化 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># In CMakeLists.txt</span></span><br><span class="line">SET(CMAKE_CXX_FLAGS_DEBUG <span class="string">&quot;<span class="variable">$ENV</span>&#123;CXXFLAGS&#125; -O0 -Wall -g -ggdb -Wno-unused-parameter&quot;</span>)  </span><br></pre></td></tr></table></figure> 注意在编译<code>ROS2</code>包的时候要指明<code>Debug</code> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">colcon build --packages-select package_name --cmake-args -DCMAKE_BUILD_TYPE=Debug</span><br></pre></td></tr></table></figure></p></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/" title="记一次解决rosbag2内存错误问题过程">https://zeal-up.github.io/2023/03/15/ros/记一次解决rosbag2内存错误问题过程/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/ros/" rel="tag"># ros</a>
+              <a href="/tags/rosbag2/" rel="tag"># rosbag2</a>
+              <a href="/tags/development/" rel="tag"># development</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/" rel="prev" title="Simple-LIO-SAM——环境搭建与运行">
+                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——环境搭建与运行
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="73e4783c1a71c1ae17cdb35318885253"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>
