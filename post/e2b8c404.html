@@ -22,26 +22,26 @@
     <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏  问题背景 由于工作需要，需要开发一个程序，根据记录的信息，从rosbag2保存的数据包根据打点的时间戳，提取出一段段单独的数据包。 为了存储空间考虑，保存时以及提取时都指定了使用压缩的方式进行存储。压缩器和压缩模式如下： 12compression_format: zstdcompression_mode: message rosbag">
 <meta property="og:type" content="article">
 <meta property="og:title" content="记一次解决rosbag2内存错误问题过程">
-<meta property="og:url" content="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/index.html">
+<meta property="og:url" content="https://zeal-up.github.io/post/e2b8c404.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
 <meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏  问题背景 由于工作需要，需要开发一个程序，根据记录的信息，从rosbag2保存的数据包根据打点的时间戳，提取出一段段单独的数据包。 为了存储空间考虑，保存时以及提取时都指定了使用压缩的方式进行存储。压缩器和压缩模式如下： 12compression_format: zstdcompression_mode: message rosbag">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/imgs/backtraces.png">
+<meta property="og:image" content="https://zeal-up.github.io/post/imgs/backtraces.png">
 <meta property="article:published_time" content="2023-03-15T10:28:01.000Z">
-<meta property="article:modified_time" content="2023-03-15T14:01:12.525Z">
+<meta property="article:modified_time" content="2023-03-16T08:36:15.392Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="ros">
 <meta property="article:tag" content="rosbag2">
 <meta property="article:tag" content="development">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/imgs/backtraces.png">
+<meta name="twitter:image" content="https://zeal-up.github.io/post/imgs/backtraces.png">
 
 
-<link rel="canonical" href="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/">
+<link rel="canonical" href="https://zeal-up.github.io/post/e2b8c404.html">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/","path":"2023/03/15/ros/记一次解决rosbag2内存错误问题过程/","title":"记一次解决rosbag2内存错误问题过程"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/post/e2b8c404.html","path":"post/e2b8c404.html","title":"记一次解决rosbag2内存错误问题过程"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>记一次解决rosbag2内存错误问题过程 | Zeal's Blog</title>
@@ -148,6 +148,10 @@
 
         </div>
       </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
     </div>
 
     
@@ -167,7 +171,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/post/e2b8c404.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -195,9 +199,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2023-03-15 18:28:01 / 修改时间：22:01:12" itemprop="dateCreated datePublished" datetime="2023-03-15T18:28:01+08:00">2023-03-15</time>
+      <time title="创建时间：2023-03-15 18:28:01" itemprop="dateCreated datePublished" datetime="2023-03-15T18:28:01+08:00">2023-03-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-16 16:36:15" itemprop="dateModified" datetime="2023-03-16T16:36:15+08:00">2023-03-16</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -213,20 +223,6 @@
         </span>
     </span>
 
-  
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Changyan：</span>
-    
-    <a title="记一次解决rosbag2内存错误问题过程" href="/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::73e4783c1a71c1ae17cdb35318885253" class="cy_cmt_count" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
   
 </div>
 
@@ -246,7 +242,16 @@
 <p><a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble" title="rosbag2 repo">rosbag2</a>不仅有命令行工具，同时还开放API给开发者使用。<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble" title="rosbag2 repo">rosbag2</a>还提供了<code>convert</code>功能，可以对录下来的bagfile进行<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble#converting-bags">二次提取</a>。因此开发这部分功能可以参考源码里面的<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/humble/rosbag2_transport/src/rosbag2_transport/bag_rewrite.cpp">bag_rewriter.cpp</a></p>
 <h2 id="开发环境">开发环境</h2>
 <blockquote>
-<p>ROS: ROS2-humble OS: ubuntu 22.04 language: cpp17 rosbag2: 0.15.4-2jammy.20230118.031755</p>
+<p>ROS: ROS2-humble</p>
+</blockquote>
+<blockquote>
+<p>OS: ubuntu 22.04</p>
+</blockquote>
+<blockquote>
+<p>language: cpp17</p>
+</blockquote>
+<blockquote>
+<p>rosbag2: 0.15.4-2jammy.20230118.031755</p>
 </blockquote>
 <h2 id="问题描述">问题描述</h2>
 <p>完成上述数据提取功能后进行测试，发现提取的时候如果同时提取多个目标（构建多个writer，读取message后进行写操作，<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/14bf3dcc2170ebe5bd73ed0cf83bb4077b3e36b4/rosbag2_transport/src/rosbag2_transport/bag_rewrite.cpp#L135">rosbag2源码参考部分</a>，并且都进行压缩的时候，会有<code>core dump</code>，错误信息： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">corrupted size vs. prev_size</span><br><span class="line">[ros2run]: Aborted</span><br></pre></td></tr></table></figure></p>
@@ -306,7 +311,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/" title="记一次解决rosbag2内存错误问题过程">https://zeal-up.github.io/2023/03/15/ros/记一次解决rosbag2内存错误问题过程/</a>
+      <a href="https://zeal-up.github.io/post/e2b8c404.html" title="记一次解决rosbag2内存错误问题过程">https://zeal-up.github.io/post/e2b8c404.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -324,7 +329,7 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/" rel="prev" title="Simple-LIO-SAM——环境搭建与运行">
+                <a href="/post/51cd93e2.html" rel="prev" title="Simple-LIO-SAM——环境搭建与运行">
                   <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——环境搭建与运行
                 </a>
             </div>
@@ -340,7 +345,7 @@
 
 
 
-    <div class="comments" id="SOHUCS" sid="73e4783c1a71c1ae17cdb35318885253"></div>
+    <div class="comments gitalk-container"></div>
 </div>
   </main>
 
@@ -363,10 +368,6 @@
   </footer>
 
   
-  <div class="back-to-top" role="button" aria-label="返回顶部">
-    <i class="fa fa-arrow-up fa-lg"></i>
-    <span>0%</span>
-  </div>
 
 <noscript>
   <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
@@ -393,8 +394,10 @@
 <script src="/js/third-party/math/mathjax.js"></script>
 
 
-<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
-<script src="/js/third-party/comments/changyan.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"zeal-up","repo":"gittalk-comments","client_id":"ee95781a1a0822451c79","client_secret":"d9e3f1ab95aebc23ee90fcfce6782f9f72b0ca59","admin_user":null,"distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":null,"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"c003175cd144e9bd444a89bd901133ab"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
 
 </body>
 </html>
