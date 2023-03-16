@@ -22,30 +22,30 @@
     <meta name="description" content="架构 架构图  域（Domain）的概念   数据中心收发模型（DCPS:Data Centric Publisher and Subscriber)  Why need a publisher and subscriber  These publishers and subscribers don’t need to know about each other ahead of time; th">
 <meta property="og:type" content="article">
 <meta property="og:title" content="FastDDS关键概念">
-<meta property="og:url" content="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/index.html">
+<meta property="og:url" content="https://zeal-up.github.io/post/431f476.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
 <meta property="og:description" content="架构 架构图  域（Domain）的概念   数据中心收发模型（DCPS:Data Centric Publisher and Subscriber)  Why need a publisher and subscriber  These publishers and subscribers don’t need to know about each other ahead of time; th">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/imgs/fast-dds-architecture.svg">
-<meta property="og:image" content="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/imgs/domain_concept.jpg">
-<meta property="og:image" content="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/imgs/dds_domain.svg">
-<meta property="og:image" content="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/imgs/DataCentricModel.png">
-<meta property="og:image" content="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/imgs/monitor.jpg">
+<meta property="og:image" content="https://zeal-up.github.io/post/imgs/fast-dds-architecture.svg">
+<meta property="og:image" content="https://zeal-up.github.io/post/imgs/domain_concept.jpg">
+<meta property="og:image" content="https://zeal-up.github.io/post/imgs/dds_domain.svg">
+<meta property="og:image" content="https://zeal-up.github.io/post/imgs/DataCentricModel.png">
+<meta property="og:image" content="https://zeal-up.github.io/post/imgs/monitor.jpg">
 <meta property="article:published_time" content="2023-03-13T10:02:43.000Z">
-<meta property="article:modified_time" content="2023-03-16T10:00:36.139Z">
+<meta property="article:modified_time" content="2023-03-16T10:04:49.512Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="FastDDS">
 <meta property="article:tag" content="DDS">
 <meta property="article:tag" content="中间件">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/imgs/fast-dds-architecture.svg">
+<meta name="twitter:image" content="https://zeal-up.github.io/post/imgs/fast-dds-architecture.svg">
 
 
-<link rel="canonical" href="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/">
+<link rel="canonical" href="https://zeal-up.github.io/post/431f476.html">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/","path":"2023/03/13/dds/FastDDS关键概念/","title":"FastDDS关键概念"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/post/431f476.html","path":"post/431f476.html","title":"FastDDS关键概念"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>FastDDS关键概念 | Zeal's Blog</title>
@@ -152,6 +152,10 @@
 
         </div>
       </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
     </div>
 
     
@@ -171,7 +175,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/post/431f476.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -207,7 +211,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-16 18:00:36" itemprop="dateModified" datetime="2023-03-16T18:00:36+08:00">2023-03-16</time>
+      <time title="修改时间：2023-03-16 18:04:49" itemprop="dateModified" datetime="2023-03-16T18:04:49+08:00">2023-03-16</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -232,8 +236,8 @@
       </span>
       <span class="post-meta-item-text">Changyan：</span>
     
-    <a title="FastDDS关键概念" href="/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::73f7a0f706535d55ad531611b3af6c03" class="cy_cmt_count" itemprop="commentCount"></span>
+    <a title="FastDDS关键概念" href="/post/431f476.html#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::09cd97f274f5671589682bebe765f179" class="cy_cmt_count" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -303,7 +307,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/" title="FastDDS关键概念">https://zeal-up.github.io/2023/03/13/dds/FastDDS关键概念/</a>
+      <a href="https://zeal-up.github.io/post/431f476.html" title="FastDDS关键概念">https://zeal-up.github.io/post/431f476.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -321,12 +325,12 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/" rel="prev" title="经久不衰的卡尔曼滤波器-基础知识及公式推导">
+                <a href="/post/69bd46a1.html" rel="prev" title="经久不衰的卡尔曼滤波器-基础知识及公式推导">
                   <i class="fa fa-chevron-left"></i> 经久不衰的卡尔曼滤波器-基础知识及公式推导
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2023/03/13/lio_sam/intro/" rel="next" title="Simple-LIO-SAM——项目简介">
+                <a href="/post/765c3a82.html" rel="next" title="Simple-LIO-SAM——项目简介">
                   Simple-LIO-SAM——项目简介 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
@@ -340,7 +344,7 @@
 
 
 
-    <div class="comments" id="SOHUCS" sid="73f7a0f706535d55ad531611b3af6c03"></div>
+    <div class="comments" id="SOHUCS" sid="09cd97f274f5671589682bebe765f179"></div>
 </div>
   </main>
 
@@ -363,10 +367,6 @@
   </footer>
 
   
-  <div class="back-to-top" role="button" aria-label="返回顶部">
-    <i class="fa fa-arrow-up fa-lg"></i>
-    <span>0%</span>
-  </div>
 
 <noscript>
   <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
