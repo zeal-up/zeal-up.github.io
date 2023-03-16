@@ -22,26 +22,26 @@
     <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏  问题背景 由于工作需要，需要开发一个程序，根据记录的信息，从rosbag2保存的数据包根据打点的时间戳，提取出一段段单独的数据包。 为了存储空间考虑，保存时以及提取时都指定了使用压缩的方式进行存储。压缩器和压缩模式如下： 12compression_format: zstdcompression_mode: message rosbag">
 <meta property="og:type" content="article">
 <meta property="og:title" content="记一次解决rosbag2内存错误问题过程">
-<meta property="og:url" content="https://zeal-up.github.io/post/e2b8c404.html">
+<meta property="og:url" content="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
 <meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏  问题背景 由于工作需要，需要开发一个程序，根据记录的信息，从rosbag2保存的数据包根据打点的时间戳，提取出一段段单独的数据包。 为了存储空间考虑，保存时以及提取时都指定了使用压缩的方式进行存储。压缩器和压缩模式如下： 12compression_format: zstdcompression_mode: message rosbag">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://zeal-up.github.io/post/imgs/backtraces.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/imgs/backtraces.png">
 <meta property="article:published_time" content="2023-03-15T10:28:01.000Z">
-<meta property="article:modified_time" content="2023-03-16T10:04:49.512Z">
+<meta property="article:modified_time" content="2023-03-16T10:07:59.012Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="ros">
 <meta property="article:tag" content="rosbag2">
 <meta property="article:tag" content="development">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://zeal-up.github.io/post/imgs/backtraces.png">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/imgs/backtraces.png">
 
 
-<link rel="canonical" href="https://zeal-up.github.io/post/e2b8c404.html">
+<link rel="canonical" href="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/post/e2b8c404.html","path":"post/e2b8c404.html","title":"记一次解决rosbag2内存错误问题过程"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/","path":"2023/03/15/ros/记一次解决rosbag2内存错误问题过程/","title":"记一次解决rosbag2内存错误问题过程"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>记一次解决rosbag2内存错误问题过程 | Zeal's Blog</title>
@@ -171,7 +171,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/post/e2b8c404.html">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -207,7 +207,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-16 18:04:49" itemprop="dateModified" datetime="2023-03-16T18:04:49+08:00">2023-03-16</time>
+      <time title="修改时间：2023-03-16 18:07:59" itemprop="dateModified" datetime="2023-03-16T18:07:59+08:00">2023-03-16</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -232,8 +232,8 @@
       </span>
       <span class="post-meta-item-text">Changyan：</span>
     
-    <a title="记一次解决rosbag2内存错误问题过程" href="/post/e2b8c404.html#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::c003175cd144e9bd444a89bd901133ab" class="cy_cmt_count" itemprop="commentCount"></span>
+    <a title="记一次解决rosbag2内存错误问题过程" href="/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::73e4783c1a71c1ae17cdb35318885253" class="cy_cmt_count" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -325,7 +325,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://zeal-up.github.io/post/e2b8c404.html" title="记一次解决rosbag2内存错误问题过程">https://zeal-up.github.io/post/e2b8c404.html</a>
+      <a href="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/" title="记一次解决rosbag2内存错误问题过程">https://zeal-up.github.io/2023/03/15/ros/记一次解决rosbag2内存错误问题过程/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -343,7 +343,7 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/post/51cd93e2.html" rel="prev" title="Simple-LIO-SAM——环境搭建与运行">
+                <a href="/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/" rel="prev" title="Simple-LIO-SAM——环境搭建与运行">
                   <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——环境搭建与运行
                 </a>
             </div>
@@ -359,7 +359,7 @@
 
 
 
-    <div class="comments" id="SOHUCS" sid="c003175cd144e9bd444a89bd901133ab"></div>
+    <div class="comments" id="SOHUCS" sid="73e4783c1a71c1ae17cdb35318885253"></div>
 </div>
   </main>
 
