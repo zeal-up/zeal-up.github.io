@@ -274,6 +274,118 @@ mjx-container[display="true"] + br {
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/" class="post-title-link" itemprop="url">Simple-LIO-SAM——utility文件解读</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-03-22 11:18:09 / 修改时间：15:11:06" itemprop="dateCreated datePublished" datetime="2023-03-22T11:18:09+08:00">2023-03-22</time>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——utility文件解读" href="/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::6ed3eebc09d2237963daad43bab3bc96" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <p>这是<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>里一个最基础的文件，主要有几个重要功能： 1. 作为所有其他节点的基类，放置所有从配置文件读取的配置字 2. 提供一些实用函数 3. 配置<a target="_blank" rel="noopener" href="https://docs.ros.org/en/humble/Concepts/About-Quality-of-Service-Settings.html" title="Ros2 QoS">QoS</a></p>
+<h2 id="配置基类">配置基类</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>为了方便配置，把所有节点的配置项都写在同一个文件<code>Simple-LIO-SAM/config/params.yaml</code>，同时构建了一个基类<code>ParamServer</code>统一读取该配置文件，其余模块都从该基类继承。 <img src="./imgs/Design-Class.png" alt="类图" /> 这可能不是最优的方式，不过从实现上来说的确是最简单的。</p>
+<p>每个模块的具体配置项后面具体讲解到会逐一解释，目前只需要知道是在哪里配置就行。 <details class="note info no-icon"><summary><p>配置部分代码</p>
+</summary>
+<figure class="highlight plaintext">
+<table>
+<tr>
+<td class="gutter">
+<pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre>
+</td>
+<td class="code">
+<pre><span class="line">// Topics</span><br><span class="line">string pointCloudTopic;  // 原始点云数据话题（/points_raw）</span><br><span class="line">string imuTopic;         // 原始IMU数据话题（/imu_correct）</span><br><span class="line">string imuOdomTopic;     // IMU里程计，在imuPreintegration中对IMU做预积分得到（/lio_sam/imu/odometry）</span><br><span class="line">string lidarOdomTopic;   // 雷达里程计，在mapOptimization中得到（/lio_sam/mapping/odometry）</span><br><span class="line">string gpsTopic;         // 原始gps经过robot_localization包计算得到，暂未使用</span><br><span class="line"></span><br><span class="line">// Services</span><br><span class="line">string saveMapSrv;      // 保存地图service地址</span><br><span class="line"></span><br><span class="line">// Frames</span><br><span class="line">string imuFrame;        // IMU数据坐标系，如果IMU和激光雷达坐标系硬件对齐，可以认为IMU、Lidar、Chassis坐标系相同</span><br><span class="line">string lidarFrame;      // 激光雷达坐标系，点云数据坐标系，由激光雷达发布的数据指定。与lidarFrame相同，但是不同雷达有不同的名称</span><br><span class="line">string baseLinkFrame;   // 车辆底盘坐标系</span><br><span class="line">string odomFrame;       // 地图坐标系，在SLAM中一般也是世界坐标系，通常是车辆的起始坐标系</span><br><span class="line"></span><br><span class="line">// GPS Settings</span><br><span class="line">bool useImuHeadingInitialization;</span><br><span class="line">bool useGpsElevation;</span><br><span class="line">float gpsCovThreshold;</span><br><span class="line">float poseCovThreshold;</span><br><span class="line"></span><br><span class="line">// Save pcd</span><br><span class="line">bool savePCD;</span><br><span class="line">string savePCDDirectory;</span><br><span class="line"></span><br><span class="line">// Lidar Sensor Configuration</span><br><span class="line">SensorType sensor;</span><br><span class="line">int N_SCAN;</span><br><span class="line">int Horizon_SCAN;</span><br><span class="line">int downsampleRate;</span><br><span class="line">float lidarMinRange;</span><br><span class="line">float lidarMaxRange;</span><br><span class="line"></span><br><span class="line">// IMU</span><br><span class="line">float imuAccNoise;      // IMU加速度噪声协方差，可以用Allen方差标定；这里三个轴设为相同的方差</span><br><span class="line">float imuGyrNoise;      // IMU角速度噪声协方差，可以用Allen方差标定；这里三个轴设为相同的方差</span><br><span class="line">float imuAccBiasN;      // IMU加速度偏差，三轴统一</span><br><span class="line">float imuGyrBiasN;      // IMU角速度偏差，三轴统一</span><br><span class="line">float imuGravity;       // 重力加速度值</span><br><span class="line">float imuRPYWeight;     // 算法中使用IMU的roll、pitch角对激光里程计的结果加权融合</span><br><span class="line">vector&lt;double&gt; extRotV;         // IMU加速度向量到雷达坐标系的旋转</span><br><span class="line">vector&lt;double&gt; extRPYV;         // IMU角速度向量到雷达坐标系的旋转</span><br><span class="line">vector&lt;double&gt; extTransV;       // IMU向量到雷达坐标系的平移：P_&#123;lidar&#125; = T * P_&#123;imu&#125;</span><br><span class="line">Eigen::Matrix3d extRot;         // IMU加速度向量到雷达坐标系的旋转</span><br><span class="line">Eigen::Matrix3d extRPY;         // IMU角速度向量到雷达坐标系的旋转</span><br><span class="line">Eigen::Vector3d extTrans;       // IMU向量到雷达坐标系的平移：P_&#123;lidar&#125; = T * P_&#123;imu&#125;</span><br><span class="line">Eigen::Quaterniond extQRPY;     // IMU角速度向量到雷达坐标系的旋转（四元数形式）</span><br><span class="line"></span><br><span class="line">// LOAM</span><br><span class="line">float edgeThreshold;            // 边缘特征点提取阈值</span><br><span class="line">float surfThreshold;            // 平面特征点提取阈值</span><br><span class="line">int edgeFeatureMinValidNum;     // 边缘特征点数量阈值（default:10)</span><br><span class="line">int surfFeatureMinValidNum;     // 平面特征点数量阈值（default:100)</span><br><span class="line"></span><br><span class="line">// voxel filter paprams</span><br><span class="line">float odometrySurfLeafSize;</span><br><span class="line">float mappingCornerLeafSize;</span><br><span class="line">float mappingSurfLeafSize ;</span><br><span class="line"></span><br><span class="line">float z_tollerance;             // 限制z轴平移的大小</span><br><span class="line">float rotation_tollerance;      // 限制roll、pitch角的大小</span><br><span class="line"></span><br><span class="line">// CPU Params</span><br><span class="line">int numberOfCores;              // 在点云匹配中使用指令集并行加速（default:4）</span><br><span class="line">double mappingProcessInterval;  // 点云帧处理时间间隔（default:0.15s）</span><br><span class="line"></span><br><span class="line">// Surrounding map</span><br><span class="line">float surroundingkeyframeAddingDistThreshold;   // 当前帧需要与上一帧距离大于1米或者角度大于0.2度才有可能采纳为关键帧</span><br><span class="line">float surroundingkeyframeAddingAngleThreshold;  // 当前帧需要与上一帧距离大于1米或者角度大于0.2度才有可能采纳为关键帧</span><br><span class="line">float surroundingKeyframeDensity;               // 构建局部地图时对采用的关键帧数量做降采样</span><br><span class="line">float surroundingKeyframeSearchRadius;          // 构建局部地图时关键帧的检索半径</span><br><span class="line"></span><br><span class="line">// Loop closure</span><br><span class="line">bool  loopClosureEnableFlag;</span><br><span class="line">float loopClosureFrequency;                     // 回环检测独立线程的执行频率</span><br><span class="line">int   surroundingKeyframeSize;                  // 回环检测构建局部地图的最大关键帧数量</span><br><span class="line">float historyKeyframeSearchRadius;              // 执行回环检测时关键帧的检索半径</span><br><span class="line">float historyKeyframeSearchTimeDiff;            // 执行回环检测时关键帧的检索时间范围</span><br><span class="line">int   historyKeyframeSearchNum;                 // 执行回环检测时融合局部地图时对目标关键帧执行+-25帧的关键帧融合</span><br><span class="line">float historyKeyframeFitnessScore;              // 执行回环检测时使用ICP做点云匹配，阈值大于0.3认为匹配失败，不采纳当前回环检测</span><br><span class="line"></span><br><span class="line">// global map visualization radius</span><br><span class="line">float globalMapVisualizationSearchRadius;</span><br><span class="line">float globalMapVisualizationPoseDensity;</span><br><span class="line">float globalMapVisualizationLeafSize;</span><br></pre>
+</td>
+</tr>
+</table>
+</figure>
+
+</details></p>
+<h2 id="实用函数">实用函数</h2>
+<p>这里主要讲解其中一个<code>imuConverter</code>函数。该函数的功能主要是将<code>IMU</code>的原始数据<strong>旋转到</strong><code>Lidar</code>坐标系。这里要先知道，在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中， 默认将雷达坐标系和小车的坐标系等同为同一个坐标系，同时，这里只做了<strong>旋转</strong>操作，没有做平移操作。代码中有很多处位置都用到这个函数，因此需要理解这个函数到底做了什么。 简单来说这个函数就是做了一个<strong>向量坐标变换</strong>。旋转矩阵操作空间中一个点有两种意义：1）三维旋转；2）坐标变换。这两种不同的操作在做连续的操作时，对应旋转矩阵的左乘和右乘。 由于笔者以前的研究方向是六自由度姿态估计，用三维旋转操作比较多，一开始被这里的<code>矩阵右乘</code>搞蒙了。关于旋转矩阵的左乘和右乘，可以看这篇<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45632220/article/details/117735223">博客</a> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">将原始IMU数据：三轴加速度、三轴角速度、三轴角度，与雷达坐标系进行旋转对齐</span></span><br><span class="line"><span class="comment">+ 对齐之后输出的加速度、角速度、角度的x，y，z就变成雷达坐标系的x，y，z</span></span><br><span class="line"><span class="comment">+ 这里的特殊之处在于允许IMU的加速度、角速度与角度的输出是两个不同的坐标系。但在算法中，角度的输出除了用来做第一帧的初始化和加权融合，似乎没有其他作用</span></span><br><span class="line"><span class="comment">+ 这里是将IMU的三个轴与雷达的三个轴在旋转上做对齐，不能加上平移</span></span><br><span class="line"><span class="comment">+ 对向量做坐标系变换，对多个变换的复合应该是右乘</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">sensor_msgs::<span class="function">msg::Imu <span class="title">imuConverter</span><span class="params">(<span class="type">const</span> sensor_msgs::msg::Imu&amp; imu_in)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    sensor_msgs::msg::Imu imu_out = imu_in;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    对加速度向量做坐标系变换，注意这里要理解成坐标系变换，也就是同一个加速度在IMU坐标系和Lidar坐标系的不同表达。不能想象成对加速度做旋转</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="function">Eigen::Vector3d <span class="title">acc</span><span class="params">(imu_in.linear_acceleration.x, imu_in.linear_acceleration.y, imu_in.linear_acceleration.z)</span></span>;</span><br><span class="line">    acc = extRot * acc;</span><br><span class="line">    imu_out.linear_acceleration.x = acc.<span class="built_in">x</span>();</span><br><span class="line">    imu_out.linear_acceleration.y = acc.<span class="built_in">y</span>();</span><br><span class="line">    imu_out.linear_acceleration.z = acc.<span class="built_in">z</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    对角速度做坐标系变换。将IMU坐标系下的向量变换到雷达坐标系。</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="function">Eigen::Vector3d <span class="title">gyr</span><span class="params">(imu_in.angular_velocity.x, imu_in.angular_velocity.y, imu_in.angular_velocity.z)</span></span>;</span><br><span class="line">    gyr = extRot * gyr;</span><br><span class="line">    imu_out.angular_velocity.x = gyr.<span class="built_in">x</span>();</span><br><span class="line">    imu_out.angular_velocity.y = gyr.<span class="built_in">y</span>();</span><br><span class="line">    imu_out.angular_velocity.z = gyr.<span class="built_in">z</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    对角度做坐标系变换。</span></span><br><span class="line"><span class="comment">    + q_from是IMU在全局坐标系下的位姿，q_from: transformation_from_map_to_imu</span></span><br><span class="line"><span class="comment">    + extQRPY如果与extRot对应的话应该是lidar到imu的变换：transformation_from_lidar_to_imu</span></span><br><span class="line"><span class="comment">    + q_final是将雷达点云从雷达坐标系转换到map坐标系的变换，也是：transformation_from_map_to_lidar -&gt; pcd_in_map = q_final * pcd_in_lidar</span></span><br><span class="line"><span class="comment">    + 这里原代码是q_final = q_from * extQRPY；似乎有点问题，还是按照我的推导修改成q_final = q_from * extQRPT.inverse()；由于这里的extQRPY是</span></span><br><span class="line"><span class="comment">    + 直接从配置文件里面读取的，所以这里加不加逆只需要在配置文件里改就行。认为这里有问题的假设是认为extQRPY和extRot的坐标系关系的定义是一致的，也就是</span></span><br><span class="line"><span class="comment">    + 将imu坐标系下的向量转换到雷达坐标系下。如果作者对这两者的定义刚好是相反的，那这里就没有问题。</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="function">Eigen::Quaterniond <span class="title">q_from</span><span class="params">(imu_in.orientation.w, imu_in.orientation.x, imu_in.orientation.y, imu_in.orientation.z)</span></span>;</span><br><span class="line">    Eigen::Quaterniond q_final = q_from * extQRPY.<span class="built_in">inverse</span>();</span><br><span class="line">    imu_out.orientation.x = q_final.<span class="built_in">x</span>();</span><br><span class="line">    imu_out.orientation.y = q_final.<span class="built_in">y</span>();</span><br><span class="line">    imu_out.orientation.z = q_final.<span class="built_in">z</span>();</span><br><span class="line">    imu_out.orientation.w = q_final.<span class="built_in">w</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">sqrt</span>(q_final.<span class="built_in">x</span>()*q_final.<span class="built_in">x</span>() + q_final.<span class="built_in">y</span>()*q_final.<span class="built_in">y</span>() + q_final.<span class="built_in">z</span>()*q_final.<span class="built_in">z</span>() + q_final.<span class="built_in">w</span>()*q_final.<span class="built_in">w</span>()) &lt; <span class="number">0.1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">RCLCPP_ERROR</span>(<span class="built_in">get_logger</span>(), <span class="string">&quot;Invalid quaternion, please use a 9-axis IMU!&quot;</span>);</span><br><span class="line">        rclcpp::<span class="built_in">shutdown</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> imu_out;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="qosquality-of-service">QoS:Quality of Service</h2>
+<p>关于ROS2中<a target="_blank" rel="noopener" href="https://docs.ros.org/en/humble/Concepts/About-Quality-of-Service-Settings.html" title="Ros2 QoS">QoS</a>的基本介绍，参考官方文档学习。<a target="_blank" rel="noopener" href="https://docs.ros.org/en/humble/Concepts/About-Quality-of-Service-Settings.html" title="Ros2 QoS">QoS</a>的设置中，有两个参数是最重要的。一个是<code>depth</code>，一个是<code>RELIABILITY</code>。<code>depth</code>可以简要理解成中间件DDS为这个消息预留的缓存队列长度。 <code>RELIABILITY</code>主要有两种选项<code>best_effort</code>和<code>reliable</code>，它们的关系类似<code>TCP</code>,<code>UDP</code>。<code>best_effort</code>不能保证每一个消息到到达接收端，但可以保持最好的实时信。<code>reliable</code>保证每一帧消息 都到达接收端，但是无法保证实时性。ROS2中专门为传感器预设了一个<a target="_blank" rel="noopener" href="https://docs.ros2.org/foxy/api/rclcpp/classrclcpp_1_1SensorDataQoS.html">SensorDataQoS</a>，里面采用的就是<code>best_effort</code> 的设置。</p>
+<p>在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>设置了三种<code>QoS</code>，分别为：原始IMU数据、原始雷达数据、框架内部传输</p>
+<ol type="1">
+<li><p>原始IMU数据QoS <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// @brief 原始IMU数据的QOS，因为IMU数据较小，所以depth可以设成较大</span></span><br><span class="line"><span class="type">rmw_qos_profile_t</span> qos_profile_imu&#123;</span><br><span class="line">  RMW_QOS_POLICY_HISTORY_KEEP_LAST,</span><br><span class="line">  <span class="number">2000</span>,</span><br><span class="line">  RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,</span><br><span class="line">  RMW_QOS_POLICY_DURABILITY_VOLATILE,</span><br><span class="line">  RMW_QOS_DEADLINE_DEFAULT,</span><br><span class="line">  RMW_QOS_LIFESPAN_DEFAULT,</span><br><span class="line">  RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT,</span><br><span class="line">  RMW_QOS_LIVELINESS_LEASE_DURATION_DEFAULT,</span><br><span class="line">  <span class="literal">false</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">auto</span> qos_imu = rclcpp::<span class="built_in">QoS</span>(</span><br><span class="line">    rclcpp::<span class="built_in">QoSInitialization</span>(</span><br><span class="line">      qos_profile_imu.history,</span><br><span class="line">      qos_profile_imu.depth</span><br><span class="line">    ),</span><br><span class="line">    qos_profile_imu);</span><br></pre></td></tr></table></figure></p></li>
+<li><p>原始雷达数据QoS <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// @brief 原始雷达数据topic的QOS，主要是best_effort和depth起作用</span></span><br><span class="line"><span class="type">rmw_qos_profile_t</span> qos_profile_lidar&#123;</span><br><span class="line">  RMW_QOS_POLICY_HISTORY_KEEP_LAST,</span><br><span class="line">  <span class="number">5</span>,</span><br><span class="line">  RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,</span><br><span class="line">  RMW_QOS_POLICY_DURABILITY_VOLATILE,</span><br><span class="line">  RMW_QOS_DEADLINE_DEFAULT,</span><br><span class="line">  RMW_QOS_LIFESPAN_DEFAULT,</span><br><span class="line">  RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT,</span><br><span class="line">  RMW_QOS_LIVELINESS_LEASE_DURATION_DEFAULT,</span><br><span class="line">  <span class="literal">false</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">auto</span> qos_lidar = rclcpp::<span class="built_in">QoS</span>(</span><br><span class="line">    rclcpp::<span class="built_in">QoSInitialization</span>(</span><br><span class="line">      qos_profile_lidar.history,</span><br><span class="line">      qos_profile_lidar.depth</span><br><span class="line">    ),</span><br><span class="line">    qos_profile_lidar);</span><br></pre></td></tr></table></figure></p></li>
+<li><p>算法框架内部传输QoS 算法框架内部要求有最高的实时性，并且由于传输中有很多点云类型的数据（较大），因此作者把<code>depth</code>设置为1 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// @brief 算法框架中默认的QOS，主要是depth=1和reliability=best_effort起作用。对于传输实时性有要求，不要求每个数据可接收的消息，一般</span></span><br><span class="line"><span class="comment">/// 设成best_effort。在ROS2中对于传感器数据，有一个内置的QOS叫rclcpp::SensorDataQoS()</span></span><br><span class="line"><span class="type">rmw_qos_profile_t</span> qos_profile&#123;</span><br><span class="line">  RMW_QOS_POLICY_HISTORY_KEEP_LAST,</span><br><span class="line">  <span class="number">1</span>,</span><br><span class="line">  RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,</span><br><span class="line">  RMW_QOS_POLICY_DURABILITY_VOLATILE,</span><br><span class="line">  RMW_QOS_DEADLINE_DEFAULT,</span><br><span class="line">  RMW_QOS_LIFESPAN_DEFAULT,</span><br><span class="line">  RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT,</span><br><span class="line">  RMW_QOS_LIVELINESS_LEASE_DURATION_DEFAULT,</span><br><span class="line">  <span class="literal">false</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> qos = rclcpp::<span class="built_in">QoS</span>(</span><br><span class="line">    rclcpp::<span class="built_in">QoSInitialization</span>(</span><br><span class="line">      qos_profile.history,</span><br><span class="line">      qos_profile.depth</span><br><span class="line">    ),</span><br><span class="line">    qos_profile);</span><br></pre></td></tr></table></figure></p></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -292,7 +404,7 @@ mjx-container[display="true"] + br {
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/" class="post-title-link" itemprop="url">总体流程认识</a>
+          <a href="/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/" class="post-title-link" itemprop="url">Simple-LIO-SAM——总体流程认识</a>
         </h2>
 
         <div class="post-meta-container">
@@ -310,7 +422,7 @@ mjx-container[display="true"] + br {
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-19 13:21:45" itemprop="dateModified" datetime="2023-03-19T13:21:45+08:00">2023-03-19</time>
+      <time title="修改时间：2023-03-22 14:41:47" itemprop="dateModified" datetime="2023-03-22T14:41:47+08:00">2023-03-22</time>
     </span>
 
   
@@ -322,7 +434,7 @@ mjx-container[display="true"] + br {
       </span>
       <span class="post-meta-item-text">Changyan：</span>
     
-    <a title="总体流程认识" href="/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/#SOHUCS" itemprop="discussionUrl">
+    <a title="Simple-LIO-SAM——总体流程认识" href="/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/#SOHUCS" itemprop="discussionUrl">
       <span id="sourceId::152660a48ad07f280a45860dc663a523" class="cy_cmt_count" itemprop="commentCount"></span>
     </a>
   </span>
@@ -374,6 +486,22 @@ p_i^0 = T_ip_i
 <h3 id="点云匹配及图优化">点云匹配及图优化</h3>
 <p>这是整个框架最复杂的一个模块（也许是没有很好解耦？）。这个模块主要包含了以下几个功能： 1. 点云匹配 2. 回环检测 3. 因子图构建及优化 4. 根据关键帧信息构建全局地图</p>
 <p>具体内容会在后面的章节展开，这里应该要有几个感性认识： 1. 一般点云精细匹配（比如ICP算法）需要有一个良好的初始值，这里的初始值可以理解成采用IMU预积分模块的输出。 2. 点云匹配部分用的是沿用自LOAM-&gt;LeGO-LOAM的点云匹配算法，不是使用ICP。<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>也是<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan" title="作者Github">TixiaoShan</a>在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>的上一篇相关论文 3. 回环检测根据里程计的x,y,z检索紧邻帧，然后通过ICP算法计算当前帧与近邻帧的转换关系 4. 经过点云匹配后的位姿会经过图优化得出更平滑的位姿 5. 地图和因子图的因子实际上是以关键帧的形态存在后端优化部分，关键帧的选取会比较稀疏，比如距离小与1米不会采用为关键帧。不采用为关键帧的点云会执行完点云匹配后就直接输出位姿。 6. 在有新的回环因子加入因子图后，会进行多次因子图优化器的更新步骤，然后将所有历史关键帧的位姿都更新一遍 7. 这个部分还支持<code>GPS里程计</code>的监听，并将<code>GPS里程计</code>也加入因子图进行优化</p>
+<h2 id="坐标系规定">坐标系规定</h2>
+<h3 id="坐标系规定-1">坐标系规定</h3>
+<p>原有的<code>urdf</code>文件加入了太多额外没必要的关节，导致<code>rviz</code>中<code>tf-tree</code>关系太过复杂。为了简化坐标系关系，但同时又维持坐标系关系标准化并且与<code>ROS</code>的规定相同（<code>ROS</code>中关于姿态估计的坐标系关系主要参考：<a target="_blank" rel="noopener" href="http://docs.ros.org/en/melodic/api/robot_localization/html/preparing_sensor_data.html">robot_localization_coordinate_system</a>，这里对项目中的坐标系关系做了一些简化修改。 根据robot_localization包的规定，所有姿态都要转到世界坐标系，通常是<code>map</code>或者<code>odom</code>坐标系。所有的twist数据，都要转到base_link坐标系下处理。</p>
+<h3 id="simple-lio-sam坐标系说明">Simple-LIO-SAM坐标系说明</h3>
+<ol type="1">
+<li>根据REP资料，一般有4个坐标系<code>earth</code>,<code>map</code>,<code>odom</code>,<code>base_link</code>。由于在SLAM中一般没有引入地球坐标系。所以在这里只有后三个坐标系。 同时，如果是以起始点作为地图原点，<code>map</code>,<code>odom</code>两个坐标系是重合的关系。</li>
+<li>另外，为了可以在Rivz显示原始点云信息，则也加入一个雷达坐标系。</li>
+<li>为了让坐标系定义自洽，虽然在算法中没有直接用到，但是IMU加速度速度和角速度应该定义在IMU坐标系，因此引入IMU坐标系</li>
+<li>为了让定义更为标准，这里保留<code>map</code>坐标系，虽然在SLAM中<code>map</code>,<code>odom</code>大部分情况是重叠的</li>
+<li>因此，整个spl_lio_sam框架可以简化成5个坐标系：<code>map</code>, <code>odom</code>,<code>base_link</code>,<code>lidar_link</code>,<code>imu_link</code>坐标系。其中， <code>map</code>是地图原点，在建图时是起始点，在重定位模式时，是地图原点。<code>odom</code>是里程计坐标系；<code>base_link</code>是车辆自身坐标系。<code>lidar_link</code>坐标系是雷达坐标系， 在lio_sam中是与<code>base_link</code>坐标系对齐的，但是<code>lidar_link</code>字段会根据雷达型号不同，被修改。<code>imu_link</code>坐标系是IMU坐标系，配置文件中 有指明IMU坐标系到Lidar坐标系的转换关系。</li>
+</ol>
+<h3 id="坐标系关系的其他说明">坐标系关系的其他说明</h3>
+<ol type="1">
+<li>ROS的Message Header只有一个frame_id字段，表明这个数据是在哪个坐标系下的。</li>
+<li>nav_msgs/Odometry中还有一个child_frame_id字段，nav_msgs/Odometry中的twist数据应该是在child_frame_id坐标系下的数据 &gt; The twist in this message should be specified in the coordinate frame given by the child_frame_id</li>
+</ol>
 
       
     </div>

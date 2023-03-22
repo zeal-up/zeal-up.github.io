@@ -21,7 +21,7 @@
 
     <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总体流程 话不多说，直接上干货。下图是整理出来的LIOSAM整体运行流程  Pipeline  整体认识 所谓的紧耦合，我是这么理解的：IMU本身就可以积分出来一个位姿，连续帧的点云匹配也可以计算出一个位姿，如果两者分别进行，然后再做一个加权融合，那么就属于松耦合。而从上面的框架图也可以看出，LIOSAM的融合框架整体呈现一个圈，每个">
 <meta property="og:type" content="article">
-<meta property="og:title" content="总体流程认识">
+<meta property="og:title" content="Simple-LIO-SAM——总体流程认识">
 <meta property="og:url" content="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
 <meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总体流程 话不多说，直接上干货。下图是整理出来的LIOSAM整体运行流程  Pipeline  整体认识 所谓的紧耦合，我是这么理解的：IMU本身就可以积分出来一个位姿，连续帧的点云匹配也可以计算出一个位姿，如果两者分别进行，然后再做一个加权融合，那么就属于松耦合。而从上面的框架图也可以看出，LIOSAM的融合框架整体呈现一个圈，每个">
@@ -30,7 +30,7 @@
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/imgs/lidar.webp">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/imgs/livox_lidar_distortion.png">
 <meta property="article:published_time" content="2023-03-16T11:38:59.000Z">
-<meta property="article:modified_time" content="2023-03-19T05:21:45.336Z">
+<meta property="article:modified_time" content="2023-03-22T06:41:47.744Z">
 <meta property="article:author" content="Zeal">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/imgs/Design-Pipelines.png">
@@ -40,10 +40,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/","path":"2023/03/16/lio_sam/总体流程认识/","title":"总体流程认识"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/","path":"2023/03/16/lio_sam/总体流程认识/","title":"Simple-LIO-SAM——总体流程认识"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>总体流程认识 | Zeal's Blog</title>
+<title>Simple-LIO-SAM——总体流程认识 | Zeal's Blog</title>
   
 
   <script src="/js/third-party/analytics/baidu-analytics.js"></script>
@@ -118,7 +118,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">总体流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E8%AE%A4%E8%AF%86"><span class="nav-number">1.1.</span> <span class="nav-text">整体认识</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E5%8A%A8%E7%95%B8%E5%8F%98%E7%9F%AB%E6%AD%A3"><span class="nav-number">1.2.</span> <span class="nav-text">运动畸变矫正</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%B9%E4%BA%91%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96"><span class="nav-number">1.3.</span> <span class="nav-text">点云特征提取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#imu%E9%A2%84%E7%A7%AF%E5%88%86%E6%A8%A1%E5%9D%97"><span class="nav-number">1.4.</span> <span class="nav-text">IMU预积分模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%B9%E4%BA%91%E5%8C%B9%E9%85%8D%E5%8F%8A%E5%9B%BE%E4%BC%98%E5%8C%96"><span class="nav-number">1.5.</span> <span class="nav-text">点云匹配及图优化</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">总体流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E8%AE%A4%E8%AF%86"><span class="nav-number">1.1.</span> <span class="nav-text">整体认识</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E5%8A%A8%E7%95%B8%E5%8F%98%E7%9F%AB%E6%AD%A3"><span class="nav-number">1.2.</span> <span class="nav-text">运动畸变矫正</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%B9%E4%BA%91%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96"><span class="nav-number">1.3.</span> <span class="nav-text">点云特征提取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#imu%E9%A2%84%E7%A7%AF%E5%88%86%E6%A8%A1%E5%9D%97"><span class="nav-number">1.4.</span> <span class="nav-text">IMU预积分模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%B9%E4%BA%91%E5%8C%B9%E9%85%8D%E5%8F%8A%E5%9B%BE%E4%BC%98%E5%8C%96"><span class="nav-number">1.5.</span> <span class="nav-text">点云匹配及图优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9D%90%E6%A0%87%E7%B3%BB%E8%A7%84%E5%AE%9A"><span class="nav-number">2.</span> <span class="nav-text">坐标系规定</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9D%90%E6%A0%87%E7%B3%BB%E8%A7%84%E5%AE%9A-1"><span class="nav-number">2.1.</span> <span class="nav-text">坐标系规定</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#simple-lio-sam%E5%9D%90%E6%A0%87%E7%B3%BB%E8%AF%B4%E6%98%8E"><span class="nav-number">2.2.</span> <span class="nav-text">Simple-LIO-SAM坐标系说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9D%90%E6%A0%87%E7%B3%BB%E5%85%B3%E7%B3%BB%E7%9A%84%E5%85%B6%E4%BB%96%E8%AF%B4%E6%98%8E"><span class="nav-number">2.3.</span> <span class="nav-text">坐标系关系的其他说明</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -183,12 +183,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="总体流程认识 | Zeal's Blog">
+      <meta itemprop="name" content="Simple-LIO-SAM——总体流程认识 | Zeal's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          总体流程认识
+          Simple-LIO-SAM——总体流程认识
         </h1>
 
         <div class="post-meta-container">
@@ -206,7 +206,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-19 13:21:45" itemprop="dateModified" datetime="2023-03-19T13:21:45+08:00">2023-03-19</time>
+      <time title="修改时间：2023-03-22 14:41:47" itemprop="dateModified" datetime="2023-03-22T14:41:47+08:00">2023-03-22</time>
     </span>
 
   
@@ -218,7 +218,7 @@
       </span>
       <span class="post-meta-item-text">Changyan：</span>
     
-    <a title="总体流程认识" href="/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/#SOHUCS" itemprop="discussionUrl">
+    <a title="Simple-LIO-SAM——总体流程认识" href="/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/#SOHUCS" itemprop="discussionUrl">
       <span id="sourceId::152660a48ad07f280a45860dc663a523" class="cy_cmt_count" itemprop="commentCount"></span>
     </a>
   </span>
@@ -270,6 +270,22 @@ p_i^0 = T_ip_i
 <h3 id="点云匹配及图优化">点云匹配及图优化</h3>
 <p>这是整个框架最复杂的一个模块（也许是没有很好解耦？）。这个模块主要包含了以下几个功能： 1. 点云匹配 2. 回环检测 3. 因子图构建及优化 4. 根据关键帧信息构建全局地图</p>
 <p>具体内容会在后面的章节展开，这里应该要有几个感性认识： 1. 一般点云精细匹配（比如ICP算法）需要有一个良好的初始值，这里的初始值可以理解成采用IMU预积分模块的输出。 2. 点云匹配部分用的是沿用自LOAM-&gt;LeGO-LOAM的点云匹配算法，不是使用ICP。<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>也是<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan" title="作者Github">TixiaoShan</a>在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>的上一篇相关论文 3. 回环检测根据里程计的x,y,z检索紧邻帧，然后通过ICP算法计算当前帧与近邻帧的转换关系 4. 经过点云匹配后的位姿会经过图优化得出更平滑的位姿 5. 地图和因子图的因子实际上是以关键帧的形态存在后端优化部分，关键帧的选取会比较稀疏，比如距离小与1米不会采用为关键帧。不采用为关键帧的点云会执行完点云匹配后就直接输出位姿。 6. 在有新的回环因子加入因子图后，会进行多次因子图优化器的更新步骤，然后将所有历史关键帧的位姿都更新一遍 7. 这个部分还支持<code>GPS里程计</code>的监听，并将<code>GPS里程计</code>也加入因子图进行优化</p>
+<h2 id="坐标系规定">坐标系规定</h2>
+<h3 id="坐标系规定-1">坐标系规定</h3>
+<p>原有的<code>urdf</code>文件加入了太多额外没必要的关节，导致<code>rviz</code>中<code>tf-tree</code>关系太过复杂。为了简化坐标系关系，但同时又维持坐标系关系标准化并且与<code>ROS</code>的规定相同（<code>ROS</code>中关于姿态估计的坐标系关系主要参考：<a target="_blank" rel="noopener" href="http://docs.ros.org/en/melodic/api/robot_localization/html/preparing_sensor_data.html">robot_localization_coordinate_system</a>，这里对项目中的坐标系关系做了一些简化修改。 根据robot_localization包的规定，所有姿态都要转到世界坐标系，通常是<code>map</code>或者<code>odom</code>坐标系。所有的twist数据，都要转到base_link坐标系下处理。</p>
+<h3 id="simple-lio-sam坐标系说明">Simple-LIO-SAM坐标系说明</h3>
+<ol type="1">
+<li>根据REP资料，一般有4个坐标系<code>earth</code>,<code>map</code>,<code>odom</code>,<code>base_link</code>。由于在SLAM中一般没有引入地球坐标系。所以在这里只有后三个坐标系。 同时，如果是以起始点作为地图原点，<code>map</code>,<code>odom</code>两个坐标系是重合的关系。</li>
+<li>另外，为了可以在Rivz显示原始点云信息，则也加入一个雷达坐标系。</li>
+<li>为了让坐标系定义自洽，虽然在算法中没有直接用到，但是IMU加速度速度和角速度应该定义在IMU坐标系，因此引入IMU坐标系</li>
+<li>为了让定义更为标准，这里保留<code>map</code>坐标系，虽然在SLAM中<code>map</code>,<code>odom</code>大部分情况是重叠的</li>
+<li>因此，整个spl_lio_sam框架可以简化成5个坐标系：<code>map</code>, <code>odom</code>,<code>base_link</code>,<code>lidar_link</code>,<code>imu_link</code>坐标系。其中， <code>map</code>是地图原点，在建图时是起始点，在重定位模式时，是地图原点。<code>odom</code>是里程计坐标系；<code>base_link</code>是车辆自身坐标系。<code>lidar_link</code>坐标系是雷达坐标系， 在lio_sam中是与<code>base_link</code>坐标系对齐的，但是<code>lidar_link</code>字段会根据雷达型号不同，被修改。<code>imu_link</code>坐标系是IMU坐标系，配置文件中 有指明IMU坐标系到Lidar坐标系的转换关系。</li>
+</ol>
+<h3 id="坐标系关系的其他说明">坐标系关系的其他说明</h3>
+<ol type="1">
+<li>ROS的Message Header只有一个frame_id字段，表明这个数据是在哪个坐标系下的。</li>
+<li>nav_msgs/Odometry中还有一个child_frame_id字段，nav_msgs/Odometry中的twist数据应该是在child_frame_id坐标系下的数据 &gt; The twist in this message should be specified in the coordinate frame given by the child_frame_id</li>
+</ol>
 
     </div>
 
@@ -287,7 +303,7 @@ p_i^0 = T_ip_i
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/" title="总体流程认识">https://zeal-up.github.io/2023/03/16/lio_sam/总体流程认识/</a>
+      <a href="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/" title="Simple-LIO-SAM——总体流程认识">https://zeal-up.github.io/2023/03/16/lio_sam/总体流程认识/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -305,6 +321,9 @@ p_i^0 = T_ip_i
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/" rel="next" title="Simple-LIO-SAM——utility文件解读">
+                  Simple-LIO-SAM——utility文件解读 <i class="fa fa-chevron-right"></i>
+                </a>
             </div>
           </div>
     </footer>
