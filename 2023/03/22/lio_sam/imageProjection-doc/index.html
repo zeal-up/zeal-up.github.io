@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="总述 点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了LeGO-LOAM，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用  去除激光雷达点云的运动畸变 检索每一帧点云对应的IMU输出角度、IMU里程计位姿（发布自ImuPreintegration），以便MapOptimization模块用这些信息作为该帧点云的初始位姿 转换点云格式，计算Range字段，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Simple-LIO-SAM——点云去畸变模块">
+<meta property="og:url" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="总述 点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了LeGO-LOAM，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用  去除激光雷达点云的运动畸变 检索每一帧点云对应的IMU输出角度、IMU里程计位姿（发布自ImuPreintegration），以便MapOptimization模块用这些信息作为该帧点云的初始位姿 转换点云格式，计算Range字段，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-pipeline.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-Node%26%26Topics-imageProjection.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-cachePointCloud.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-deskewInfo.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-projectPointCloud.png">
+<meta property="article:published_time" content="2023-03-22T07:55:36.000Z">
+<meta property="article:modified_time" content="2023-03-22T11:45:17.258Z">
+<meta property="article:author" content="Zeal">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-pipeline.png">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/","path":"2023/03/22/lio_sam/imageProjection-doc/","title":"Simple-LIO-SAM——点云去畸变模块"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Simple-LIO-SAM——点云去畸变模块 | Zeal's Blog</title>
+  
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">总述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E8%AE%A2%E9%98%85%E5%8F%8A%E5%8F%91%E5%B8%83"><span class="nav-number">2.</span> <span class="nav-text">消息订阅及发布</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cloudinfo%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">CloudInfo数据类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E8%A7%A3%E8%AF%BB"><span class="nav-number">4.</span> <span class="nav-text">功能解读</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#imu%E5%8F%8Aimu%E9%87%8C%E7%A8%8B%E8%AE%A1%E5%A4%84%E7%90%86"><span class="nav-number">4.1.</span> <span class="nav-text">IMU及IMU里程计处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%BB%E7%95%B8%E5%8F%98%E6%B5%81%E7%A8%8B"><span class="nav-number">4.2.</span> <span class="nav-text">去畸变流程</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Simple-LIO-SAM——点云去畸变模块 | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Simple-LIO-SAM——点云去畸变模块
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-03-22 15:55:36 / 修改时间：19:45:17" itemprop="dateCreated datePublished" datetime="2023-03-22T15:55:36+08:00">2023-03-22</time>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——点云去畸变模块" href="/2023/03/22/lio_sam/imageProjection-doc/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::92a09cadad63fefbcbc8404aeb27c1f1" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="总述">总述</h2>
+<p>点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用</p>
+<ol type="1">
+<li>去除激光雷达点云的运动畸变</li>
+<li>检索每一帧点云对应的IMU输出角度、IMU里程计位姿（发布自ImuPreintegration），以便MapOptimization模块用这些信息作为该帧点云的初始位姿</li>
+<li>转换点云格式，计算<code>Range</code>字段，方便特征提取模块进行角点、平面点提取</li>
+</ol>
+<p>总体的流程如下图：</p>
+<figure>
+<img src="./imgs/Design-imageProjection-pipeline.png" alt="" /><figcaption>pipeline</figcaption>
+</figure>
+<h2 id="消息订阅及发布">消息订阅及发布</h2>
+<figure>
+<img src="./imgs/Design-Node%26%26Topics-imageProjection.png" alt="" /><figcaption>消息订阅及发布</figcaption>
+</figure>
+<h2 id="cloudinfo数据类型">CloudInfo数据类型</h2>
+<p>经过去畸变的点云通过<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>自定义的数据格式<code>CloudInfo.msg</code>(Simple-LIO-SAM/msg/CloudInfo.msg)发布；特征提取模块也是将特征点放入这个自定义数据格式发布。 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Cloud Info</span></span><br><span class="line"><span class="string">std_msgs/Header</span> <span class="string">header</span> </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在进行点云去畸变时，把range数据展开成一维向量</span></span><br><span class="line"><span class="comment"># ring代表第几条激光线数，比如16线的激光雷达有16个ring</span></span><br><span class="line"><span class="comment"># start_ring_index记录第一个ring在一维向量中的起始索引</span></span><br><span class="line"><span class="comment"># end_ring_index记录第一个ring在一维向量中的结束索引</span></span><br><span class="line"><span class="string">int32[]</span> <span class="string">start_ring_index</span></span><br><span class="line"><span class="string">int32[]</span> <span class="string">end_ring_index</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一维的Range数据中每一个点在原始range图片中属于那一个列</span></span><br><span class="line"><span class="string">int32[]</span>  <span class="string">point_col_ind</span> <span class="comment"># point column index in range image</span></span><br><span class="line"><span class="comment"># 所有点的range数值，展开为一维数组</span></span><br><span class="line"><span class="string">float32[]</span> <span class="string">point_range</span> <span class="comment"># point range </span></span><br><span class="line"></span><br><span class="line"><span class="string">int64</span> <span class="string">imu_available</span></span><br><span class="line"><span class="string">int64</span> <span class="string">odom_available</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Attitude for LOAM initialization</span></span><br><span class="line"><span class="comment"># 从IMU原始数据获取的roll、pitch、yaw角初值</span></span><br><span class="line"><span class="comment"># 当上面的imu_avaliable为true，odom_available为false的时候，会被用来</span></span><br><span class="line"><span class="comment"># 当作这一帧点云的初值</span></span><br><span class="line"><span class="string">float32</span> <span class="string">imu_roll_init</span></span><br><span class="line"><span class="string">float32</span> <span class="string">imu_pitch_init</span></span><br><span class="line"><span class="string">float32</span> <span class="string">imu_yaw_init</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Initial guess from imu pre-integration</span></span><br><span class="line"><span class="comment"># 从imuPreintegration，IMU预积分模块获取的与这一帧雷达最接近的初始位姿</span></span><br><span class="line"><span class="comment"># 当上面的odom_available标签被置为true的时候会被使用</span></span><br><span class="line"><span class="comment"># 优先级比imu_xxx_init高</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_x</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_y</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_z</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_roll</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_pitch</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_yaw</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Point cloud messages</span></span><br><span class="line"><span class="comment"># 去畸变后的原始点云</span></span><br><span class="line"><span class="comment"># 在经过imageProjection模块后，这个数据字段被填充。在经过特征提取之后这个字段被清空</span></span><br><span class="line"><span class="string">sensor_msgs/PointCloud2</span> <span class="string">cloud_deskewed</span> </span><br><span class="line"><span class="comment"># featureExtraction模块提取出的点云角点</span></span><br><span class="line"><span class="string">sensor_msgs/PointCloud2</span> <span class="string">cloud_corner</span></span><br><span class="line"><span class="comment"># featureExtraction模块提取出的点云平面点</span></span><br><span class="line"><span class="string">sensor_msgs/PointCloud2</span> <span class="string">cloud_surface</span></span><br></pre></td></tr></table></figure> 这里主要是前面几个数组类型会比较难理解，主要是要知道在去畸变模块中，将所有点的<code>range</code>信息（也就是点距离雷达的距离）拉成一个一维的数组，即<code>float32[] point_range</code>。 同时，<code>cloud_deskewed</code>里存储的是去完畸变后的点云，里面点的顺序与<code>point_range</code>的顺序是一样的。</p>
+<p><code>cloud_corner</code>和<code>cloud_surface</code>两个字段在<code>imageProjection</code>模块中没有被放置数据。特征提取模块会将角点、平面点放置在这两个字段中，同时将<code>cloud_deskewed</code>字段清空。</p>
+<h2 id="功能解读">功能解读</h2>
+<h3 id="imu及imu里程计处理">IMU及IMU里程计处理</h3>
+<p>ImageProjection监听IMU原始数据与从ImuPreintegration发布出来的IMU里程计数据，分别由两个回调函数处理，对于IMU原始数据，只是简单地将其旋转到雷达坐标系后塞入缓存队列。 对于IMU历程计，则是直接塞入缓存队列。</p>
+<h3 id="去畸变流程">去畸变流程</h3>
+<p>一句话说明点云运动畸变校正：根据每一帧点云中每一个点的时间戳，计算该点到该帧点云起始点的旋转平移变换，将每一个点变换到起始点的坐标系。</p>
+<p>要注意的是，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中对运动畸变校正只做了旋转校正，没有做平移校正。</p>
+<p>去畸变流程发生在点云的回调函数中 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// imageProjection::cloudHandler</span></span><br><span class="line"><span class="comment">/** 原始雷达点云话题的回调函数，实际上真正做点云处理的函数</span></span><br><span class="line"><span class="comment">    * 实际处理流程是单线程流水线式处理，这个函数后面的所有函数都是为这个函数服务，因此需要了解</span></span><br><span class="line"><span class="comment">    * 点云去畸变的流程。</span></span><br><span class="line"><span class="comment">    * 订阅原始lidar数据</span></span><br><span class="line"><span class="comment">    * 1、转换点云为统一格式，提取点云信息</span></span><br><span class="line"><span class="comment">    *   1）添加一帧激光点云到队列，取出最早一帧作为当前帧</span></span><br><span class="line"><span class="comment">    *   2) 计算起止时间戳，检查数据有效性</span></span><br><span class="line"><span class="comment">    * 2、从IMU数据和IMU里程计数据中提取去畸变信息</span></span><br><span class="line"><span class="comment">    *   imu数据：</span></span><br><span class="line"><span class="comment">    *   1) 遍历当前激光帧起止时刻之间的imu数据，初始时刻对应imu的姿态角RPY设为当前帧的初始姿态角</span></span><br><span class="line"><span class="comment">    *   2) 用角速度、时间积分，计算每一时刻相对于初始时刻的旋转量，初始时刻旋转设为0</span></span><br><span class="line"><span class="comment">    *   imu里程计数据：</span></span><br><span class="line"><span class="comment">    *   1) 遍历当前激光帧起止时刻之间的imu里程计数据，初始时刻对应imu里程计设为当前帧的初始位姿</span></span><br><span class="line"><span class="comment">    *   2) 用起始、终止时刻对应imu里程计，计算相对位姿变换，保存平移增量</span></span><br><span class="line"><span class="comment">    * 3、当前帧激光点云运动畸变校正</span></span><br><span class="line"><span class="comment">    *   1) 检查激光点距离、扫描线是否合规</span></span><br><span class="line"><span class="comment">    *   2) 激光运动畸变校正，保存激光点</span></span><br><span class="line"><span class="comment">    * 4、提取有效激光点，集合信息到准备发布的cloud_info数据包</span></span><br><span class="line"><span class="comment">    * 5、发布当前帧校正后点云，有效点和其他信息</span></span><br><span class="line"><span class="comment">    * 6、重置参数，接收每帧lidar数据都要重置这些参数</span></span><br><span class="line"><span class="comment">**/</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">cloudHandler</span><span class="params">(<span class="type">const</span> sensor_msgs::msg::PointCloud2::SharedPtr laserCloudMsg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 1、提取、转换点云为统一格式</span></span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">cachePointCloud</span>(laserCloudMsg))</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2、从IMU数据和IMU里程计数据中提取去畸变信息</span></span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">deskewInfo</span>())</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3、当前帧激光点云运动畸变校正</span></span><br><span class="line">    <span class="built_in">projectPointCloud</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 4、提取有效激光点，集合信息到准备发布的cloud_info数据包</span></span><br><span class="line">    <span class="built_in">cloudExtraction</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 5、发布当前帧校正后点云，有效点和其他信息</span></span><br><span class="line">    <span class="built_in">publishClouds</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 6、重置参数，接收每帧lidar数据都要重置这些参数</span></span><br><span class="line">    <span class="built_in">resetParameters</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><p>提取、转换点云为统一格式 <img src="./imgs/Design-imageProjection-cachePointCloud.png" alt="提取、转换点云为统一格式" /></p></li>
+<li><p>提取去畸变信息 <img src="./imgs/Design-imageProjection-deskewInfo.png" alt="提取去畸变信息" /></p></li>
+</ul>
+<p>这里有几点要注意 1. 从IMU原始数据计算每一时刻的位姿变换用的是近似算法（因为一帧点云成像时间很短，一般小与100ms） <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 对角度做积分</span></span><br><span class="line"><span class="comment">// 再次强调，对角速度的积分不是简单的角速度乘以间隔时间</span></span><br><span class="line"><span class="comment">// 关于角速度的积分公式可以查阅：https://zhuanlan.zhihu.com/p/591613108</span></span><br><span class="line"><span class="type">static</span> <span class="type">double</span> timeDiff;</span><br><span class="line">timeDiff = currentImuTime - imuTime[imuPointerCur<span class="number">-1</span>];</span><br><span class="line">imuRotX[imuPointerCur] = imuRotX[imuPointerCur<span class="number">-1</span>] + angular_x * timeDiff;</span><br><span class="line">imuRotY[imuPointerCur] = imuRotY[imuPointerCur<span class="number">-1</span>] + angular_y * timeDiff;</span><br><span class="line">imuRotZ[imuPointerCur] = imuRotZ[imuPointerCur<span class="number">-1</span>] + angular_z * timeDiff;</span><br><span class="line">imuTime[imuPointerCur] = currentImuTime;</span><br><span class="line">++imuPointerCur;</span><br></pre></td></tr></table></figure> 2. 对于速度较低，角度变化不那么剧烈的行驶系统，即使不做点云畸变校正也没有问题</p>
+<ul>
+<li><p>对点云做去畸变处理 <img src="./imgs/Design-imageProjection-projectPointCloud.png" alt="对点云做去畸变处理" /></p></li>
+<li><p>提取有效点云并集合其他信息 这里主要是将经过去畸变处理后记录下来的有效点进行数据转换，并把各种信息填入准备发布的<code>cloud_info</code>消息中。</p></li>
+<li><p>发布点云</p></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/" title="Simple-LIO-SAM——点云去畸变模块">https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/" rel="prev" title="Simple-LIO-SAM——utility文件解读">
+                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——utility文件解读
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="92a09cadad63fefbcbc8404aeb27c1f1"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>
