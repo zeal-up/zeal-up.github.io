@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述 LIOSAM沿用LOAM、LeGO-LOAM的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自imageProjection发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：  特征点的提取根据点的平滑度，而平滑度则通过">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Simple-LIO-SAM——特征提取模块">
+<meta property="og:url" content="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述 LIOSAM沿用LOAM、LeGO-LOAM的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自imageProjection发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：  特征点的提取根据点的平滑度，而平滑度则通过">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/imgs/illegal_feature_point.png">
+<meta property="article:published_time" content="2023-03-22T12:03:12.000Z">
+<meta property="article:modified_time" content="2023-03-22T13:32:33.990Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="liosam">
+<meta property="article:tag" content="slam">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/imgs/illegal_feature_point.png">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/","path":"2023/03/22/lio_sam/featureExtraction-doc/","title":"Simple-LIO-SAM——特征提取模块"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Simple-LIO-SAM——特征提取模块 | Zeal's Blog</title>
+  
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">总述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">特征点提取原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AC%E6%8D%A2%E5%88%B0rangemat"><span class="nav-number">2.1.</span> <span class="nav-text">转换到RangeMat</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E6%BB%91%E5%BA%A6%E4%BC%B0%E8%AE%A1"><span class="nav-number">2.2.</span> <span class="nav-text">平滑度估计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%AE%B5%E6%8F%90%E5%8F%96%E5%8F%8A%E7%89%B9%E5%BE%81%E7%82%B9%E6%95%B0%E9%87%8F%E6%95%B0%E9%87%8F%E9%99%90%E5%88%B6"><span class="nav-number">2.3.</span> <span class="nav-text">分段提取及特征点数量数量限制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E6%83%85%E5%86%B5"><span class="nav-number">2.4.</span> <span class="nav-text">特殊情况</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E7%82%B9%E6%8F%90%E5%8F%96%E6%B5%81%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">特征点提取流程</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Simple-LIO-SAM——特征提取模块 | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Simple-LIO-SAM——特征提取模块
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-03-22 20:03:12 / 修改时间：21:32:33" itemprop="dateCreated datePublished" datetime="2023-03-22T20:03:12+08:00">2023-03-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——特征提取模块" href="/2023/03/22/lio_sam/featureExtraction-doc/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::e84bd67344741c4da21c259e3e444c5d" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="总述">总述</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>沿用<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>、<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自<code>imageProjection</code>发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：</p>
+<ol type="1">
+<li>特征点的提取根据点的平滑度，而平滑度则通过每个点与周围点距离的平均值做近似</li>
+<li>实际上在提取完边缘点和平面点之后，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>在代码里又把所有非边缘点的点都加入了平面点集合。这是比较奇怪的地方。从这里看出也许特征提取也不是必要的， 因为平面点已经包含了大部分的点云。事实上，在Github的一个仓库<a target="_blank" rel="noopener" href="https://github.com/YJZLuckyBoy/liorf" title="Based LIO-SAM, remove featureExtraction">liorf</a>中，就将特征提取模块去掉。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将该段中除了角点之外的点加入平面点集合</span></span><br><span class="line"><span class="comment">// ！！！ 这点让步骤2感觉是多余的，最终的结果可能只是原始点云降采样，可能特征点提取也是没有必要的！！！</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> k = sp; k &lt;= ep; k++)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (cloudLabel[k] &lt;= <span class="number">0</span>)&#123;</span><br><span class="line">        surfaceCloudScan-&gt;<span class="built_in">push_back</span>(extractedCloud-&gt;points[k]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure> <code>cloudLabel</code>标识该点的性质，-1为平面点，0为非特征点，1为边缘点。</li>
+</ol>
+<h2 id="特征点提取原理">特征点提取原理</h2>
+<p>关于特征点提取部分<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>的论文基本略过，因为跟<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>和<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>的做法基本相同，这里建议这部分可以阅读<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>论文。</p>
+<h3 id="转换到rangemat">转换到RangeMat</h3>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>沿用<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>的做法，先把三维点全部投影到二维图片，图像像素保存每个点距离原点的距离，称做<code>RangeMat</code>，<code>RangeMat</code>是规则的，每一行代表一条激光线束扫射360度所产生的点，因此后面用这个<code>RangeMat</code>做特征提取更快速更简单。 PS：这部分是在<code>ImageProjection</code>就已经处理好，并且<code>RangeMat</code>也被展开成一维向量存储。</p>
+<h3 id="平滑度估计">平滑度估计</h3>
+<p>特征点提取通过每个点的平滑度来提取，平滑度高于某个阈值的认为是边缘点；平滑度小于某个阈值的认为是平面点。 而平滑度的估计则通过每一个点在该激光线成像的前后几个点的平均距离代替。 我们另时间<span class="math inline">\(t\)</span>的点云为<span class="math inline">\(P_t = \{p_i, i \in |P_t|\}\)</span>，同时我们可以根据每个点的坐标算出每个点距离原点的距离<span class="math inline">\(r_i\)</span>，对于每个点，我们取其同一条激光线上前后5个点构成集合<span class="math inline">\(S\)</span>，则，点<span class="math inline">\(p_i\)</span>的平滑度可以这样计算： <span class="math display">\[
+c = \frac{1}{|S|\cdot||r_i||}\left|\left|\sum_{j\in S,j\neq i}(r_j-r_i)\right|\right|
+\]</span></p>
+<h3 id="分段提取及特征点数量数量限制">分段提取及特征点数量数量限制</h3>
+<p>为了让特征点分布更均匀，采用类似<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>，将整个360的图像在水平方向分成6个子图像，在每个子图像中进行特征点提取。并且，对于每一个子图像中的每一条激光线束，会限制边缘点数量不超过20个，平面点的数量则没有限制。</p>
+<h3 id="特殊情况">特殊情况</h3>
+<p>有3种特殊情况不能将该点设置为边缘点。 1. 当一个点被选择为特征点，则把该点左右5个点都排除在特征点选取范围 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 对该角点左右各5个点，如果两点之间的列索引差距小于10，则抛弃周围的点，避免重复对同一块区域提取角点</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> l = <span class="number">1</span>; l &lt;= <span class="number">5</span>; l++)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> columnDiff = std::<span class="built_in">abs</span>(<span class="built_in">int</span>(cloudInfo.point_col_ind[ind + l] - cloudInfo.point_col_ind[ind + l - <span class="number">1</span>]));</span><br><span class="line">    <span class="keyword">if</span> (columnDiff &gt; <span class="number">10</span>)</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    cloudNeighborPicked[ind + l] = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> l = <span class="number">-1</span>; l &gt;= <span class="number">-5</span>; l--)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> columnDiff = std::<span class="built_in">abs</span>(<span class="built_in">int</span>(cloudInfo.point_col_ind[ind + l] - cloudInfo.point_col_ind[ind + l + <span class="number">1</span>]));</span><br><span class="line">    <span class="keyword">if</span> (columnDiff &gt; <span class="number">10</span>)</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    cloudNeighborPicked[ind + l] = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ol start="2" type="1">
+<li>当该点可能是由于遮挡导致被选择为边缘点</li>
+</ol>
+<figure>
+<img src="./imgs/illegal_feature_point.png" alt="" /><figcaption>不合格的特征点(from LOAM)</figcaption>
+</figure>
+<p>如上图（b）所示，点A是由于被平面遮挡而产生的边缘点，当视角变化后，点A就不再是边缘点。 这个逻辑的判断也是通过点与其周围点的range差距判断。如果是由于遮挡产生的边缘点，则其与左边或者右边会存在距离的图片。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// featureExtraction.cpp&gt;markOccludedPoints</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">markOccludedPoints</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> cloudSize = extractedCloud-&gt;points.<span class="built_in">size</span>();</span><br><span class="line">    <span class="comment">// 标记被遮挡的点和与激光束平行的点</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">5</span>; i &lt; cloudSize - <span class="number">6</span>; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 标记被遮挡的点</span></span><br><span class="line">        <span class="type">float</span> depth1 = cloudInfo.point_range[i];</span><br><span class="line">        <span class="type">float</span> depth2 = cloudInfo.point_range[i+<span class="number">1</span>];</span><br><span class="line">        <span class="type">int</span> columnDiff = std::<span class="built_in">abs</span>(<span class="built_in">int</span>(cloudInfo.point_col_ind[i+<span class="number">1</span>] - cloudInfo.point_col_ind[i]));</span><br><span class="line">        <span class="comment">// 两个点的列索引相差10个像素之内，认为是同一块区域</span></span><br><span class="line">        <span class="keyword">if</span> (columnDiff &lt; <span class="number">10</span>)&#123;</span><br><span class="line">            <span class="comment">// 当前点距离大于右点距离0.3米，认为当前点及左边6个点无效</span></span><br><span class="line">            <span class="keyword">if</span> (depth1 - depth2 &gt; <span class="number">0.3</span>)&#123;</span><br><span class="line">                cloudNeighborPicked[i - <span class="number">5</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i - <span class="number">4</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i - <span class="number">3</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i - <span class="number">2</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i - <span class="number">1</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i] = <span class="number">1</span>;</span><br><span class="line">            <span class="comment">// 当前点距离小于右边点距离0.3米，认为右边6个点无效</span></span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span> (depth2 - depth1 &gt; <span class="number">0.3</span>)&#123;</span><br><span class="line">                cloudNeighborPicked[i + <span class="number">1</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i + <span class="number">2</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i + <span class="number">3</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i + <span class="number">4</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i + <span class="number">5</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i + <span class="number">6</span>] = <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 标记平行与激光束的点</span></span><br><span class="line">        <span class="type">float</span> diff1 = std::<span class="built_in">abs</span>(<span class="built_in">float</span>(cloudInfo.point_range[i<span class="number">-1</span>] - cloudInfo.point_range[i]));</span><br><span class="line">        <span class="type">float</span> diff2 = std::<span class="built_in">abs</span>(<span class="built_in">float</span>(cloudInfo.point_range[i+<span class="number">1</span>] - cloudInfo.point_range[i]));</span><br><span class="line">        <span class="comment">// 当前点与左右两点的距离均大于阈值，认为当前点是处于平行面的点</span></span><br><span class="line">        <span class="keyword">if</span> (diff1 &gt; <span class="number">0.02</span> * cloudInfo.point_range[i] &amp;&amp; diff2 &gt; <span class="number">0.02</span> * cloudInfo.point_range[i])</span><br><span class="line">            cloudNeighborPicked[i] = <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ol start="3" type="1">
+<li>当点处于跟激光线平行的平面上时，也可能被认为时边缘点，也需要排除 如上图中的(a)所示，点B位于一个跟激光线较为平行的面上，激光线扫过去，前后几个点的距离差距会很大，因此在处理时可能会被认为是边缘点。这些点也需要做标记，不要设置为边缘点。</li>
+</ol>
+<h2 id="特征点提取流程">特征点提取流程</h2>
+<p>由于这部分代码和原理都比较简单，这里只说一下特征提取的流程 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* @brief</span></span><br><span class="line"><span class="comment">* cloudInfo话题的回调函数，这个模块的功能都是顺序进行</span></span><br><span class="line"><span class="comment">* 1. 接收到从imageProjection中发布出的一个去畸变点云信息cloudInfo(自定义格式)</span></span><br><span class="line"><span class="comment">* 2. 对每个点计算曲率。计算时是计算周围点的平均距离用来作为曲率的替代</span></span><br><span class="line"><span class="comment">* 3. 标记遮挡点和与激光平行的点，后续这些点不能采纳为特征点</span></span><br><span class="line"><span class="comment">* 4. 特征提取。分别做角点（曲率大）和平面点（曲率小）特征点提取</span></span><br><span class="line"><span class="comment">* 5. 整合信息，发布完整数据包</span></span><br><span class="line"><span class="comment">* </span></span><br><span class="line"><span class="comment">* @param msgIn 从去畸变模块接受的数据包</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">laserCloudInfoHandler</span><span class="params">(<span class="type">const</span> spl_lio_sam::msg::CloudInfo::SharedPtr msgIn)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="comment">// 缓存全局变量，后面的函数可以直接读取cloudInfo和cloudHeader进行处理</span></span><br><span class="line">cloudInfo = *msgIn;</span><br><span class="line">cloudHeader = msgIn-&gt;header;</span><br><span class="line"><span class="comment">// 把ros2 PointCloud2转成PCL格式，方便后面处理</span></span><br><span class="line">pcl::<span class="built_in">fromROSMsg</span>(msgIn-&gt;cloud_deskewed, *extractedCloud);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 计算点云每一个点曲率</span></span><br><span class="line"><span class="built_in">calculateSmoothness</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">//标记遮挡点和与激光平行的点，后续这些点不能采纳为特征点</span></span><br><span class="line"><span class="built_in">markOccludedPoints</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 特征提取。分别做角点（曲率大）和平面点（曲率小）特征点提取</span></span><br><span class="line"><span class="built_in">extractFeatures</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 整合信息，发布完整数据包</span></span><br><span class="line"><span class="built_in">publishFeatureCloud</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/" title="Simple-LIO-SAM——特征提取模块">https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/liosam/" rel="tag"># liosam</a>
+              <a href="/tags/slam/" rel="tag"># slam</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/03/22/lio_sam/imageProjection-doc/" rel="prev" title="Simple-LIO-SAM——点云去畸变模块">
+                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——点云去畸变模块
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="e84bd67344741c4da21c259e3e444c5d"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>

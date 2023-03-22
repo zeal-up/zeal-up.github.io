@@ -19,17 +19,19 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="这是LIOSAM里一个最基础的文件，主要有几个重要功能： 1. 作为所有其他节点的基类，放置所有从配置文件读取的配置字 2. 提供一些实用函数 3. 配置QoS 配置基类 LIOSAM为了方便配置，把所有节点的配置项都写在同一个文件Simple-LIO-SAM&#x2F;config&#x2F;params.yaml，同时构建了一个基类ParamServer统一读取该配置文件，其余模块都从该基类继承。  这可能不是最">
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  这是LIOSAM里一个最基础的文件，主要有几个重要功能： 1. 作为所有其他节点的基类，放置所有从配置文件读取的配置字 2. 提供一些实用函数 3. 配置QoS 配置基类 LIOSAM为了方便配置，把所有节点的配置项都写在同一个文件Simple-LIO-SAM&#x2F;config&#x2F;params.yaml，同时构建了一个基类ParamServ">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Simple-LIO-SAM——utility文件解读">
 <meta property="og:url" content="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
-<meta property="og:description" content="这是LIOSAM里一个最基础的文件，主要有几个重要功能： 1. 作为所有其他节点的基类，放置所有从配置文件读取的配置字 2. 提供一些实用函数 3. 配置QoS 配置基类 LIOSAM为了方便配置，把所有节点的配置项都写在同一个文件Simple-LIO-SAM&#x2F;config&#x2F;params.yaml，同时构建了一个基类ParamServer统一读取该配置文件，其余模块都从该基类继承。  这可能不是最">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  这是LIOSAM里一个最基础的文件，主要有几个重要功能： 1. 作为所有其他节点的基类，放置所有从配置文件读取的配置字 2. 提供一些实用函数 3. 配置QoS 配置基类 LIOSAM为了方便配置，把所有节点的配置项都写在同一个文件Simple-LIO-SAM&#x2F;config&#x2F;params.yaml，同时构建了一个基类ParamServ">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/imgs/Design-Class.png">
 <meta property="article:published_time" content="2023-03-22T03:18:09.000Z">
-<meta property="article:modified_time" content="2023-03-22T07:11:06.639Z">
+<meta property="article:modified_time" content="2023-03-22T13:32:22.022Z">
 <meta property="article:author" content="Zeal">
+<meta property="article:tag" content="liosam">
+<meta property="article:tag" content="slam">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/imgs/Design-Class.png">
 
@@ -198,7 +200,24 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2023-03-22 11:18:09 / 修改时间：15:11:06" itemprop="dateCreated datePublished" datetime="2023-03-22T11:18:09+08:00">2023-03-22</time>
+      <time title="创建时间：2023-03-22 11:18:09 / 修改时间：21:32:22" itemprop="dateCreated datePublished" datetime="2023-03-22T11:18:09+08:00">2023-03-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
     </span>
 
   
@@ -225,7 +244,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <p>这是<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>里一个最基础的文件，主要有几个重要功能： 1. 作为所有其他节点的基类，放置所有从配置文件读取的配置字 2. 提供一些实用函数 3. 配置<a target="_blank" rel="noopener" href="https://docs.ros.org/en/humble/Concepts/About-Quality-of-Service-Settings.html" title="Ros2 QoS">QoS</a></p>
+        <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<p>这是<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>里一个最基础的文件，主要有几个重要功能： 1. 作为所有其他节点的基类，放置所有从配置文件读取的配置字 2. 提供一些实用函数 3. 配置<a target="_blank" rel="noopener" href="https://docs.ros.org/en/humble/Concepts/About-Quality-of-Service-Settings.html" title="Ros2 QoS">QoS</a></p>
 <h2 id="配置基类">配置基类</h2>
 <p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>为了方便配置，把所有节点的配置项都写在同一个文件<code>Simple-LIO-SAM/config/params.yaml</code>，同时构建了一个基类<code>ParamServer</code>统一读取该配置文件，其余模块都从该基类继承。 <img src="./imgs/Design-Class.png" alt="类图" /> 这可能不是最优的方式，不过从实现上来说的确是最简单的。</p>
 <p>每个模块的具体配置项后面具体讲解到会逐一解释，目前只需要知道是在哪里配置就行。 <details class="note info no-icon"><summary><p>配置部分代码</p>
@@ -279,6 +303,10 @@
 </ul>
 </div>
 
+          <div class="post-tags">
+              <a href="/tags/liosam/" rel="tag"># liosam</a>
+              <a href="/tags/slam/" rel="tag"># slam</a>
+          </div>
 
         
 

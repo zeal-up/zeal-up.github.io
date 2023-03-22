@@ -162,6 +162,141 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/22/lio_sam/featureExtraction-doc/" class="post-title-link" itemprop="url">Simple-LIO-SAM——特征提取模块</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-03-22 20:03:12 / 修改时间：21:32:33" itemprop="dateCreated datePublished" datetime="2023-03-22T20:03:12+08:00">2023-03-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——特征提取模块" href="/2023/03/22/lio_sam/featureExtraction-doc/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::e84bd67344741c4da21c259e3e444c5d" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="总述">总述</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>沿用<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>、<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自<code>imageProjection</code>发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：</p>
+<ol type="1">
+<li>特征点的提取根据点的平滑度，而平滑度则通过每个点与周围点距离的平均值做近似</li>
+<li>实际上在提取完边缘点和平面点之后，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>在代码里又把所有非边缘点的点都加入了平面点集合。这是比较奇怪的地方。从这里看出也许特征提取也不是必要的， 因为平面点已经包含了大部分的点云。事实上，在Github的一个仓库<a target="_blank" rel="noopener" href="https://github.com/YJZLuckyBoy/liorf" title="Based LIO-SAM, remove featureExtraction">liorf</a>中，就将特征提取模块去掉。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将该段中除了角点之外的点加入平面点集合</span></span><br><span class="line"><span class="comment">// ！！！ 这点让步骤2感觉是多余的，最终的结果可能只是原始点云降采样，可能特征点提取也是没有必要的！！！</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> k = sp; k &lt;= ep; k++)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (cloudLabel[k] &lt;= <span class="number">0</span>)&#123;</span><br><span class="line">        surfaceCloudScan-&gt;<span class="built_in">push_back</span>(extractedCloud-&gt;points[k]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure> <code>cloudLabel</code>标识该点的性质，-1为平面点，0为非特征点，1为边缘点。</li>
+</ol>
+<h2 id="特征点提取原理">特征点提取原理</h2>
+<p>关于特征点提取部分<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>的论文基本略过，因为跟<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>和<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>的做法基本相同，这里建议这部分可以阅读<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>论文。</p>
+<h3 id="转换到rangemat">转换到RangeMat</h3>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>沿用<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>的做法，先把三维点全部投影到二维图片，图像像素保存每个点距离原点的距离，称做<code>RangeMat</code>，<code>RangeMat</code>是规则的，每一行代表一条激光线束扫射360度所产生的点，因此后面用这个<code>RangeMat</code>做特征提取更快速更简单。 PS：这部分是在<code>ImageProjection</code>就已经处理好，并且<code>RangeMat</code>也被展开成一维向量存储。</p>
+<h3 id="平滑度估计">平滑度估计</h3>
+<p>特征点提取通过每个点的平滑度来提取，平滑度高于某个阈值的认为是边缘点；平滑度小于某个阈值的认为是平面点。 而平滑度的估计则通过每一个点在该激光线成像的前后几个点的平均距离代替。 我们另时间<span class="math inline">\(t\)</span>的点云为<span class="math inline">\(P_t = \{p_i, i \in |P_t|\}\)</span>，同时我们可以根据每个点的坐标算出每个点距离原点的距离<span class="math inline">\(r_i\)</span>，对于每个点，我们取其同一条激光线上前后5个点构成集合<span class="math inline">\(S\)</span>，则，点<span class="math inline">\(p_i\)</span>的平滑度可以这样计算： <span class="math display">\[
+c = \frac{1}{|S|\cdot||r_i||}\left|\left|\sum_{j\in S,j\neq i}(r_j-r_i)\right|\right|
+\]</span></p>
+<h3 id="分段提取及特征点数量数量限制">分段提取及特征点数量数量限制</h3>
+<p>为了让特征点分布更均匀，采用类似<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>，将整个360的图像在水平方向分成6个子图像，在每个子图像中进行特征点提取。并且，对于每一个子图像中的每一条激光线束，会限制边缘点数量不超过20个，平面点的数量则没有限制。</p>
+<h3 id="特殊情况">特殊情况</h3>
+<p>有3种特殊情况不能将该点设置为边缘点。 1. 当一个点被选择为特征点，则把该点左右5个点都排除在特征点选取范围 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 对该角点左右各5个点，如果两点之间的列索引差距小于10，则抛弃周围的点，避免重复对同一块区域提取角点</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> l = <span class="number">1</span>; l &lt;= <span class="number">5</span>; l++)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> columnDiff = std::<span class="built_in">abs</span>(<span class="built_in">int</span>(cloudInfo.point_col_ind[ind + l] - cloudInfo.point_col_ind[ind + l - <span class="number">1</span>]));</span><br><span class="line">    <span class="keyword">if</span> (columnDiff &gt; <span class="number">10</span>)</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    cloudNeighborPicked[ind + l] = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> l = <span class="number">-1</span>; l &gt;= <span class="number">-5</span>; l--)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> columnDiff = std::<span class="built_in">abs</span>(<span class="built_in">int</span>(cloudInfo.point_col_ind[ind + l] - cloudInfo.point_col_ind[ind + l + <span class="number">1</span>]));</span><br><span class="line">    <span class="keyword">if</span> (columnDiff &gt; <span class="number">10</span>)</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    cloudNeighborPicked[ind + l] = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ol start="2" type="1">
+<li>当该点可能是由于遮挡导致被选择为边缘点</li>
+</ol>
+<figure>
+<img src="./imgs/illegal_feature_point.png" alt="" /><figcaption>不合格的特征点(from LOAM)</figcaption>
+</figure>
+<p>如上图（b）所示，点A是由于被平面遮挡而产生的边缘点，当视角变化后，点A就不再是边缘点。 这个逻辑的判断也是通过点与其周围点的range差距判断。如果是由于遮挡产生的边缘点，则其与左边或者右边会存在距离的图片。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// featureExtraction.cpp&gt;markOccludedPoints</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">markOccludedPoints</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> cloudSize = extractedCloud-&gt;points.<span class="built_in">size</span>();</span><br><span class="line">    <span class="comment">// 标记被遮挡的点和与激光束平行的点</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">5</span>; i &lt; cloudSize - <span class="number">6</span>; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 标记被遮挡的点</span></span><br><span class="line">        <span class="type">float</span> depth1 = cloudInfo.point_range[i];</span><br><span class="line">        <span class="type">float</span> depth2 = cloudInfo.point_range[i+<span class="number">1</span>];</span><br><span class="line">        <span class="type">int</span> columnDiff = std::<span class="built_in">abs</span>(<span class="built_in">int</span>(cloudInfo.point_col_ind[i+<span class="number">1</span>] - cloudInfo.point_col_ind[i]));</span><br><span class="line">        <span class="comment">// 两个点的列索引相差10个像素之内，认为是同一块区域</span></span><br><span class="line">        <span class="keyword">if</span> (columnDiff &lt; <span class="number">10</span>)&#123;</span><br><span class="line">            <span class="comment">// 当前点距离大于右点距离0.3米，认为当前点及左边6个点无效</span></span><br><span class="line">            <span class="keyword">if</span> (depth1 - depth2 &gt; <span class="number">0.3</span>)&#123;</span><br><span class="line">                cloudNeighborPicked[i - <span class="number">5</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i - <span class="number">4</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i - <span class="number">3</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i - <span class="number">2</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i - <span class="number">1</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i] = <span class="number">1</span>;</span><br><span class="line">            <span class="comment">// 当前点距离小于右边点距离0.3米，认为右边6个点无效</span></span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span> (depth2 - depth1 &gt; <span class="number">0.3</span>)&#123;</span><br><span class="line">                cloudNeighborPicked[i + <span class="number">1</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i + <span class="number">2</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i + <span class="number">3</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i + <span class="number">4</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i + <span class="number">5</span>] = <span class="number">1</span>;</span><br><span class="line">                cloudNeighborPicked[i + <span class="number">6</span>] = <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 标记平行与激光束的点</span></span><br><span class="line">        <span class="type">float</span> diff1 = std::<span class="built_in">abs</span>(<span class="built_in">float</span>(cloudInfo.point_range[i<span class="number">-1</span>] - cloudInfo.point_range[i]));</span><br><span class="line">        <span class="type">float</span> diff2 = std::<span class="built_in">abs</span>(<span class="built_in">float</span>(cloudInfo.point_range[i+<span class="number">1</span>] - cloudInfo.point_range[i]));</span><br><span class="line">        <span class="comment">// 当前点与左右两点的距离均大于阈值，认为当前点是处于平行面的点</span></span><br><span class="line">        <span class="keyword">if</span> (diff1 &gt; <span class="number">0.02</span> * cloudInfo.point_range[i] &amp;&amp; diff2 &gt; <span class="number">0.02</span> * cloudInfo.point_range[i])</span><br><span class="line">            cloudNeighborPicked[i] = <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ol start="3" type="1">
+<li>当点处于跟激光线平行的平面上时，也可能被认为时边缘点，也需要排除 如上图中的(a)所示，点B位于一个跟激光线较为平行的面上，激光线扫过去，前后几个点的距离差距会很大，因此在处理时可能会被认为是边缘点。这些点也需要做标记，不要设置为边缘点。</li>
+</ol>
+<h2 id="特征点提取流程">特征点提取流程</h2>
+<p>由于这部分代码和原理都比较简单，这里只说一下特征提取的流程 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* @brief</span></span><br><span class="line"><span class="comment">* cloudInfo话题的回调函数，这个模块的功能都是顺序进行</span></span><br><span class="line"><span class="comment">* 1. 接收到从imageProjection中发布出的一个去畸变点云信息cloudInfo(自定义格式)</span></span><br><span class="line"><span class="comment">* 2. 对每个点计算曲率。计算时是计算周围点的平均距离用来作为曲率的替代</span></span><br><span class="line"><span class="comment">* 3. 标记遮挡点和与激光平行的点，后续这些点不能采纳为特征点</span></span><br><span class="line"><span class="comment">* 4. 特征提取。分别做角点（曲率大）和平面点（曲率小）特征点提取</span></span><br><span class="line"><span class="comment">* 5. 整合信息，发布完整数据包</span></span><br><span class="line"><span class="comment">* </span></span><br><span class="line"><span class="comment">* @param msgIn 从去畸变模块接受的数据包</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">laserCloudInfoHandler</span><span class="params">(<span class="type">const</span> spl_lio_sam::msg::CloudInfo::SharedPtr msgIn)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="comment">// 缓存全局变量，后面的函数可以直接读取cloudInfo和cloudHeader进行处理</span></span><br><span class="line">cloudInfo = *msgIn;</span><br><span class="line">cloudHeader = msgIn-&gt;header;</span><br><span class="line"><span class="comment">// 把ros2 PointCloud2转成PCL格式，方便后面处理</span></span><br><span class="line">pcl::<span class="built_in">fromROSMsg</span>(msgIn-&gt;cloud_deskewed, *extractedCloud);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 计算点云每一个点曲率</span></span><br><span class="line"><span class="built_in">calculateSmoothness</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">//标记遮挡点和与激光平行的点，后续这些点不能采纳为特征点</span></span><br><span class="line"><span class="built_in">markOccludedPoints</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 特征提取。分别做角点（曲率大）和平面点（曲率小）特征点提取</span></span><br><span class="line"><span class="built_in">extractFeatures</span>();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 整合信息，发布完整数据包</span></span><br><span class="line"><span class="built_in">publishFeatureCloud</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -192,7 +327,24 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2023-03-22 15:55:36 / 修改时间：19:45:17" itemprop="dateCreated datePublished" datetime="2023-03-22T15:55:36+08:00">2023-03-22</time>
+      <time title="创建时间：2023-03-22 15:55:36 / 修改时间：21:32:29" itemprop="dateCreated datePublished" datetime="2023-03-22T15:55:36+08:00">2023-03-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
     </span>
 
   
@@ -219,12 +371,17 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="总述">总述</h2>
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="总述">总述</h2>
 <p>点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用</p>
 <ol type="1">
 <li>去除激光雷达点云的运动畸变</li>
 <li>检索每一帧点云对应的IMU输出角度、IMU里程计位姿（发布自ImuPreintegration），以便MapOptimization模块用这些信息作为该帧点云的初始位姿</li>
-<li>转换点云格式，计算<code>Range</code>字段，方便特征提取模块进行角点、平面点提取</li>
+<li>转换点云格式，计算<code>Range</code>字段，方便特征提取模块进行边缘点、平面点提取</li>
 </ol>
 <p>总体的流程如下图：</p>
 <figure>
@@ -235,8 +392,8 @@
 <img src="./imgs/Design-Node%26%26Topics-imageProjection.png" alt="" /><figcaption>消息订阅及发布</figcaption>
 </figure>
 <h2 id="cloudinfo数据类型">CloudInfo数据类型</h2>
-<p>经过去畸变的点云通过<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>自定义的数据格式<code>CloudInfo.msg</code>(Simple-LIO-SAM/msg/CloudInfo.msg)发布；特征提取模块也是将特征点放入这个自定义数据格式发布。 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Cloud Info</span></span><br><span class="line"><span class="string">std_msgs/Header</span> <span class="string">header</span> </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在进行点云去畸变时，把range数据展开成一维向量</span></span><br><span class="line"><span class="comment"># ring代表第几条激光线数，比如16线的激光雷达有16个ring</span></span><br><span class="line"><span class="comment"># start_ring_index记录第一个ring在一维向量中的起始索引</span></span><br><span class="line"><span class="comment"># end_ring_index记录第一个ring在一维向量中的结束索引</span></span><br><span class="line"><span class="string">int32[]</span> <span class="string">start_ring_index</span></span><br><span class="line"><span class="string">int32[]</span> <span class="string">end_ring_index</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一维的Range数据中每一个点在原始range图片中属于那一个列</span></span><br><span class="line"><span class="string">int32[]</span>  <span class="string">point_col_ind</span> <span class="comment"># point column index in range image</span></span><br><span class="line"><span class="comment"># 所有点的range数值，展开为一维数组</span></span><br><span class="line"><span class="string">float32[]</span> <span class="string">point_range</span> <span class="comment"># point range </span></span><br><span class="line"></span><br><span class="line"><span class="string">int64</span> <span class="string">imu_available</span></span><br><span class="line"><span class="string">int64</span> <span class="string">odom_available</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Attitude for LOAM initialization</span></span><br><span class="line"><span class="comment"># 从IMU原始数据获取的roll、pitch、yaw角初值</span></span><br><span class="line"><span class="comment"># 当上面的imu_avaliable为true，odom_available为false的时候，会被用来</span></span><br><span class="line"><span class="comment"># 当作这一帧点云的初值</span></span><br><span class="line"><span class="string">float32</span> <span class="string">imu_roll_init</span></span><br><span class="line"><span class="string">float32</span> <span class="string">imu_pitch_init</span></span><br><span class="line"><span class="string">float32</span> <span class="string">imu_yaw_init</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Initial guess from imu pre-integration</span></span><br><span class="line"><span class="comment"># 从imuPreintegration，IMU预积分模块获取的与这一帧雷达最接近的初始位姿</span></span><br><span class="line"><span class="comment"># 当上面的odom_available标签被置为true的时候会被使用</span></span><br><span class="line"><span class="comment"># 优先级比imu_xxx_init高</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_x</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_y</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_z</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_roll</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_pitch</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_yaw</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Point cloud messages</span></span><br><span class="line"><span class="comment"># 去畸变后的原始点云</span></span><br><span class="line"><span class="comment"># 在经过imageProjection模块后，这个数据字段被填充。在经过特征提取之后这个字段被清空</span></span><br><span class="line"><span class="string">sensor_msgs/PointCloud2</span> <span class="string">cloud_deskewed</span> </span><br><span class="line"><span class="comment"># featureExtraction模块提取出的点云角点</span></span><br><span class="line"><span class="string">sensor_msgs/PointCloud2</span> <span class="string">cloud_corner</span></span><br><span class="line"><span class="comment"># featureExtraction模块提取出的点云平面点</span></span><br><span class="line"><span class="string">sensor_msgs/PointCloud2</span> <span class="string">cloud_surface</span></span><br></pre></td></tr></table></figure> 这里主要是前面几个数组类型会比较难理解，主要是要知道在去畸变模块中，将所有点的<code>range</code>信息（也就是点距离雷达的距离）拉成一个一维的数组，即<code>float32[] point_range</code>。 同时，<code>cloud_deskewed</code>里存储的是去完畸变后的点云，里面点的顺序与<code>point_range</code>的顺序是一样的。</p>
-<p><code>cloud_corner</code>和<code>cloud_surface</code>两个字段在<code>imageProjection</code>模块中没有被放置数据。特征提取模块会将角点、平面点放置在这两个字段中，同时将<code>cloud_deskewed</code>字段清空。</p>
+<p>经过去畸变的点云通过<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>自定义的数据格式<code>CloudInfo.msg</code>(Simple-LIO-SAM/msg/CloudInfo.msg)发布；特征提取模块也是将特征点放入这个自定义数据格式发布。 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Cloud Info</span></span><br><span class="line"><span class="string">std_msgs/Header</span> <span class="string">header</span> </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在进行点云去畸变时，把range数据展开成一维向量</span></span><br><span class="line"><span class="comment"># ring代表第几条激光线数，比如16线的激光雷达有16个ring</span></span><br><span class="line"><span class="comment"># start_ring_index记录第一个ring在一维向量中的起始索引</span></span><br><span class="line"><span class="comment"># end_ring_index记录第一个ring在一维向量中的结束索引</span></span><br><span class="line"><span class="string">int32[]</span> <span class="string">start_ring_index</span></span><br><span class="line"><span class="string">int32[]</span> <span class="string">end_ring_index</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 记录一维的Range数据中每一个点在原始range图片中属于那一个列</span></span><br><span class="line"><span class="string">int32[]</span>  <span class="string">point_col_ind</span> <span class="comment"># point column index in range image</span></span><br><span class="line"><span class="comment"># 所有点的range数值，展开为一维数组</span></span><br><span class="line"><span class="string">float32[]</span> <span class="string">point_range</span> <span class="comment"># point range </span></span><br><span class="line"></span><br><span class="line"><span class="string">int64</span> <span class="string">imu_available</span></span><br><span class="line"><span class="string">int64</span> <span class="string">odom_available</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Attitude for LOAM initialization</span></span><br><span class="line"><span class="comment"># 从IMU原始数据获取的roll、pitch、yaw角初值</span></span><br><span class="line"><span class="comment"># 当上面的imu_avaliable为true，odom_available为false的时候，会被用来</span></span><br><span class="line"><span class="comment"># 当作这一帧点云的初值</span></span><br><span class="line"><span class="string">float32</span> <span class="string">imu_roll_init</span></span><br><span class="line"><span class="string">float32</span> <span class="string">imu_pitch_init</span></span><br><span class="line"><span class="string">float32</span> <span class="string">imu_yaw_init</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Initial guess from imu pre-integration</span></span><br><span class="line"><span class="comment"># 从imuPreintegration，IMU预积分模块获取的与这一帧雷达最接近的初始位姿</span></span><br><span class="line"><span class="comment"># 当上面的odom_available标签被置为true的时候会被使用</span></span><br><span class="line"><span class="comment"># 优先级比imu_xxx_init高</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_x</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_y</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_z</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_roll</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_pitch</span></span><br><span class="line"><span class="string">float32</span> <span class="string">initial_guess_yaw</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Point cloud messages</span></span><br><span class="line"><span class="comment"># 去畸变后的原始点云</span></span><br><span class="line"><span class="comment"># 在经过imageProjection模块后，这个数据字段被填充。在经过特征提取之后这个字段被清空</span></span><br><span class="line"><span class="string">sensor_msgs/PointCloud2</span> <span class="string">cloud_deskewed</span> </span><br><span class="line"><span class="comment"># featureExtraction模块提取出的点云边缘点</span></span><br><span class="line"><span class="string">sensor_msgs/PointCloud2</span> <span class="string">cloud_corner</span></span><br><span class="line"><span class="comment"># featureExtraction模块提取出的点云平面点</span></span><br><span class="line"><span class="string">sensor_msgs/PointCloud2</span> <span class="string">cloud_surface</span></span><br></pre></td></tr></table></figure> 这里主要是前面几个数组类型会比较难理解，主要是要知道在去畸变模块中，将所有点的<code>range</code>信息（也就是点距离雷达的距离）拉成一个一维的数组，即<code>float32[] point_range</code>。 同时，<code>cloud_deskewed</code>里存储的是去完畸变后的点云，里面点的顺序与<code>point_range</code>的顺序是一样的。</p>
+<p><code>cloud_corner</code>和<code>cloud_surface</code>两个字段在<code>imageProjection</code>模块中没有被放置数据。特征提取模块会将边缘点、平面点放置在这两个字段中，同时将<code>cloud_deskewed</code>字段清空。</p>
 <h2 id="功能解读">功能解读</h2>
 <h3 id="imu及imu里程计处理">IMU及IMU里程计处理</h3>
 <p>ImageProjection监听IMU原始数据与从ImuPreintegration发布出来的IMU里程计数据，分别由两个回调函数处理，对于IMU原始数据，只是简单地将其旋转到雷达坐标系后塞入缓存队列。 对于IMU历程计，则是直接塞入缓存队列。</p>
@@ -310,7 +467,24 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2023-03-22 11:18:09 / 修改时间：15:11:06" itemprop="dateCreated datePublished" datetime="2023-03-22T11:18:09+08:00">2023-03-22</time>
+      <time title="创建时间：2023-03-22 11:18:09 / 修改时间：21:32:22" itemprop="dateCreated datePublished" datetime="2023-03-22T11:18:09+08:00">2023-03-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
     </span>
 
   
@@ -337,7 +511,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>这是<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>里一个最基础的文件，主要有几个重要功能： 1. 作为所有其他节点的基类，放置所有从配置文件读取的配置字 2. 提供一些实用函数 3. 配置<a target="_blank" rel="noopener" href="https://docs.ros.org/en/humble/Concepts/About-Quality-of-Service-Settings.html" title="Ros2 QoS">QoS</a></p>
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<p>这是<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>里一个最基础的文件，主要有几个重要功能： 1. 作为所有其他节点的基类，放置所有从配置文件读取的配置字 2. 提供一些实用函数 3. 配置<a target="_blank" rel="noopener" href="https://docs.ros.org/en/humble/Concepts/About-Quality-of-Service-Settings.html" title="Ros2 QoS">QoS</a></p>
 <h2 id="配置基类">配置基类</h2>
 <p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>为了方便配置，把所有节点的配置项都写在同一个文件<code>Simple-LIO-SAM/config/params.yaml</code>，同时构建了一个基类<code>ParamServer</code>统一读取该配置文件，其余模块都从该基类继承。 <img src="./imgs/Design-Class.png" alt="类图" /> 这可能不是最优的方式，不过从实现上来说的确是最简单的。</p>
 <p>每个模块的具体配置项后面具体讲解到会逐一解释，目前只需要知道是在哪里配置就行。 <details class="note info no-icon"><summary><p>配置部分代码</p>
@@ -428,7 +607,24 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-22 14:41:47" itemprop="dateModified" datetime="2023-03-22T14:41:47+08:00">2023-03-22</time>
+      <time title="修改时间：2023-03-22 21:31:59" itemprop="dateModified" datetime="2023-03-22T21:31:59+08:00">2023-03-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
     </span>
 
   
@@ -485,8 +681,8 @@
 p_i^0 = T_ip_i
 \]</span></p>
 <h3 id="点云特征提取">点云特征提取</h3>
-<p>激光里程计中一般会涉及到点云匹配，如果用原始点云进行匹配由于点数过多的关系，会导致耗时太长，因此<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中用类似<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>的方法进行<code>角点</code>,<code>平面点</code>两类特征点的提取，后面点云匹配部分使用这两种特征点进行<code>LM</code>优化求解出匹配关系。</p>
-<p>这部分的代码相对简单，后面关于这个模块的详细内容会介绍，这里唯一要清楚的是，这里的点云特征点提取用的是每个点的曲率，选择曲率大的点作为角点，选择曲率小的点作为平面点。但是曲率的计算是用每个点周围的点到其平均距离作为近似。</p>
+<p>激光里程计中一般会涉及到点云匹配，如果用原始点云进行匹配由于点数过多的关系，会导致耗时太长，因此<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中用类似<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>的方法进行<code>边缘点</code>,<code>平面点</code>两类特征点的提取，后面点云匹配部分使用这两种特征点进行<code>LM</code>优化求解出匹配关系。</p>
+<p>这部分的代码相对简单，后面关于这个模块的详细内容会介绍，这里唯一要清楚的是，这里的点云特征点提取用的是每个点的曲率，选择曲率大的点作为边缘点，选择曲率小的点作为平面点。但是曲率的计算是用每个点周围的点到其平均距离作为近似。</p>
 <h3 id="imu预积分模块">IMU预积分模块</h3>
 <p>这一个模块虽然从原理和实现上来说稍微有一点点复杂，但是从功能上简单来说只有一个功能，就是实时对<code>IMU原始数据</code>做处理（积分），得到每一个时刻的IMU里程计（也是6自由度位姿），然后该位姿被用来作为该帧点云的初始估计位姿，这个初始估计位姿会被用来作为点云匹配的初始估计。</p>
 <h3 id="点云匹配及图优化">点云匹配及图优化</h3>
@@ -1484,179 +1680,6 @@ v_t\\
 <li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/578920168">卡尔曼滤波器的基础知识及公式推导</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cs.unc.edu/~welch/kalman/media/pdf/Kalman1960.pdf">Kalman Filter的原始论文</a></li>
 </ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/kalman_filter/%E5%BD%A2%E8%B1%A1%E5%8C%96%E7%90%86%E8%A7%A3%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E2%80%94%E6%9C%80%E5%B0%8F%E4%BE%8B%E5%AD%90%E5%8F%8A%E4%BB%A3%E7%A0%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zeal">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zeal's Blog">
-      <meta itemprop="description" content="学习记录及分享">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Zeal's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/03/13/kalman_filter/%E5%BD%A2%E8%B1%A1%E5%8C%96%E7%90%86%E8%A7%A3%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E2%80%94%E6%9C%80%E5%B0%8F%E4%BE%8B%E5%AD%90%E5%8F%8A%E4%BB%A3%E7%A0%81/" class="post-title-link" itemprop="url">形象化理解卡尔曼滤波—最小例子及代码</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-03-13 17:56:56" itemprop="dateCreated datePublished" datetime="2023-03-13T17:56:56+08:00">2023-03-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-16 18:07:59" itemprop="dateModified" datetime="2023-03-16T18:07:59+08:00">2023-03-16</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E8%83%BD/%E6%BB%A4%E6%B3%A2/" itemprop="url" rel="index"><span itemprop="name">滤波</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E8%83%BD/%E6%BB%A4%E6%B3%A2/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2/" itemprop="url" rel="index"><span itemprop="name">卡尔曼滤波</span></a>
-        </span>
-    </span>
-
-  
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Changyan：</span>
-    
-    <a title="形象化理解卡尔曼滤波—最小例子及代码" href="/2023/03/13/kalman_filter/%E5%BD%A2%E8%B1%A1%E5%8C%96%E7%90%86%E8%A7%A3%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E2%80%94%E6%9C%80%E5%B0%8F%E4%BE%8B%E5%AD%90%E5%8F%8A%E4%BB%A3%E7%A0%81/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::a8df2ba48cf5d3db361fc08425f74c01" class="cy_cmt_count" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="一概述">一、概述</h1>
-<p>这篇文章会使用一个形象化的最小例子说明卡尔曼滤波器各个公式的推导。</p>
-<p>如果你已经从纯数学公式推导过卡尔曼滤波器，那么这篇文章可以让你形象化地理解卡尔曼滤波器的精髓，即为什么利用[<strong>预测</strong>-&gt;<strong>更新</strong>]的循环可以得到对系统状态的估计？</p>
-<p>如果你还在寻求对卡尔曼滤波器入门的讲解，这篇文章更可以让你建立对卡尔曼滤波器即直观又严谨的概念。如果要学习卡尔曼滤波器的完整公式化推导过程，可以查看另一篇文章：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/578920168">卡尔曼滤波器——基础知识</a></p>
-<p><strong><em>PS</em>：这篇文章有大部分来自外国的一篇课程讲义：<a target="_blank" rel="noopener" href="https://ieeexplore.ieee.org/document/6279585">Understanding the Basis of the Kalman Filter Via a Simple and Intuitive Derivation</a>。当然，语言是自己重新组织，同时，符号上的规定保持与本专栏卡尔曼滤波系列的其他文章一致。</strong></p>
-<h1 id="二最小例子">二、最小例子</h1>
-<p>我们有一辆小车，小车上面装了加速度传感器，为了简便描述，该加速度传感器只会输出一个方向（设为x）上的加速度值。该加速度计每隔<span class="math inline">\(\Delta t\)</span> 时间输出小车在时刻<span class="math inline">\(t\)</span>的瞬时加速度<span class="math inline">\(a_t\)</span>。同时，有一个光学测量仪器可以在每一时刻测量光从原点传播到小车位置的时间<span class="math inline">\(z_t\)</span>。我们希望能够估计小车在每一时刻的速度<span class="math inline">\(v_t\)</span>和距离<span class="math inline">\(d_t\)</span>。 ​ <img src="./imgs/car1.png" alt="最小例子图示" /></p>
-<p><strong>如何求解？</strong> 如果加速度计的测量是完美的，那么我们直接对加速度做积分就能得到速度，对速度再做一次积分就得到距离。但是在实际中，无论什么样的传感器的输出都是带有噪声的。因此，我们不能用该传感器的原始输出做积分。</p>
-<h1 id="三卡尔曼滤波的两个步骤">三、卡尔曼滤波的两个步骤</h1>
-<p>卡尔曼滤波包含两个步骤 1. 预测（prediction）—— Dynamic model 2. 更新（correction/measurment update）—— Observation model</p>
-<p>所谓<strong>预测</strong>，就是用一个数学模型，根据当前的传感器输出，直接根据模型推导此时系统的状态。可以理解为一个方程的计算就行。 所谓的<strong>更新</strong>，就是在某些时刻或者每一时刻，获取一些系统的观测信息（可以同样是传感器的值），甚至是<strong>预测</strong>阶段中的同样的传感器的值，将其当作带噪声的真值，我们将这个值叫做<strong>测量值(measurment)</strong>。比较此刻<strong>预测</strong>的系统状态和<strong>测量</strong>的系统状态，对<strong>预测</strong>的系统状态进行修正。因此也叫<strong>测量更新（measurment update）</strong> ​ <img src="imgs/framework.png" alt="framework" /></p>
-<h1 id="四卡尔曼滤波的状态方程">四、卡尔曼滤波的状态方程</h1>
-<h2 id="状态方程">状态方程</h2>
-<p>卡尔曼滤波算法假定系统在某一时刻的状态可以由上一时刻根据一个线性方程变化而来 <span class="math display">\[ \textbf{x}_t = \textbf{A}_t\textbf{x}_{t-1}+ \textbf{B}_t\textbf{u}_t+\textbf{w}_t \tag{1}\]</span> 其中 - <span class="math inline">\(\textbf{x}_t\)</span>就是每一时刻系统的状态向量，N行1列 - <span class="math inline">\(\textbf{u}_t\)</span>是该时刻系统的输入，M行1列 - <span class="math inline">\(\textbf{w}_t\)</span>是系统随机噪声，N行1列；且该随机噪声是高斯噪声，均值为0，协方差矩阵为<span class="math inline">\(\textbf{Q}_t\)</span>，N行N列 - <span class="math inline">\(\textbf{A}_t\)</span>叫做状态转换矩阵，N行N列 - <span class="math inline">\(\textbf{B}_t\)</span>称为控制矩阵，N行M列</p>
-<p><strong><em>PS</em>:大写字母表示矩阵；小写加粗字母表示向量；小写字母表示变量</strong></p>
-<p>由于噪声<span class="math inline">\(\textbf{w}_t\)</span>是均值为0的高斯噪声，那么上述状态方程的期望（最大概率对应的值）也就是 <span class="math display">\[ \hat{\textbf{x}}^-_t = \textbf{A}_t\hat{\textbf{x}}^+_{t-1} + \textbf{B}_t\textbf{u}_t\tag{2}\]</span> 其中： - 上标<span class="math inline">\(\hat{.}\)</span>表示该值是一个估计的量，角标+、-表示更新后，更新前的量。</p>
-<p>公式（2）的意思就是说，当前时刻对状态向量的预测可以从上一时刻输出的系统状态乘以状态转换矩阵加上此时的控制输入乘以控制矩阵得出。</p>
-<p><strong>（当前时刻预测的状态向量经过第二步骤的更新之后成为当前时刻的最终输出）</strong></p>
-<h2 id="代入例子中">代入例子中</h2>
-<p>由于我们要估计小车每一时刻的速度和距离，那么很自然地，系统状态向量<span class="math inline">\(\textbf{x}_t=[\textbf{d}_t,\textbf{v}_t]^T\)</span>，由于我们只关注一个纬度上的估计，那么速度和距离就弱化为一个变量，则 <span class="math display">\[ \textbf{x}_t = \begin{bmatrix} d_t\\ v_t \end{bmatrix}\]</span> 同时，我们让每一时刻的控制输入是加速度计输出的加速度值 <span class="math display">\[ \textbf{u}_t=[a_t]\]</span> 那么，由高中物理 <span class="math display">\[ v_t=v_{t-1}+a_t\Delta t\]</span> <span class="math display">\[ d_t = d_{t-1}+v_{t-1}\Delta t+\frac{1}{2}a_t\Delta t^2\]</span> 我们将上面两个式子写成矩阵相乘的形式 <span class="math display">\[ \textbf{x}_t = \begin{bmatrix} d_t\\ v_t \end{bmatrix}= \begin{bmatrix} 1 \ \ \Delta t\\ 0 \ \ \ \ \  1\\ \end{bmatrix} \begin{bmatrix} d_{t-1}\\ v_{t-1}\\ \end{bmatrix}+ \begin{bmatrix} \frac{\Delta t^2}{2}\\ \Delta t\\ \end{bmatrix}a_t\\\]</span> 于是，我们就得出了A矩阵和B矩阵的表达形式 <span class="math display">\[ \textbf{A}_t= \begin{bmatrix} 1 \ \ \Delta t\\ 0 \ \ \ \ \  1\\ \end{bmatrix}, \textbf{B}_t= \begin{bmatrix} \frac{\Delta t^2}{2}\\ \Delta t\\ \end{bmatrix} \\\]</span></p>
-<h1 id="五状态向量的协方差矩阵">五、状态向量的协方差矩阵</h1>
-<h2 id="协方差矩阵的推导">协方差矩阵的推导</h2>
-<p>上文中，公式（1）是系统状态的线型模型，公式（2）是对系统状态的预测方程。其实公式（2）之所以成立，是因为高斯噪声的0均值特性。所以公式（2）可以看成是公式（1）的期望。 那么我们使用公式（2）对系统状态进行预测，得出的误差是多少呢？这也就是系统状态的协方差。随机向量的协方差矩阵等于向量减去均值的平方的期望，于是，由公式（1）减去公式（2）并求期望，有： <span class="math display">\[ \begin{split}P^-_t&amp;=\mathbb{E}[\big((A_tx_{t-1}+w_t)-A_tx_{t-1}^+\big)\big((A_tx_{t-1}+w_t)-A_tx_{t-1}^+\big)^T]\\ &amp;=\mathbb{E}[\big(A_t(x_{t-1}-x_{t-1}^+)+w_t\big)\big(A_t(x_{t-1}-x_{t-1}^+)+w_t\big)^T]\\ &amp;=\mathbb{E}[A_t(x_{t-1}-x_{t-1}^+)(x_{t-1}-x_{t-1}^+)^TA_t^T]+\mathbb{E}[w_tw_t^T]\\ &amp;=A_tP_{t-1}^+A_t^T+Q_t \end{split} \\\]</span> 其中考虑到了状态向量与噪声是独立的（第二个等号到第三个等号的简化）。 于是我们得到了预测的状态向量的协方差表达 <span class="math display">\[ P^-_t=A_tP^+_{t-1}A^T_t+Q_t\tag{3}\\\]</span> 其中，<span class="math inline">\(P_{t-1}^+\)</span>是<span class="math inline">\(t-1\)</span>时刻更新后的状态向量的协方差矩阵，其具体形式在后文给出 从公式（3）的形式也可以看出，由于有一个噪声的协方差矩阵，所以误差随着时间的推移在不断地累积。 ## 代入例子中 为了计算<span class="math inline">\(t=1\)</span>时刻预测的状态向量的协方差矩阵，我们需要给一个<span class="math inline">\(t=0\)</span>时刻的协方差矩阵<span class="math inline">\(P_0^+\)</span>,以及初始化一个<span class="math inline">\(Q_0\)</span>。卡尔曼滤波对初始值还是不那么敏感的。在实际使用中，如果可以得到在一段初始时间内状态向量的简单计算结果，那么也许可以从这一段时间内计算均值然后计算出方差。比如在这个例子中，起始阶段，小车静止，速度和距离都是0，但是如果直接用加速度的输出做一次积分得到速度，做二次积分得到距离，那么得到的速度和位置就不是0，那么我们就可以根据这一段静止状态下简单估计状态向量的方差。</p>
-<p>噪声同理，我们可以取前面一小段静止的数据计算加速度输出的方差。</p>
-<p>如果对于无法估计的系统，那么噪声的协方差可以设为传感器的观测方差（一般在传感器的参数给出）。 或者其实将两个方差都设置为一个比较小的值即可。比如 <span class="math display">\[ \textbf{P}_0= \begin{bmatrix}10^{-5} \ \ 0\\0 \ \  10^{-5}\\ \end{bmatrix}, \textbf{Q}_0= \begin{bmatrix}10^{-10} \ \ 0\\ 0 \ \ \  10^{-10}\\ \end{bmatrix}\]</span></p>
-<h1 id="六如何理解预测方程和协方差矩阵">六、如何理解预测方程和协方差矩阵</h1>
-<p>​ <img src="imgs/max_prob.png" alt="max probablity" /></p>
-<p>我们用了公式（1） <span class="math display">\[ \textbf{x}_t = \textbf{A}_t\textbf{x}_{t-1}+ \textbf{B}_t\textbf{u}_t+\textbf{w}_t\]</span> 对系统的状态向量进行建模，由于传感器的输出是带噪声的，那么必将反映到我们对状态向量的估计，也就是反映到了公式（1）中的噪声项。同时我们假设这是一个随机噪声（高斯噪声），那么系统状态实际上就是一个随机向量。也就是说，系统状态等于什么值实际上是一个概率问题。 由于高斯噪声是0均值的，也就是值为0对应的概率最大，因此我们使用公式（2） <span class="math display">\[ \hat{\textbf{x}}^-_t = \textbf{A}_t\hat{\textbf{x}}^+_{t-1} + \textbf{B}_t\textbf{u}_t\]</span> 作为每一时刻对状态向量的预测，其实也就是取了公式（1）的均值。</p>
-<p>那么对应到上面的那个图中，小车在时刻t的位置是一个满足图示的概率分布，其中均值为<span class="math inline">\(\hat{\textbf{x}}_t^-\)</span>（公式2），协方差矩阵为<span class="math inline">\(P^-_t\)</span>（公式3）</p>
-<h1 id="七测量更新">七、测量更新</h1>
-<h2 id="测量">测量</h2>
-<p>其实我们也可以用公式（2）不断迭代得到对状态向量的预测，但这明显是不够的，因为误差在持续不断地累积。为了将公式（2）预测的值修正，就需要得到更多的信息，也就是对系统的测量。</p>
-<p>我们假设对系统的测量与系统的状态之间有如下关系： <span class="math display">\[ \textbf{z}_t=H_t\textbf{x}_t+\textbf{v}_t\tag{4}\\\]</span> 其中： - <span class="math inline">\(\textbf{z}_t\)</span>是测量向量，L行1列 - <span class="math inline">\(H_t\)</span>就叫做测量转换矩阵吧（不知道可不可以这样叫），L行N列。作用就是将系统状态映射到测量域 - <span class="math inline">\(\textbf{v}_t\)</span>叫做测量噪声，L行1列。其协方差矩阵为<span class="math inline">\(\textbf{R}_t\)</span> - 我们同时假设<span class="math inline">\(\bar{\textbf{z}}_t\)</span>是测量得到的值，这个值也是<span class="math inline">\(\textbf{z}_t\)</span>的均值</p>
-<h2 id="代入例子中-1">代入例子中</h2>
-<p>前文例子中系统状态向量是距离和速度 <span class="math display">\[ \textbf{x}_t = \begin{bmatrix} d_t\\ v_t \end{bmatrix}\]</span> 我们可以得到的测量值是光从原点移动到小车的时间，那么<span class="math inline">\(H\)</span>就是光速(c)的倒数 <span class="math display">\[ \begin{split}
-H_t=
-\begin{bmatrix}
-\frac{1}{c}\ \ 0
-\end{bmatrix}
-\end{split}\]</span></p>
-<h2 id="测量更新">测量更新</h2>
-<p>我们已知<span class="math inline">\(\textbf{z}_t\)</span>满足下面分布 <span class="math display">\[ p(z)\sim N(\bar{z}, R)\]</span> 且根据公式（4），可以得到<span class="math inline">\(\textbf{x}_t\)</span>的另一个分布(根据多元高斯分布的性质) <span class="math display">\[ \textbf{x}^2_t \sim N(H_t^{-T}\bar{\textbf{z}}_t, H_t^{-T}R_tH_t^{-1})\]</span></p>
-<p>在<strong>预测</strong>阶段，我们得到的<span class="math inline">\(\textbf{x}_t\)</span>的一个分布是 <span class="math display">\[\textbf{x}^1_t \sim N(\hat{\textbf{x}}_t^-, P_t^-)\]</span></p>
-<p>两者的联合概率分布是 <span class="math display">\[ \begin{split} \mu_{fused}&amp;=\frac{\mu_1\sigma_2^2+\mu_2\sigma_1^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=\mu_1+\frac{(\mu_2-\mu_1)\sigma_1^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=\hat{x}_t^-+\frac{(H_t^{-1}\bar{z}_t-\hat{x}_t^-)P_t^-}{P_t^-+H_t^{-1}R_t(H_t^{-1})^T}\\ &amp;=\hat{x}_t^-+\frac{P_t^-H_t^T}{H_tP_t^-H_t^T+R_t}(\bar{z}_t-H_t\hat{x}_t^-)\\ &amp;=\hat{x}_t^-+K_t(\bar{z}_t-H_t\hat{x}_t^-) \end{split}\\\]</span> <span class="math display">\[
-\begin{split} \sigma_{fused}^2 &amp;=\frac{\sigma_1^2\sigma_2^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=\sigma_1^2-\frac{\sigma_1^4}{\sigma_1^2+\sigma_2^2}\\ &amp;=P_t^--\frac{P_t^-H_t^TH_tP_t^-}{H_tP_t^-H_t^T+R_t}\\ &amp;=P_t^--K_tH_tP_t^- \end{split}\\\]</span> 其中 <span class="math display">\[ K_t=\frac{P^-_tH_t^T}{H_tP^-_tH_t^T+R_t}\]</span></p>
-<p>于是，我们得到了结合测量量之后新的系统状态输出 <span class="math display">\[\hat{x}_t^+=\hat{x}_t^-+K_t(\bar{z}_t-H_t\hat{x}_t^-)\]</span></p>
-<h1 id="总结">总结</h1>
-<figure>
-<img src="./imgs/conclusion.png" alt="" /><figcaption>conclusion</figcaption>
-</figure>
-<h1 id="代码">代码</h1>
-<p><strong>完整代码可以从github获取：https://github.com/zeal-github/KalmanFilterTutorial/blob/master/BaseKalmanFilter/CarExample.py</strong></p>
-<h2 id="数据生成">数据生成</h2>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> pyplot <span class="keyword">as</span> plt</span><br><span class="line">C = <span class="number">100</span>  <span class="comment"># velocity of light, just a simulation value</span></span><br><span class="line"><span class="comment"># generate perfect acceleration and corresponding velocity and distance</span></span><br><span class="line"><span class="comment"># 生成没有噪声的加速度信号，并用积分计算出对应的速度和距离 ---------------------------------</span></span><br><span class="line">N_steps = <span class="number">1000</span>  <span class="comment"># 1000 steps to estimate</span></span><br><span class="line">Delta_t = <span class="number">0.05</span>  <span class="comment"># time interval is 0.05s</span></span><br><span class="line">timeline = np.arange(N_steps) * Delta_t  <span class="comment"># \Delta t = 0.05s</span></span><br><span class="line">accs_gt = np.sin(timeline)  <span class="comment"># set accelerator as a log shape</span></span><br><span class="line">vels_gt = np.cumsum(accs_gt*Delta_t)  <span class="comment"># get the ground truth velocity;速度是加速度的积分</span></span><br><span class="line">dists_gt = np.cumsum(vels_gt*Delta_t)  <span class="comment"># get the ground truth distance; 距离是速度的积分</span></span><br><span class="line">zs_gt = dists_gt/C</span><br><span class="line"><span class="comment">#----------------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># add noise to acceleration signals and calculate the velocity and distance with simple integral</span></span><br><span class="line"><span class="comment"># 往加速度信号添加噪声模拟真实传感器信号，并用简单的积分计算速度和距离</span></span><br><span class="line">accs_noise_var = <span class="number">0.005</span>  <span class="comment"># set acceleration noise variation as 0.5</span></span><br><span class="line">accs_noise = np.random.rand(N_steps) * accs_noise_var</span><br><span class="line">accs_w_noise = accs_gt + accs_noise</span><br><span class="line">vels_w_noise = np.cumsum(accs_w_noise*Delta_t)</span><br><span class="line"><span class="comment"># vels_w_noise = np.cumsum(accs_noise * Delta_t)</span></span><br><span class="line">dists_w_noise = np.cumsum(vels_w_noise*Delta_t)</span><br><span class="line">zs_noise_var = <span class="number">0.001</span></span><br><span class="line">zs_noise = np.random.rand(N_steps) * zs_noise_var</span><br><span class="line">zs_w_noise = zs_gt + zs_noise</span><br><span class="line"><span class="comment">#---------------------------------</span></span><br></pre></td></tr></table></figure>
-<h2 id="数据可视化结果">数据可视化结果</h2>
-<figure>
-<img src="./imgs/data_vis.png" alt="" /><figcaption>数据可视化</figcaption>
-</figure>
-<h2 id="各个转换矩阵及初始化">各个转换矩阵及初始化</h2>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">A = np.array([</span><br><span class="line">    [<span class="number">1</span>, Delta_t],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">1</span>]</span><br><span class="line">])  <span class="comment"># 状态转移矩阵</span></span><br><span class="line">B = np.array([</span><br><span class="line">    [Delta_t**<span class="number">2</span>*<span class="number">0.5</span>],</span><br><span class="line">    [Delta_t]</span><br><span class="line">])  <span class="comment"># 控制转移矩阵</span></span><br><span class="line">Q_var = <span class="number">0.005</span></span><br><span class="line">Q = np.array([</span><br><span class="line">    [Q_var, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, Q_var]</span><br><span class="line">])  <span class="comment"># 预测噪声协方差矩阵</span></span><br><span class="line">P0 = np.array([</span><br><span class="line">    [<span class="number">0.0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0.0</span>, <span class="number">0</span>]</span><br><span class="line">])  <span class="comment"># 状态向量协方差初始值</span></span><br><span class="line">H = np.array([</span><br><span class="line"><span class="number">1</span>/C, <span class="number">0</span></span><br><span class="line">]).reshape((<span class="number">1</span>,<span class="number">2</span>))  <span class="comment"># 测量转换矩阵</span></span><br><span class="line">R_var = <span class="number">0.001</span> </span><br><span class="line">R = R_var  <span class="comment"># 测量协方差矩阵，此时只有一个测量变量，因此只有一个值</span></span><br><span class="line"></span><br><span class="line">x0 = np.array([</span><br><span class="line">    [<span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>]</span><br><span class="line">])  <span class="comment"># 系统状态向量初始化，速度和距离均初始化为0</span></span><br></pre></td></tr></table></figure>
-<h2 id="卡尔曼滤波过程">卡尔曼滤波过程</h2>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">est_vel = [<span class="number">0</span>]</span><br><span class="line">est_dist = [<span class="number">0</span>]</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(N_steps-<span class="number">1</span>):</span><br><span class="line">    <span class="keyword">if</span> i == <span class="number">0</span>:</span><br><span class="line">        x_t = x0</span><br><span class="line">        P_t = P0</span><br><span class="line">    u = np.array([accs_w_noise[i-<span class="number">1</span>]])</span><br><span class="line">    x_t_ = A@x_t + B*u  <span class="comment"># 预测方程</span></span><br><span class="line">    P_t_ = A@P_t@(A.T) + Q  <span class="comment"># 预测状态向量的协方差矩阵</span></span><br><span class="line">    </span><br><span class="line"></span><br><span class="line">    K = P_t_@H.T / (H@P_t_@H.T + R)  <span class="comment"># 卡尔曼增益</span></span><br><span class="line">    x_t = x_t_ + K*(zs_w_noise[i-<span class="number">1</span>] - H@x_t_)  <span class="comment"># 更新方程</span></span><br><span class="line">    P_t = P_t_ - K@H@P_t_  <span class="comment"># 更新状态向量协方差矩阵</span></span><br><span class="line"></span><br><span class="line">    est_vel.append(x_t[<span class="number">1</span>][<span class="number">0</span>])</span><br><span class="line">    est_dist.append(x_t[<span class="number">0</span>][<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
-<h2 id="滤波结果可视化及误差">滤波结果可视化及误差</h2>
-<p><img src="imgs/result_vis.png" alt="结果" /> ## 结果分析 <strong>要注意一点，代码里<em>使用均匀分布模拟噪声，以模拟不知道真实噪声分布情况</em></strong></p>
-<p>从上图可以看到，速度的预测结果误差明显减小，距离的估计误差相比直接积分也小了很多。而且这里我们添加的噪声其实不是高斯噪声，也证明了卡尔曼滤波能够处理真实的噪声分布。</p>
-<p>其实我们也可以将加速度当作系统的一个状态放进状态向量中，同时也将其当作一个测量量。这样可以起到类似平滑加速度信号的效果。对应的状态方程和矩阵形式只需要做出一点修改。具体代码放入仓库中：https://github.com/zeal-github/KalmanFilterTutorial/blob/master/BaseKalmanFilter/CarExample_acc_as_state.py # Ref [1] Understanding the Basis of the Kalman Filter Via a Simple and Intuitive Derivation</p>
-<p>[2] <a target="_blank" rel="noopener" href="https://www.cs.unc.edu/~welch/media/pdf/kalman_intro.pdf">An Introduction to the Kalman Filter</a></p>
 
       
     </div>
