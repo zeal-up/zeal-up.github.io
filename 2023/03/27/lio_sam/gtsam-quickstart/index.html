@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  前言 LIOSAM其中的两大模块imuPreintegration和mapOptimization都依赖了因子图优化框架——GTSAM。 为了确保本项目的自洽性以及后面章节讲解的展开，不介绍一下因子图后端优化算法似乎说不过去。但是笔者目前对因子图的原理还没有进行非常详细的推导，因此这部分 内容会偏向如何对GTSAM快速入门。当然，最快">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Simple-LIO-SAM——GTSAM快速入门">
+<meta property="og:url" content="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  前言 LIOSAM其中的两大模块imuPreintegration和mapOptimization都依赖了因子图优化框架——GTSAM。 为了确保本项目的自洽性以及后面章节讲解的展开，不介绍一下因子图后端优化算法似乎说不过去。但是笔者目前对因子图的原理还没有进行非常详细的推导，因此这部分 内容会偏向如何对GTSAM快速入门。当然，最快">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/imgs/introToBA.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/imgs/egForFactorGraph.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/imgs/gtsam-minExample.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/imgs/ImuFactorGraph.png">
+<meta property="article:published_time" content="2023-03-27T13:28:48.000Z">
+<meta property="article:modified_time" content="2023-03-29T11:16:46.294Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="liosam">
+<meta property="article:tag" content="slam">
+<meta property="article:tag" content="GTSAM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/imgs/introToBA.png">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/","path":"2023/03/27/lio_sam/gtsam-quickstart/","title":"Simple-LIO-SAM——GTSAM快速入门"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Simple-LIO-SAM——GTSAM快速入门 | Zeal's Blog</title>
+  
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#slam%E5%90%8E%E7%AB%AF%E5%9B%BE%E4%BC%98%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">SLAM后端——图优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-number">2.1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96"><span class="nav-number">2.2.</span> <span class="nav-text">非线性优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%BE%E4%BC%98%E5%8C%96"><span class="nav-number">2.3.</span> <span class="nav-text">图优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gtsam"><span class="nav-number">3.</span> <span class="nav-text">GTSAM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E6%A6%82%E5%BF%B5"><span class="nav-number">3.1.</span> <span class="nav-text">重要概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gtsam%E4%BE%8B%E5%AD%90%E6%9C%80%E5%B0%8F%E4%BE%8B%E5%AD%90"><span class="nav-number">3.2.</span> <span class="nav-text">GTSAM例子——最小例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gtsam%E4%BE%8B%E5%AD%90imu%E9%A2%84%E7%A7%AF%E5%88%86%E5%8F%8Aimufactor"><span class="nav-number">3.3.</span> <span class="nav-text">GTSAM例子——IMU预积分及ImuFactor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gtsam%E4%BE%8B%E5%AD%90%E9%80%92%E5%A2%9E%E5%BC%8F%E4%BC%98%E5%8C%96"><span class="nav-number">3.4.</span> <span class="nav-text">GTSAM例子——递增式优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gtsam%E5%AD%A6%E4%B9%A0%E8%B7%AF%E5%BE%84"><span class="nav-number">4.</span> <span class="nav-text">GTSAM学习路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%96%99%E5%8F%82%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">资料参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Simple-LIO-SAM——GTSAM快速入门 | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Simple-LIO-SAM——GTSAM快速入门
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-27 21:28:48" itemprop="dateCreated datePublished" datetime="2023-03-27T21:28:48+08:00">2023-03-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-29 19:16:46" itemprop="dateModified" datetime="2023-03-29T19:16:46+08:00">2023-03-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——GTSAM快速入门" href="/2023/03/27/lio_sam/gtsam-quickstart/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::0d35c30bd7aedf439c2d1184605769ac" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="前言">前言</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>其中的两大模块<code>imuPreintegration</code>和<code>mapOptimization</code>都依赖了因子图优化框架——<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>。 为了确保本项目的自洽性以及后面章节讲解的展开，不介绍一下因子图后端优化算法似乎说不过去。但是笔者目前对因子图的原理还没有进行非常详细的推导，因此这部分 内容会偏向如何对<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>快速入门。当然，最快速的入门方式就是完整地阅读一遍<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>的官方教程。这部分章节只是拙劣地进行知识的搬迁，当然不是直接将 <a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>的教程直接翻译过来。本章节会介绍<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>快速入门的知识，同时讲解<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>提供的<code>examples</code>中跟<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>联系较为紧密的一两个，同时指明<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中的用法出处。 至少阅读完本章节后应该能够对因子图有基本的认识，并且能够看懂<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中对<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>的使用</p>
+<h2 id="slam后端图优化">SLAM后端——图优化</h2>
+<h3 id="问题描述">问题描述</h3>
+<p>让我们先回归问题本身。在SLAM中，我们可以拥有多个输入，我们的最终目的是获取一条最准确的轨迹，然后使用这条准确的轨迹实时构建地图。在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中，我们有以下输入： 1. IMU数据； 2. 点云数据； 3. GPS数据（可选）； 4. 回环检测；</p>
+<p>我们的问题是如何使用这些数据计算出一条最准确的历史轨迹，使用该轨迹就可以将对应的点云投影到地图坐标系，以此来建立一个点云格式地图。 PS：这只是SLAM的一个形式，就是优化出一条光滑准确的轨迹，这也是在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中使用的方法，因此本文以这种类型作为讲解。</p>
+<h3 id="非线性优化">非线性优化</h3>
+<p>在SLAM领域后端优化的一个分支是<code>滤波器方法</code>，主要以扩展卡尔曼滤波方法为主，采用隐马尔科夫假设，只保存上一次状态，并通过当前输入预测当前状态，偶尔通过观测修正状态。具体可见本博客的卡尔曼滤波相关文章。</p>
+<p>目前的后端优化主要以各种非线性优化方法为主，把批量的位姿加入目标方程（projective function）一起优化，得到具有更好的全局性质的解。 <span class="math display">\[
+\mathbf{x}^* = \argmin_{\mathbf{x}}\mathbb{F}(\mathbf{x})
+\]</span> 其中，<span class="math inline">\(\mathbb{F}\)</span>是历史轨迹引入的各个误差之和 <span class="math display">\[
+\mathbb{F}(\mathbf{x}) = \sum\mathbf{e}(x_i,c_{ij},x_j)
+\]</span> <span class="math inline">\(x_i,x_j\)</span>是历史时刻的位姿，<span class="math inline">\(c_{ij}\)</span>是两者之间的约束（可以认为是观测或者输入）</p>
+<p><strong>PS：再重申一句，SLAM后端体系很庞大，不是一篇文章能说清楚的，笔者目前也还没有这个能力。目前只求能够稍微讲清楚<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中是怎么被使用的即可。</strong></p>
+<p>为了求解非线性方程在不同的SLAM任务中的特点，又发展出各种不同的优化方式，比如VIO中有Bundle Adjustment，有其他叫PoseGraph的，还有<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>中使用的FactorGraph。 简单理解就是这些都是非线性方程和求解在不同的任务场景中的细分。后面有机会再单独列一篇文章讲解这些后端优化方法把。 <img src="./imgs/introToBA.png" alt="一图说明BA" /></p>
+<h3 id="图优化">图优化</h3>
+<p><strong>以下内容大量引用自<a target="_blank" rel="noopener" href="https://github.com/borglab/gtsam/blob/develop/doc/gtsam.pdf">GTSAM-repo/doc/gtsam.pdf</a></strong></p>
+<p>为了批量优化历史位姿<span class="math inline">\(\mathbf{x} = \{x_0, x_1, x_2, ... x_i\}\)</span>，研究者将图论引入SLAM后端优化。每一个机器的位姿<span class="math inline">\(x_i\)</span>是图中的顶点；通过各种里程计计算，比如连续位姿间的IMU积分结果或者点云匹配结果，成为两个位姿<span class="math inline">\(x_i,x_j\)</span>之间的边；对于一些额外的观测，比如GPS数据，成为连接顶点的一元边（只有一端连接到顶点）。比如下图(引用自：<a target="_blank" rel="noopener" href="https://github.com/borglab/gtsam/blob/develop/doc/gtsam.pdf">GTSAM-Hands-on Introduction</a>) <img src="./imgs/egForFactorGraph.png" alt="FactorGraph" /></p>
+<h2 id="gtsam">GTSAM</h2>
+<p>GTSAM使用因子图（FactorGraph）作为通用的图问题描述框架，并为各种机器人任务提供实现好的优化算法API，使得研究者快速开发后端优化框架。</p>
+<p><strong>图优化（GraphOptimization）vs. <a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>中使用的因子图优化（FactorGraph Optimization）区别 vs. BA</strong></p>
+<ol type="1">
+<li><strong>图优化</strong>似乎一般指位姿图（PoseGraph）的优化，图中的顶点都是机器人的位姿</li>
+<li><strong>BA</strong>(Bundle Adjustment)似乎一般指在视觉SLAM中对地标（Landmarks）和位姿同时优化的方法</li>
+<li><strong>GTSAM</strong>的因子图除了能够构建位姿图之外，还可以将速度、偏差、IMU预积分等当作顶点和边加入图中。另外，<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>框架实现了iSAM和iSAM2两个递增式优化器</li>
+</ol>
+<h3 id="重要概念">重要概念</h3>
+<p><strong>变量（variables）</strong>：因子图中的每一个顶点是一个代求的变量。假设我们只需要求解每一个时刻的机器人姿态，那么每个顶点就是该时刻的机器人位姿，如上图中的<span class="math inline">\({X_1,X_2,X_3}\)</span></p>
+<p><strong>值（values）</strong>：值是每个变量数值。在调用优化器对因子图做优化时，我们要先为每个变量设置初始值，优化结束后再从优化器中拿出每个变量优化后的值。</p>
+<p><strong>因子（factors）</strong>：因子是因子图中的边，每条边都可以视为一个因子，每个因子又可以认为是一个约束。比如连续两个位姿之间可以由IMU计算出两个位姿的变换，该变换作为一条边加入因子图连接两个变量（<code>二元因子：binary factor</code>）；又或者在某个时刻有GPS数据输入，GPS数据是一个观测，也可以作为一个因子加入因子图，这时候GPS的边只有一端连接到变量（<code>一元因子：unary factor</code>）。</p>
+<p><strong>因子图（factor graph）</strong>：因子图由顶点（变量）和因子（边）构成。</p>
+<p><strong>优化器（Optimizer）</strong>：因子图只是建模了SLAM的历史位姿和输入与观测间的关系，如何求解这个因子图也就是如何设置变量使得整个图最符合所有的约束（误差最小）则需要用到优化器。除了最常见的求解非线性问题的<code>Gaussian-Newton</code>和<code>Levenberg-Marquardt</code>优化器之外，<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>还实现了两个增量式优化器<a target="_blank" rel="noopener" href="https://www.cs.cmu.edu/~kaess/pub/Kaess08tro.pdf">iSAM</a>,<a target="_blank" rel="noopener" href="https://www.cs.cmu.edu/~kaess/pub/Kaess12ijrr.pdf">iSAM2</a></p>
+<p><strong>键（Keys）</strong>：往因子图添加因子需要指定该因子连接到哪些变量。GTSAM中使用键来指明。一元因子需要指明其连接到第几个变量；二元因子需要指明其连接到哪两个变量。因子图中每个变量的键都应该是唯一的。为了方便在多种变量类型的情况下指明键，GTSAM提供<code>Symbols</code>来让用户方便生成不同变量类型的键值。（键不一定是连续的，但必须是唯一的）</p>
+<h3 id="gtsam例子最小例子">GTSAM例子——最小例子</h3>
+<p>本小节引用自<a target="_blank" rel="noopener" href="https://github.com/borglab/gtsam/blob/develop/doc/gtsam.pdf">GTSAM-Hands-on Introduction</a>—第2章 以构建并求解下面因子图为例 <img src="./imgs/gtsam-minExample.png" alt="GTSAM最小例子" /> 图中<span class="math inline">\(x_1,x_2,x_3\)</span>为机器人三个时刻的位姿；<span class="math inline">\(f_0\)</span>为第一个时刻机器人位姿的观测；<span class="math inline">\(f_1,f_2\)</span>为时刻1-2和时刻2-3之间的里程计估计。<a target="_blank" rel="noopener" href="https://github.com/borglab/gtsam/blob/develop/examples/OdometryExample.cpp">代码</a> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 构建一个空的非线性因子图</span></span><br><span class="line">NonlinearFactorGraph graph;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 构建先验因子，也就是图中的f_0</span></span><br><span class="line"><span class="comment">// 这里使用二维姿态（x,y,theta）简化问题</span></span><br><span class="line"><span class="function">Pose2 <span class="title">priorMean</span><span class="params">(<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>)</span></span>;</span><br><span class="line"><span class="comment">// 高斯噪声，代表我们对该因子的不确定性</span></span><br><span class="line"><span class="keyword">auto</span> priorNoise = noiseModel::Diagonal::<span class="built_in">Sigmas</span>(<span class="built_in">Vector3</span>(<span class="number">0.3</span>, <span class="number">0.3</span>, <span class="number">0.1</span>));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将先验因子加入因子图</span></span><br><span class="line"><span class="comment">// 其中的1表示该因子连接到第1个变量</span></span><br><span class="line">graph.<span class="built_in">add</span>(<span class="built_in">PriorFactor</span>&lt;Pose2&gt;(<span class="number">1</span>, priorMean, priorNoise));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 构建里程计因子，也就是图中的f_1,f_2</span></span><br><span class="line"><span class="comment">// 往前移动2米，y轴不便，theta不变</span></span><br><span class="line"><span class="function">Pose2 <span class="title">odometry</span><span class="params">(<span class="number">2.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>)</span></span>;</span><br><span class="line"><span class="keyword">auto</span> odometryNoise = noiseModel::Diagonal::<span class="built_in">Sigmas</span>(<span class="built_in">Vector3</span>(<span class="number">0.2</span>, <span class="number">0.2</span>, <span class="number">0.1</span>));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将里程计因子加入因子图</span></span><br><span class="line"><span class="comment">// 1,2代表该里程计约束是从变量1到变量2</span></span><br><span class="line">graph.<span class="built_in">add</span>(<span class="built_in">BetweenFactor</span>&lt;Pose2&gt;(<span class="number">1</span>, <span class="number">2</span>, odometry, odometryNoise));</span><br><span class="line"><span class="comment">// 添加相同的因子到变量2和变量3之间</span></span><br><span class="line">graph.<span class="built_in">add</span>(<span class="built_in">BetweenFactor</span>&lt;Pose2&gt;(<span class="number">2</span>, <span class="number">3</span>, odometry, odometryNoise));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置各个变量的初始值</span></span><br><span class="line">Values initial;</span><br><span class="line">initial.<span class="built_in">insert</span>(<span class="number">1</span>, <span class="built_in">Pose2</span>(<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.2</span>));</span><br><span class="line">initial.<span class="built_in">insert</span>(<span class="number">2</span>, <span class="built_in">Pose2</span>(<span class="number">2.3</span>, <span class="number">0.1</span>, <span class="number">-0.2</span>));</span><br><span class="line">initial.<span class="built_in">insert</span>(<span class="number">3</span>, <span class="built_in">Pose2</span>(<span class="number">4.1</span>, <span class="number">0.1</span>, <span class="number">0.1</span>));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用优化器并使用设定好的初始值对因子图优化</span></span><br><span class="line">Values result = <span class="built_in">LevenberMarquardtOptimizer</span>(graph, initial).<span class="built_in">optimize</span>();</span><br></pre></td></tr></table></figure></p>
+<h3 id="gtsam例子imu预积分及imufactor">GTSAM例子——IMU预积分及ImuFactor</h3>
+<p>在目前的SLAM，无论是VIO还是LIO，前端都需要IMU做积分得到一个位姿的初始估计。<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>中实现了一个IMU预积分算法，并可以将其直接加入因子图中做优化。这在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中也被使用到。 本例子引用自<a target="_blank" rel="noopener" href="https://github.com/borglab/gtsam/blob/develop/examples/ImuFactorsExample2.cpp">GTSAM-repo/examples/ImuFactorExample2.cpp</a>，为了说明<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>中IMU预积分器及<code>ImuFactor</code>的用法，对该例子进行简化。最后构建出的因子图如下（为了可视化，人工调整了布局）： <img src="./imgs/ImuFactorGraph.png" alt="ImuFactorGraph" /> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 伪代码，完整代码见下文</span></span><br><span class="line"><span class="comment">// ---------------------------------------------------------</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// IMU 预积分器</span></span><br><span class="line"><span class="comment">// 设置预积分器的噪声参数，这些噪声参数一般来自IMU的离线标定结果</span></span><br><span class="line"><span class="keyword">auto</span> params = PreintegrationParams::<span class="built_in">MakeSharedU</span>(kGravity);</span><br><span class="line">params-&gt;<span class="built_in">setAccelerometerCovariance</span>(I_3x3 * <span class="number">0.1</span>);</span><br><span class="line">params-&gt;<span class="built_in">setGyroscopeCovariance</span>(I_3x3 * <span class="number">0.1</span>);</span><br><span class="line">params-&gt;<span class="built_in">setIntegrationCovariance</span>(I_3x3 * <span class="number">0.1</span>);</span><br><span class="line">params-&gt;<span class="built_in">setUse2ndOrderCoriolis</span>(<span class="literal">false</span>);</span><br><span class="line">params-&gt;<span class="built_in">setOmegaCoriolis</span>(<span class="built_in">Vector3</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>));</span><br><span class="line"><span class="comment">// 设置IMU预积分器</span></span><br><span class="line"><span class="function">PreintegratedImuMeasurements <span class="title">accum</span><span class="params">(params)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置一个非线性因子图</span></span><br><span class="line">NonlinearFactorGraph newgraph;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 声明因子图的初始值和优化结果</span></span><br><span class="line">Values initialEstimate;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置位姿的先验因子</span></span><br><span class="line"><span class="comment">// 对应到上图中连接到变量x0的一元因子</span></span><br><span class="line"><span class="comment">// 噪声设置为roll、pitch、yaw有0.1rad的标准差，x，y，z有30cm的标准差</span></span><br><span class="line"><span class="keyword">auto</span> noise = noiseModel::Diagonal::<span class="built_in">Sigmas</span>(</span><br><span class="line">    (<span class="built_in">Vector</span>(<span class="number">6</span>) &lt;&lt; Vector3::<span class="built_in">Constant</span>(<span class="number">0.1</span>), Vector3::<span class="built_in">Constant</span>(<span class="number">0.3</span>)).<span class="built_in">finished</span>());</span><br><span class="line"><span class="comment">// 将位姿的先验因子加入因子图中</span></span><br><span class="line">newgraph.<span class="built_in">addPrior</span>(<span class="built_in">X</span>(<span class="number">0</span>), pose_0, noise);</span><br><span class="line"><span class="comment">// 将位姿0的初始值加入初始估计集合</span></span><br><span class="line">initialEstimate.<span class="built_in">insert</span>(<span class="built_in">X</span>(<span class="number">0</span>), pose_0);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置IMU偏差的先验因子</span></span><br><span class="line"><span class="comment">// 对应到上图中连接到变量b0的一元因子</span></span><br><span class="line">Key biasKey = <span class="built_in">Symbol</span>(<span class="string">&#x27;b&#x27;</span>, <span class="number">0</span>);</span><br><span class="line"><span class="keyword">auto</span> biasnoise = noiseModel::Diagonal::<span class="built_in">Sigmas</span>(Vector6::<span class="built_in">Constant</span>(<span class="number">0.1</span>));</span><br><span class="line">newgraph.<span class="built_in">addPrior</span>(biasKey, imuBias::<span class="built_in">ConstantBias</span>(), biasnoise);</span><br><span class="line"><span class="comment">// 将IMU偏差b0的初始值加入初始估计集合</span></span><br><span class="line">initialEstimate.<span class="built_in">insert</span>(biasKey, imuBias::<span class="built_in">ConstantBias</span>());</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置速度的先验因子</span></span><br><span class="line"><span class="comment">// 对应到上图中连接到变量v0的一元因子</span></span><br><span class="line"><span class="comment">// 这里设置初始速度为0：Vector3(0,0,0)</span></span><br><span class="line"><span class="keyword">auto</span> velnoise = noiseModel::Diagonal::<span class="built_in">Sigmas</span>(<span class="built_in">Vector3</span>(<span class="number">0.01</span>, <span class="number">0.01</span>, <span class="number">0.01</span>));</span><br><span class="line">newgraph.<span class="built_in">addPrior</span>(<span class="built_in">V</span>(<span class="number">0</span>), <span class="built_in">Vector3</span>(<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>), velnoise);</span><br><span class="line"><span class="comment">// 将速度v0的初始值加入初始估计集合</span></span><br><span class="line">initialEstimate.<span class="built_in">insert</span>(<span class="built_in">V</span>(<span class="number">0</span>), <span class="built_in">Vector3</span>(<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 对于机器人的所有位姿时刻（关键帧）</span></span><br><span class="line"><span class="keyword">for</span> (i in N_steps)</span><br><span class="line">&#123;</span><br><span class="line">  biasKey++;</span><br><span class="line">  Symbol b1 = biasKey - <span class="number">1</span>;</span><br><span class="line">  Symbol b2 = biasKey;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 设置i时刻的位姿初始值</span></span><br><span class="line">  initialEstimate.<span class="built_in">insert</span>(<span class="built_in">X</span>(i), pose_i);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 对于两个时刻之间的所有IMU数据进行积分</span></span><br><span class="line">  <span class="keyword">for</span> (j in N_imu_queue)</span><br><span class="line">  &#123;</span><br><span class="line">    accum.<span class="built_in">integrateMeasurement</span>(measuredAcc, measuredOmega, <span class="type">delta_t</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 使用预积分器构建IMU因子，并加入因子图中</span></span><br><span class="line">  <span class="comment">// IMU因子需要指定本次积分的过程连接了哪两个位姿X，速度V以及当前的偏差估计，因此也叫`5-way factor`</span></span><br><span class="line">  <span class="function">ImuFactor <span class="title">imufac</span><span class="params">(X(i - <span class="number">1</span>), V(i - <span class="number">1</span>), X(i), V(i), biasKey, accum)</span></span>;</span><br><span class="line">  newgraph.<span class="built_in">add</span>(imufac);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 添加两个时刻之间IMU偏差因子</span></span><br><span class="line">  <span class="keyword">auto</span> f = std::make_shared&lt;BetweenFactor&lt;imuBias::ConstantBias&gt; &gt;(</span><br><span class="line">            b1, b2, imuBias::<span class="built_in">ConstantBias</span>(), cov);</span><br><span class="line">  newgraph.<span class="built_in">add</span>(f);</span><br><span class="line">  initialEstimate.<span class="built_in">insert</span>(biasKey, imuBias::<span class="built_in">ConstantBias</span>());</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 将速度的初始值加入初始值集合，注意，这里加入的是GroundTruth的速度，只是为了做示例</span></span><br><span class="line">  initialEstimate.<span class="built_in">insert</span>(<span class="built_in">V</span>(i), linear_velocity_vector);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 重值IMU预积分器</span></span><br><span class="line">  accum.<span class="built_in">resetIntegration</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 调用LM优化器对因子图进行优化并获取优化结果</span></span><br><span class="line">result = <span class="built_in">LevenbergMarquardtOptimizer</span>(newgraph, initialEstimate).<span class="built_in">optimize</span>();</span><br></pre></td></tr></table></figure></p>
+<details class="note info no-icon"><summary><p>IMU预积分及IMU因子完整代码</p>
+</summary>
+<figure class="highlight plaintext">
+<table>
+<tr>
+<td class="gutter">
+<pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br></pre>
+</td>
+<td class="code">
+<pre><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * @file ImuFactorExample2</span><br><span class="line"> * @brief Test example for using GTSAM ImuFactor and ImuCombinedFactor with ISAM2. Simplify and add graphviz by Zeal</span><br><span class="line"> * @author Robert Truax</span><br><span class="line"> * @author Zeal</span><br><span class="line"> */</span><br><span class="line"></span><br><span class="line">#include &lt;gtsam/geometry/PinholeCamera.h&gt;</span><br><span class="line">#include &lt;gtsam/geometry/Cal3_S2.h&gt;</span><br><span class="line">#include &lt;gtsam/inference/Symbol.h&gt;</span><br><span class="line">#include &lt;gtsam/navigation/ImuBias.h&gt;</span><br><span class="line">#include &lt;gtsam/navigation/ImuFactor.h&gt;</span><br><span class="line">#include &lt;gtsam/navigation/Scenario.h&gt;</span><br><span class="line">#include &lt;gtsam/nonlinear/ISAM2.h&gt;</span><br><span class="line">#include &lt;gtsam/nonlinear/LevenbergMarquardtOptimizer.h&gt;</span><br><span class="line">#include &lt;gtsam/slam/BetweenFactor.h&gt;</span><br><span class="line"></span><br><span class="line">#include &lt;vector&gt;</span><br><span class="line"></span><br><span class="line">using namespace std;</span><br><span class="line">using namespace gtsam;</span><br><span class="line"></span><br><span class="line">// Shorthand for velocity and pose variables</span><br><span class="line">using symbol_shorthand::V;</span><br><span class="line">using symbol_shorthand::X;</span><br><span class="line"></span><br><span class="line">const double kGravity = 9.81;</span><br><span class="line"></span><br><span class="line">/* ************************************************************************* */</span><br><span class="line">int main(int argc, char* argv[]) &#123;</span><br><span class="line">  </span><br><span class="line"></span><br><span class="line">  // 起点</span><br><span class="line">  Pose3 pose_0(Rot3::Rodrigues(0, 0, 0), Point3(0,0,0));</span><br><span class="line"></span><br><span class="line">  // 设置一个姿态仿真器，姿态沿着y轴以5m/s的速度前进，没有角度变化</span><br><span class="line">  Vector3 angular_velocity_vector(0, 0, 0);</span><br><span class="line">  Vector3 linear_velocity_vector(0, 5, 0);</span><br><span class="line">  auto scenario = ConstantTwistScenario(angular_velocity_vector,</span><br><span class="line">                                        linear_velocity_vector, pose_0);</span><br><span class="line">  // 设置仿真步长为1s</span><br><span class="line">  double delta_t = 1.0;</span><br><span class="line"></span><br><span class="line">  // 设置一个非线性因子图</span><br><span class="line">  NonlinearFactorGraph newgraph;</span><br><span class="line"></span><br><span class="line">  // 声明因子图的初始值和优化结果</span><br><span class="line">  Values initialEstimate, result;</span><br><span class="line"></span><br><span class="line">  // 设置位姿的先验因子</span><br><span class="line">  // 对应到上图中连接到变量x0的一元因子</span><br><span class="line">  // 噪声设置为roll、pitch、yaw有0.1rad的标准差，x，y，z有30cm的标准差</span><br><span class="line">  auto noise = noiseModel::Diagonal::Sigmas(</span><br><span class="line">      (Vector(6) &lt;&lt; Vector3::Constant(0.1), Vector3::Constant(0.3)).finished());</span><br><span class="line">  // 将位姿的先验因子加入因子图中</span><br><span class="line">  newgraph.addPrior(X(0), pose_0, noise);</span><br><span class="line">  // 将位姿0的初始值加入初始估计集合</span><br><span class="line">  initialEstimate.insert(X(0), pose_0);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  // 设置IMU偏差的先验因子</span><br><span class="line">  // 对应到上图中连接到变量b0的一元因子</span><br><span class="line">  Key biasKey = Symbol(&#x27;b&#x27;, 0);</span><br><span class="line">  auto biasnoise = noiseModel::Diagonal::Sigmas(Vector6::Constant(0.1));</span><br><span class="line">  newgraph.addPrior(biasKey, imuBias::ConstantBias(), biasnoise);</span><br><span class="line">  // 将IMU偏差b0的初始值加入初始估计集合</span><br><span class="line">  initialEstimate.insert(biasKey, imuBias::ConstantBias());</span><br><span class="line">  </span><br><span class="line">  // 设置速度的先验因子</span><br><span class="line">  // 对应到上图中连接到变量v0的一元因子</span><br><span class="line">  // 这里设置初始速度为0：Vector3(0,0,0)</span><br><span class="line">  auto velnoise = noiseModel::Diagonal::Sigmas(Vector3(0.01, 0.01, 0.01));</span><br><span class="line">  newgraph.addPrior(V(0), Vector3(0,0,0), velnoise);</span><br><span class="line">  // 将速度v0的初始值加入初始估计集合</span><br><span class="line">  initialEstimate.insert(V(0), Vector3(0,0,0));</span><br><span class="line"></span><br><span class="line">  // IMU 预积分器</span><br><span class="line">  // 设置预积分器的噪声参数，这些噪声参数一般来自IMU的离线标定结果</span><br><span class="line">  auto params = PreintegrationParams::MakeSharedU(kGravity);</span><br><span class="line">  params-&gt;setAccelerometerCovariance(I_3x3 * 0.1);</span><br><span class="line">  params-&gt;setGyroscopeCovariance(I_3x3 * 0.1);</span><br><span class="line">  params-&gt;setIntegrationCovariance(I_3x3 * 0.1);</span><br><span class="line">  params-&gt;setUse2ndOrderCoriolis(false);</span><br><span class="line">  params-&gt;setOmegaCoriolis(Vector3(0, 0, 0));</span><br><span class="line">  // 设置IMU预积分器</span><br><span class="line">  PreintegratedImuMeasurements accum(params);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  // 模仿机器人在运动，这里一共有3个位姿节点0,1,2</span><br><span class="line">  // 在运动过程中模拟IMU预积分，并将IMU因子、IMU偏差因子加入因子图中</span><br><span class="line">  for (size_t i = 0; i &lt; 3; ++i) &#123;</span><br><span class="line">    double t = i * delta_t;</span><br><span class="line">    if (i &gt; 0) &#123;  // 设置位姿的初始值，这里是错误示范，使用真值作为初始值设置</span><br><span class="line">      auto pose_i = scenario.pose(t);</span><br><span class="line">      initialEstimate.insert(X(i), pose_i);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 添加IMU因子和IMU偏差因子</span><br><span class="line">    if (i &gt; 0) &#123;</span><br><span class="line">      // 周期性添加IMU的偏差因子；IMU的偏差需要用其他方式计算，也可以使用离线标定的参数（一般不会）</span><br><span class="line">      if (i % 2 == 0) &#123;</span><br><span class="line">        // b1是上一次的IMU偏差变量的键值；b2是本次IMU偏差的键值</span><br><span class="line">        biasKey++;</span><br><span class="line">        Symbol b1 = biasKey - 1;</span><br><span class="line">        Symbol b2 = biasKey;</span><br><span class="line">        // 添加两个IMU偏差变量之间的二元因子</span><br><span class="line">        Vector6 covvec;</span><br><span class="line">        covvec &lt;&lt; 0.1, 0.1, 0.1, 0.1, 0.1, 0.1;</span><br><span class="line">        auto cov = noiseModel::Diagonal::Variances(covvec);</span><br><span class="line">        auto f = std::make_shared&lt;BetweenFactor&lt;imuBias::ConstantBias&gt; &gt;(</span><br><span class="line">            b1, b2, imuBias::ConstantBias(), cov);</span><br><span class="line">        newgraph.add(f);</span><br><span class="line">        // 将当前的IMU偏差变量的初始估计加入初始值集合</span><br><span class="line">        initialEstimate.insert(biasKey, imuBias::ConstantBias());</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      // 这部分才是预积分器进行积分的地方</span><br><span class="line">      // 每次积分接收加速度、角速度以及间隔时间delta_t</span><br><span class="line">      Vector3 measuredAcc = scenario.acceleration_b(t);</span><br><span class="line">      Vector3 measuredOmega = scenario.omega_b(t);</span><br><span class="line">      accum.integrateMeasurement(measuredAcc, measuredOmega, delta_t);</span><br><span class="line"></span><br><span class="line">      // 使用预积分器构建IMU因子，并加入因子图中</span><br><span class="line">      // IMU因子需要指定本次积分的过程连接了哪两个位姿X，速度V以及当前的偏差估计，因此也叫`5-way factor`</span><br><span class="line">      ImuFactor imufac(X(i - 1), V(i - 1), X(i), V(i), biasKey, accum);</span><br><span class="line">      newgraph.add(imufac);</span><br><span class="line"></span><br><span class="line">      // 将速度的初始值加入初始值集合，注意，这里加入的是GroundTruth的速度，只是为了做示例</span><br><span class="line">      initialEstimate.insert(V(i), linear_velocity_vector);</span><br><span class="line">      // 重值IMU预积分器</span><br><span class="line">      accum.resetIntegration();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  // 使用初始值保存因子图</span><br><span class="line">  newgraph.saveGraph(&quot;ImuFactorsExample2_graphviz.dot&quot;, initialEstimate);</span><br><span class="line">  // 打印到命令行</span><br><span class="line">  newgraph.dot(cout, result);</span><br><span class="line"></span><br><span class="line">  // 调用LM优化器对因子图进行优化并获取优化结果</span><br><span class="line">  result = LevenbergMarquardtOptimizer(newgraph, initialEstimate).optimize();</span><br><span class="line"></span><br><span class="line">  return 0;</span><br><span class="line">&#125;</span><br><span class="line">/* ************************************************************************* */</span><br><span class="line"></span><br></pre>
+</td>
+</tr>
+</table>
+</figure>
+
+</details>
+<h3 id="gtsam例子递增式优化">GTSAM例子——递增式优化</h3>
+<p><a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>不仅内置了<code>Gaussian-Newton</code>和<code>Leverberg-Marquat</code>两个常见的非线性优化器，还是实现了<a target="_blank" rel="noopener" href="https://www.cs.cmu.edu/~kaess/pub/Kaess08tro.pdf">iSAM</a>和<a target="_blank" rel="noopener" href="https://www.cs.cmu.edu/~kaess/pub/Kaess12ijrr.pdf">iSAM2</a>两个递增式的优化器。 递增式优化器更符合SLAM中常见的使用方式，也就是持续加入新的位姿和约束，并持续进行优化。</p>
+<p>这部分内容可以参考<a target="_blank" rel="noopener" href="https://github.com/borglab/gtsam/blob/develop/doc/gtsam.pdf">GTSAM-Hands-on Introduction</a>——第7章</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/borglab/gtsam/blob/develop/examples/VisualISAM2Example.cpp">example/VisualISAM2Example.cpp</a> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置iSAM2优化器</span></span><br><span class="line"><span class="function">ISAM2 <span class="title">isam</span><span class="params">(parameters)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置因子图和初始值</span></span><br><span class="line">NonlinearFactorGraph graph;</span><br><span class="line">Values initialEstimate;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="type">size_t</span> i = <span class="number">1</span>; i &lt; poses.<span class="built_in">size</span>(); ++i)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">size_t</span> j = <span class="number">0</span>; j &lt; relations.<span class="built_in">size</span>(); ++i)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">// 添加因子</span></span><br><span class="line">    graph.<span class="built_in">add</span>(<span class="built_in">BetweenFactor</span>&lt;Pose3&gt;(i, j))</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 添加初始值到初始估计集合</span></span><br><span class="line">  initialEstimate.<span class="built_in">insert</span>(<span class="built_in">Symbol</span>(<span class="string">&#x27;x&#x27;</span>,i), initial_x[i]);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 将因子图加入优化器</span></span><br><span class="line">  isam.<span class="built_in">update</span>(graph, initialEstimate);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 清空当前因子图和初始值</span></span><br><span class="line">  <span class="comment">// 因子图已经加入优化器，因此需要清空为下一次因子图做准备</span></span><br><span class="line">  graph.<span class="built_in">resize</span>(<span class="number">0</span>);</span><br><span class="line">  initialEstimate.<span class="built_in">clear</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="gtsam学习路径">GTSAM学习路径</h2>
+<p><a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>对整个SLAM后端问题都封装得很好，因此可以让我们在不了解优化细节的情况下也可以构建自己的优化算法。除了对后端优化和图优化这些知识掌握外，<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>的学习主要还是要<code>学以致用</code>， 这里只是简单列出笔者觉得比较合适的资料阅读和学习顺序。</p>
+<ol type="1">
+<li>本文</li>
+<li>GTSAM仓库下<code>doc</code>文件夹中的<a target="_blank" rel="noopener" href="https://github.com/borglab/gtsam/blob/develop/doc/gtsam.pdf">gtsam.pdf</a></li>
+<li>GTSAM仓库下<code>examples</code>文件夹中的一些例子，主要是对照上面的文档以及本文出现的例子进行阅读运行</li>
+<li>本项目博客中关于<code>ImuPreintegration</code>和<code>MapOptimization</code>的讲解</li>
+<li>本项目代码<a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM" title="Simple LIO-SAM">spl</a>中<code>src/mapOptimization.cpp</code>和<code>src/imuPreintegration.cpp</code>代码</li>
+</ol>
+<h2 id="资料参考">资料参考</h2>
+<ol type="1">
+<li>对目前各个图优化框架（g2o,GTSAM,ceres,SE-Sync）等做统一分析的综述性论文（强烈建议）</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://lamor.fer.hr/images/50036607/2021-ajuric-comparison-mipro.pdf">A Comparison of Graph OptimizationApproaches for Pose Estimation in SLAM</a></p>
+<ol start="2" type="1">
+<li>Introduction to Bundle Adjustment, ppt</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://vincentqin.gitee.io/blogresource-3/slam-summer-courses-CADCG-Lab/BA-haominLiu.pdf">Bundle Adjustment</a></p>
+<ol start="3" type="1">
+<li>对基于图的SLAM后端优化算法的讲解，对SLAM的后端问题做比较正式的描述，接近2000引用</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="http://www2.informatik.uni-freiburg.de/~stachnis/pdf/grisetti10titsmag.pdf">A Tutorial on Graph-Based SLAM</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/" title="Simple-LIO-SAM——GTSAM快速入门">https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/liosam/" rel="tag"># liosam</a>
+              <a href="/tags/slam/" rel="tag"># slam</a>
+              <a href="/tags/GTSAM/" rel="tag"># GTSAM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/03/22/lio_sam/featureExtraction-doc/" rel="prev" title="Simple-LIO-SAM——特征提取模块">
+                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——特征提取模块
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="0d35c30bd7aedf439c2d1184605769ac"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>
