@@ -19,25 +19,26 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述 点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了LeGO-LOAM，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用  去除激光雷达点云的运动畸变 检索每一帧点云对应的IMU输出角度、IMU里程计位姿（发布自ImuPreintegration），以便MapOptimization模块用这">
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述  点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了LeGO-LOAM，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用  去除激光雷达点云的运动畸变 检索每一帧点云对应的IMU输出角度、IMU里程计位姿（发布自ImuPreintegration），以便MapOptimization模块用">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Simple-LIO-SAM——点云去畸变模块">
 <meta property="og:url" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
-<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述 点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了LeGO-LOAM，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用  去除激光雷达点云的运动畸变 检索每一帧点云对应的IMU输出角度、IMU里程计位姿（发布自ImuPreintegration），以便MapOptimization模块用这">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述  点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了LeGO-LOAM，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用  去除激光雷达点云的运动畸变 检索每一帧点云对应的IMU输出角度、IMU里程计位姿（发布自ImuPreintegration），以便MapOptimization模块用">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-Pipelines-image.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-pipeline.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-Node%26%26Topics-imageProjection.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-cachePointCloud.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-deskewInfo.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-projectPointCloud.png">
 <meta property="article:published_time" content="2023-03-22T07:55:36.000Z">
-<meta property="article:modified_time" content="2023-03-22T13:32:29.782Z">
+<meta property="article:modified_time" content="2023-03-30T13:30:17.702Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-pipeline.png">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-Pipelines-image.png">
 
 
 <link rel="canonical" href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/">
@@ -202,9 +203,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2023-03-22 15:55:36 / 修改时间：21:32:29" itemprop="dateCreated datePublished" datetime="2023-03-22T15:55:36+08:00">2023-03-22</time>
+      <time title="创建时间：2023-03-22 15:55:36" itemprop="dateCreated datePublished" datetime="2023-03-22T15:55:36+08:00">2023-03-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-30 21:30:17" itemprop="dateModified" datetime="2023-03-30T21:30:17+08:00">2023-03-30</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -254,7 +261,7 @@
 <li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
 </ul>
 <h2 id="总述">总述</h2>
-<p>点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用</p>
+<p><img src="./imgs/Design-Pipelines-image.png" alt="Pipeline-image" /> 点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用</p>
 <ol type="1">
 <li>去除激光雷达点云的运动畸变</li>
 <li>检索每一帧点云对应的IMU输出角度、IMU里程计位姿（发布自ImuPreintegration），以便MapOptimization模块用这些信息作为该帧点云的初始位姿</li>

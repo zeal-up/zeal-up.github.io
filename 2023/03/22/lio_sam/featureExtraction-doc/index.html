@@ -19,21 +19,22 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述 LIOSAM沿用LOAM、LeGO-LOAM的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自imageProjection发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：  特征点的提取根据点的平滑度，而平滑度则通过">
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述  LIOSAM沿用LOAM、LeGO-LOAM的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自imageProjection发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：  特征点的提取根据点的平滑度，而平滑度则通">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Simple-LIO-SAM——特征提取模块">
 <meta property="og:url" content="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
-<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述 LIOSAM沿用LOAM、LeGO-LOAM的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自imageProjection发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：  特征点的提取根据点的平滑度，而平滑度则通过">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述  LIOSAM沿用LOAM、LeGO-LOAM的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自imageProjection发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：  特征点的提取根据点的平滑度，而平滑度则通">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/imgs/Design-Pipelines-feature.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/imgs/illegal_feature_point.png">
 <meta property="article:published_time" content="2023-03-22T12:03:12.000Z">
-<meta property="article:modified_time" content="2023-03-22T13:32:33.990Z">
+<meta property="article:modified_time" content="2023-03-30T13:29:49.790Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/imgs/illegal_feature_point.png">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/imgs/Design-Pipelines-feature.png">
 
 
 <link rel="canonical" href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/">
@@ -198,9 +199,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2023-03-22 20:03:12 / 修改时间：21:32:33" itemprop="dateCreated datePublished" datetime="2023-03-22T20:03:12+08:00">2023-03-22</time>
+      <time title="创建时间：2023-03-22 20:03:12" itemprop="dateCreated datePublished" datetime="2023-03-22T20:03:12+08:00">2023-03-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-30 21:29:49" itemprop="dateModified" datetime="2023-03-30T21:29:49+08:00">2023-03-30</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -250,7 +257,7 @@
 <li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
 </ul>
 <h2 id="总述">总述</h2>
-<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>沿用<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>、<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自<code>imageProjection</code>发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：</p>
+<p><img src="./imgs/Design-Pipelines-feature.png" alt="Pipeline-featureExtraction" /> <a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>沿用<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>、<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自<code>imageProjection</code>发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：</p>
 <ol type="1">
 <li>特征点的提取根据点的平滑度，而平滑度则通过每个点与周围点距离的平均值做近似</li>
 <li>实际上在提取完边缘点和平面点之后，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>在代码里又把所有非边缘点的点都加入了平面点集合。这是比较奇怪的地方。从这里看出也许特征提取也不是必要的， 因为平面点已经包含了大部分的点云。事实上，在Github的一个仓库<a target="_blank" rel="noopener" href="https://github.com/YJZLuckyBoy/liorf" title="Based LIO-SAM, remove featureExtraction">liorf</a>中，就将特征提取模块去掉。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将该段中除了角点之外的点加入平面点集合</span></span><br><span class="line"><span class="comment">// ！！！ 这点让步骤2感觉是多余的，最终的结果可能只是原始点云降采样，可能特征点提取也是没有必要的！！！</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> k = sp; k &lt;= ep; k++)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (cloudLabel[k] &lt;= <span class="number">0</span>)&#123;</span><br><span class="line">        surfaceCloudScan-&gt;<span class="built_in">push_back</span>(extractedCloud-&gt;points[k]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure> <code>cloudLabel</code>标识该点的性质，-1为平面点，0为非特征点，1为边缘点。</li>

@@ -162,6 +162,179 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/30/lio_sam/imuPreintegration-doc/" class="post-title-link" itemprop="url">Simple-LIO-SAM——IMU预积分模块</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-30 20:55:54" itemprop="dateCreated datePublished" datetime="2023-03-30T20:55:54+08:00">2023-03-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-31 22:32:13" itemprop="dateModified" datetime="2023-03-31T22:32:13+08:00">2023-03-31</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——IMU预积分模块" href="/2023/03/30/lio_sam/imuPreintegration-doc/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::447e7d053e8cf00fca42d617e062a049" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="总述">总述</h2>
+<p><img src="./imgs/Design-Pipelines-IMU.png" alt="Pipelines-ImuPreintegration" /> IMU预积分模块无论在VIO或者LIO中都是一个非常重要的模块。VIO或者LIO中的<code>I</code>，也就是<code>Inertial</code>指的是惯性，基本上在这类SLAM框架里指的就是IMU里程计。 IMU可以输出车辆坐标系下的三轴加速度、三轴角速度、三轴地磁计（九轴IMU）。我们都知道，加速度的积分是速度、速度的积分是距离，角速度的积分是角度，地磁计可以计算与地磁北极的偏角，因此，如果IMU的输出是准确的话，使用IMU原始数据并进行积分就可以得到车辆的位姿。然而，目前无论多么高精度的IMU，都很难在较长时间下保持较高的准确度，而且积分会对误差也进行积分，导致IMU里程计只能用来做短时间内的位姿校正。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>是IMU里程计和激光雷达里程计紧耦合的SLAM框架。“紧耦合”三个字在IMU预积分模块得到明显的表达。如果用一句话说明IMU预积分模块的作用，那就是：利用IMU数据，为车辆位姿提供一个较好的位姿初始估计。由于目前的激光雷达大部分是10Hz，部分可以达到20Hz以上，因此，在两帧雷达点云期间，车辆会发生旋转和位移，如果旋转和位移很小，那么点云匹配就能够单独算出一个较准确的里程计（在运动缓慢的情况下，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>即使去除了IMU预积分也可以工作，只需要不启动imuPreintegration节点即可）；但是如果旋转和位移较大，点云匹配就可以失败；IMU一般拥有较高频率（200Hz以上），因此可以为两帧雷达点云的匹配提供较好的初始位姿值。</p>
+<p>前面提到单纯利用IMU数据做积分，时间一场误差累积会很大，无法提供良好的初始位姿估计，因此需要融合其他传感器校正IMU积分算法。在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中，通过不断从激光里程计获取最新的里程计信息，作为IMU积分算法的观测来达到校正IMU积分算法的目的。</p>
+<p><em>PS：此部分代码很大程度利用了<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>，因此，需要提前阅读本项目《Simple-LIO-SAM——GTSAM快速入门》一章</em></p>
+<h2 id="imu预积分模块的整体框架流程图">IMU预积分模块的整体框架流程图</h2>
+<img src="./imgs/Design-imuPreintegration-top01.png" title="fig:预积分模块流程图" alt="整体框架流程图" />
+<center>
+预积分模块流程图
+</center>
+<h2 id="偏差估计和imu里程计">偏差估计和IMU里程计</h2>
+<p>这个模块容易让人看晕的地方在与模块里有两个队列缓存IMU原始数据，同时有两个IMU预积分器。只所以需要有两个预积分器的原因在于，<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>中对于IMU的预积分，在预测时（predict）需要指明上一时刻的<code>bias</code>，也就是IMU的积分误差。通常这个<code>bias</code>会随着时间慢慢改变，因此不能用离线标定的数据直接使用。于是，在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中，有一个线程（LaserHandler）会利用激光里程计当作额外的观测量，不断估计最新的<code>bias</code>值。而另一个线程（ImuHandler）则可以一直利用最新的<code>bias</code>值对实时接收到的IMU数据做积分，并发布为IMU里程计。</p>
+<p>为了简单起见，我们将用来做偏差估计的队列和预积分器叫做<strong>优化队列</strong>和<strong>优化预积分器</strong>；将用来实时对IMU数据积分并发布IMU里程计的队列和预积分器叫做<strong>IMU队列</strong>和<strong>IMU预积分器</strong>。</p>
+一图胜千言，下面这幅图描述了两个队列是如何被耦合起来输出更为准确的IMU预积分结果。其中<code>imuQueOpt</code>是优化队列，<code>imuQueImu</code>是IMU队列，两者命令与代码中一致。 <img src="./imgs/TwoImuQues.png" alt="两个IMU队列" />
+<center>
+线程交互图
+</center>
+<h2 id="偏差估计线程即odometryhandler">偏差估计线程——即odometryHandler</h2>
+<p>这个回调函数占据了预积分模块大部分内容，而且有较多的重置条件和与<code>imuHandler</code>线程同步的操作，比较容易弄混。</p>
+<p>这个回调函数会在接收到新的一帧雷达里程计（发自<code>MapOptimization</code>模块），主要操作上图中的<code>imuQueOpt</code>和<code>优化预积分器</code>。每当节点新收到一帧雷达里程计时，就会执行<code>预积分模块流程图</code>中左侧的一系列操作。主要目的就是利用雷达里程计做观测数据，实时更新IMU的偏差<code>bias</code>。同时，更新过的<code>bias</code>会传递到<code>IMU预积分器</code>。</p>
+<h3 id="系统初始化">系统初始化</h3>
+<img src="./imgs/Design-imuPreintegration-sysinit.png" title="fig:" alt="SystemInitialization" />
+<center>
+系统初始化流程
+</center>
+<p>当接收到第一帧雷达里程计时，需要对系统做初始化操作。主要包括因子图、因子图优化器、两个预积分器的初始化。由于初始化操作需要将第一帧雷达里程计的位姿作为先验因子，因此不能在构造函数中初始化。</p>
+<h3 id="判断是否应该重置因子图">判断是否应该重置因子图</h3>
+<img src="./imgs/Design-imuPreintegration-reset.png" title="fig:" alt="ResetSystem" />
+<center>
+重置系统
+</center>
+<p>为了保证拥有足够的实时性（预积分模块需要与IMU频率保持一致），<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>的预积分模块在因子图中里程计因子数量大于100时会重置因子图与优化器。操作主要是从当前的因子图优化器拿出最新结果，并当作先验因子构造新的因子图。</p>
+<h3 id="对优化队列中imu原始数据进行积分">对优化队列中IMU原始数据进行积分</h3>
+<img src="./imgs/Design-imuPreintegration-integraOpt.png" title="fig:" alt="IntegrateOpt" />
+<center>
+积分优化队列
+</center>
+<p>这里要重新回顾上文的<code>线程交互图</code>。偏差估计线程的主要目的就是为IMU里程计线程提供最新的<code>bias</code>估计，因此每当到达新的一帧雷达里程计，意味着有新的观测到达，<code>bias</code>就可以进行更新。于是需要对优化队列中在当前雷达里程计时间之前的IMU原始数据用IMU预积分器进行积分，然后构造IMU因子。将IMU因子和雷达里程计加入因子图优化，得出最新的<code>bias</code>估计。</p>
+<h3 id="因子图优化">因子图优化</h3>
+<img src="./imgs/Design-imuPreintegration-factorgraph.png" title="fig:" alt="FactorGraphOptimization" />
+<center>
+因子图优化
+</center>
+<p><a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>可以使用IMU预积分器构造IMU因子。利用<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>可以用因子图优化出<code>速度</code>,<code>IMU bias</code>,<code>位姿</code>的估计。</p>
+<h3 id="传递优化结果">传递优化结果</h3>
+<p><img src="./imgs/Design-imuPreintegration-setBias.png" alt="TransferOptimizationResults" /> 使用因子图优化出最新的IMU偏差估计之后，实际上还有优化后的位姿，这个位姿和IMU偏差会用来重置另外一个预积分器——IMU预积分器。IMU预积分器是在另一个回调函数中被主要使用，回顾<code>线程交互图</code>的下半部分和<code>模块流程图</code>的右侧流程。同时，设置完<code>IMU预积分器</code>之后，会将<code>imuQueImu</code>中剩余的其他IMU原始数据放入<code>IMU预积分器</code>做积分，这样<code>IMU预积分器</code>就一直保持最新状态，在<code>imuHandler</code>中可以实时积分并发布IMU里程计。</p>
+<h2 id="imu里程计线程即imuhandler">IMU里程计线程——即imuHandler</h2>
+这个回调函数比起odometryHandler就要简单很多。这个回调函数的主要功能就只有两个：1）不断地将新收到的IMU数据塞入两个放置IMU原始数据的队列——<code>线程交互图</code>中的imuQueOpt和imuQueImu；2）使用<code>IMU预积分器</code>对收到的IMU数据做积分，并将结果作为IMU里程计发布。 主要流程如下图： <img src="./imgs/Design-imuPreintegration-imuHandler.png" alt="imuHandler" />
+<center>
+imuHandler
+</center>
+<p>这个回调函数比较简单，就不再赘述。</p>
+<h2 id="代码要点">代码要点</h2>
+<h3 id="坐标系转换">坐标系转换</h3>
+<p>IMU预积分模块中代码涉及到多次坐标系转换。主要是要明白IMU积分的原理和<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中坐标系的转换关系。关于坐标系有几个注意要点：</p>
+<p><strong>1. 所有IMU原始数据都会先旋转到与雷达的坐标系朝向一致后再进行处理</strong></p>
+<p>在<code>imuHandler</code>中每收到一个IMU数据就先旋转再存放。<a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM/blob/dda6459aaf79913ab27d1950ccac14e07ce8ec71/src/imuPreintegration.cpp#L555-L556">code</a> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将IMU数据旋转到lidar的旋转朝向</span></span><br><span class="line">sensor_msgs::msg::Imu thisImu = <span class="built_in">imuConverter</span>(*imu_raw);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 缓存IMU数据</span></span><br><span class="line">imuQueOpt.<span class="built_in">push_back</span>(thisImu);</span><br><span class="line">imuQueImu.<span class="built_in">push_back</span>(thisImu);</span><br></pre></td></tr></table></figure></p>
+<p><strong>2. 里程计都是对齐到雷达坐标系</strong></p>
+<p>所有在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>框架中发布出来的里程计，无论是IMU里程计或者是雷达里程计，度量的都是雷达在地图坐标系下的位姿。但是在IMU预积分模块的偏差估计线程中，使用IMU数据做积分，又需要使用雷达里程计作为观测，两者要同时加入因子图中，所以必须统一两者的坐标系。IMU原始数据在上面提到的第一个注意要点已经旋转到对齐雷达的方向，两者之间还差一个平移。因此，在接收到雷达里程计时，会先平移到旋转后的IMU坐标系，最后再平移回来。 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM/blob/dda6459aaf79913ab27d1950ccac14e07ce8ec71/src/imuPreintegration.cpp#L298-L300">雷达里程计平移到旋转后的IMU坐标系代码</a> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化因子图的prior状态</span></span><br><span class="line"><span class="comment">// 将雷达里程计位姿平移到IMU坐标系，只是做了平移</span></span><br><span class="line">prevPose_ = lidarPose.<span class="built_in">compose</span>(lidar2Imu);</span><br></pre></td></tr></table></figure></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM/blob/dda6459aaf79913ab27d1950ccac14e07ce8ec71/src/imuPreintegration.cpp#L585-L587">将IMU里程计对齐到雷达坐标系代码</a> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将IMU里程计完全对齐到雷达（剩下一个平移关系）</span></span><br><span class="line">gtsam::Pose3 imuPose = gtsam::<span class="built_in">Pose3</span>(currentState.<span class="built_in">quaternion</span>(), currentState.<span class="built_in">position</span>());</span><br><span class="line">gtsam::Pose3 lidarPose = imuPose.<span class="built_in">compose</span>(imu2Lidar);</span><br></pre></td></tr></table></figure></p>
+<h3 id="时间同步">时间同步</h3>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>框架中各个模块都是进行异步通信（ros topic），因此在每个模块里面都有几个队列保存数据，处理的时候再根据时间戳做同步。IMU预积分模块中有多个地方对数据做了时间戳同步。 比如在更新完<code>bias</code>之后，对IMU队列做积分时，会先抛弃早于最新的雷达里程计时间之前的数据。<a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM/blob/dda6459aaf79913ab27d1950ccac14e07ce8ec71/src/imuPreintegration.cpp#L480-L486">code link</a> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 同样先做IMU数据队列和雷达里程计的时间同步</span></span><br><span class="line"><span class="type">double</span> lastImuQT = <span class="number">-1</span>;</span><br><span class="line"><span class="keyword">while</span> (!imuQueImu.<span class="built_in">empty</span>() &amp;&amp; <span class="built_in">stamp2Sec</span>(imuQueImu.<span class="built_in">front</span>().header.stamp) &lt; currentLidarOdomTime - <span class="type">sync_t</span>)</span><br><span class="line">&#123;</span><br><span class="line">    lastImuQT = <span class="built_in">stamp2Sec</span>(imuQueImu.<span class="built_in">front</span>().header.stamp);</span><br><span class="line">    imuQueImu.<span class="built_in">pop_front</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -380,9 +553,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2023-03-22 20:03:12 / 修改时间：21:32:33" itemprop="dateCreated datePublished" datetime="2023-03-22T20:03:12+08:00">2023-03-22</time>
+      <time title="创建时间：2023-03-22 20:03:12" itemprop="dateCreated datePublished" datetime="2023-03-22T20:03:12+08:00">2023-03-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-30 21:29:49" itemprop="dateModified" datetime="2023-03-30T21:29:49+08:00">2023-03-30</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -432,7 +611,7 @@
 <li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
 </ul>
 <h2 id="总述">总述</h2>
-<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>沿用<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>、<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自<code>imageProjection</code>发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：</p>
+<p><img src="./imgs/Design-Pipelines-feature.png" alt="Pipeline-featureExtraction" /> <a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>沿用<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>、<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自<code>imageProjection</code>发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：</p>
 <ol type="1">
 <li>特征点的提取根据点的平滑度，而平滑度则通过每个点与周围点距离的平均值做近似</li>
 <li>实际上在提取完边缘点和平面点之后，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>在代码里又把所有非边缘点的点都加入了平面点集合。这是比较奇怪的地方。从这里看出也许特征提取也不是必要的， 因为平面点已经包含了大部分的点云。事实上，在Github的一个仓库<a target="_blank" rel="noopener" href="https://github.com/YJZLuckyBoy/liorf" title="Based LIO-SAM, remove featureExtraction">liorf</a>中，就将特征提取模块去掉。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将该段中除了角点之外的点加入平面点集合</span></span><br><span class="line"><span class="comment">// ！！！ 这点让步骤2感觉是多余的，最终的结果可能只是原始点云降采样，可能特征点提取也是没有必要的！！！</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> k = sp; k &lt;= ep; k++)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (cloudLabel[k] &lt;= <span class="number">0</span>)&#123;</span><br><span class="line">        surfaceCloudScan-&gt;<span class="built_in">push_back</span>(extractedCloud-&gt;points[k]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure> <code>cloudLabel</code>标识该点的性质，-1为平面点，0为非特征点，1为边缘点。</li>
@@ -515,9 +694,15 @@ c = \frac{1}{|S|\cdot||r_i||}\left|\left|\sum_{j\in S,j\neq i}(r_j-r_i)\right|\r
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2023-03-22 15:55:36 / 修改时间：21:32:29" itemprop="dateCreated datePublished" datetime="2023-03-22T15:55:36+08:00">2023-03-22</time>
+      <time title="创建时间：2023-03-22 15:55:36" itemprop="dateCreated datePublished" datetime="2023-03-22T15:55:36+08:00">2023-03-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-30 21:30:17" itemprop="dateModified" datetime="2023-03-30T21:30:17+08:00">2023-03-30</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -567,7 +752,7 @@ c = \frac{1}{|S|\cdot||r_i||}\left|\left|\sum_{j\in S,j\neq i}(r_j-r_i)\right|\r
 <li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
 </ul>
 <h2 id="总述">总述</h2>
-<p>点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用</p>
+<p><img src="./imgs/Design-Pipelines-image.png" alt="Pipeline-image" /> 点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用</p>
 <ol type="1">
 <li>去除激光雷达点云的运动畸变</li>
 <li>检索每一帧点云对应的IMU输出角度、IMU里程计位姿（发布自ImuPreintegration），以便MapOptimization模块用这些信息作为该帧点云的初始位姿</li>
@@ -1496,199 +1681,6 @@ p_i^0 = T_ip_i
 <li><a target="_blank" rel="noopener" href="https://fast-dds-monitor.readthedocs.io/en/latest/rst/installation/linux.html">FastDDS Monitor Documentation</a></li>
 <li><a target="_blank" rel="noopener" href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/use_cases/rosbag_capture/rosbag_capture.html#rosbag-capture">使用rosbag-capture</a></li>
 <li><a target="_blank" rel="noopener" href="https://github.com/eProsima/Fast-DDS-python.git">Fast-DDS-Python</a></li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zeal">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zeal's Blog">
-      <meta itemprop="description" content="学习记录及分享">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Zeal's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/" class="post-title-link" itemprop="url">经久不衰的卡尔曼滤波器-基础知识及公式推导</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-03-13 17:59:59" itemprop="dateCreated datePublished" datetime="2023-03-13T17:59:59+08:00">2023-03-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-16 18:07:59" itemprop="dateModified" datetime="2023-03-16T18:07:59+08:00">2023-03-16</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E8%83%BD/%E6%BB%A4%E6%B3%A2/" itemprop="url" rel="index"><span itemprop="name">滤波</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E8%83%BD/%E6%BB%A4%E6%B3%A2/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2/" itemprop="url" rel="index"><span itemprop="name">卡尔曼滤波</span></a>
-        </span>
-    </span>
-
-  
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Changyan：</span>
-    
-    <a title="经久不衰的卡尔曼滤波器-基础知识及公式推导" href="/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::485da1f1f8066e1c77d786731c1e5117" class="cy_cmt_count" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="一卡尔曼滤波器的应用场景">一、卡尔曼滤波器的应用场景</h1>
-<p>卡尔曼滤波器之前被广泛用来做动态系统的状态估计、预测。主要的目的就是用来从带噪声的观测量，比如各种传感器的观测（IMU、GPS、里程计等）估计出最优的系统状态（state）。不过要明确强调的是，由于测量都带有噪声，也就是随机性，所以真正准确的状态是无法获知的。</p>
-<p>最小二乘法可以从一长串的测量值回归出一个最为匹配的模型。卡尔曼滤波相比于最小二乘法，采用了一种递归的计算方式，也就是每一时刻只需要保存上一时刻的状态。因此可以被用来处理实时任务。</p>
-<p>虽然卡尔曼滤波器从美国阿波罗登月计划到如今已有几十年，且目前有更先进的因子图（Factor Graph）算法，但是在很多领域依旧可以看到卡尔曼滤波器的身影，特别是在自动驾驶的各个模块，比如：从IMU的数据（三轴加速度，三轴角速度）计算出运动物体的当前位置。</p>
-<h1 id="二卡尔曼滤波器的两个步骤宏观认识">二、卡尔曼滤波器的两个步骤——宏观认识</h1>
-<p>卡尔曼滤波包含两个步骤</p>
-<ol type="1">
-<li>预测（prediction）—— Dynamic model</li>
-<li>更新（correction/measurment update）—— Observation model</li>
-</ol>
-<p>所谓<strong>预测</strong>，就是用一个数学模型，根据当前的传感器输入，直接计算此时系统的状态。可以理解为一个方程的计算就行。</p>
-<p>所谓的<strong>更新</strong>，就是在某些时刻或者每一时刻，获取一些系统的状态输入（可以同样是传感器的值），甚至是<strong>预测</strong>阶段中同样的传感器的值，将其当作真值，我们将这个值叫做<strong>测量值</strong>。比较此刻<strong>预测</strong>的系统状态和<strong>测量</strong>的系统状态，对<strong>预测</strong>出的系统状态进行修正，因此也叫<strong>测量更新</strong>（measurment update）。</p>
-<figure>
-<img src="./imgs/framework.png" alt="" /><figcaption>framework</figcaption>
-</figure>
-<h1 id="三卡尔曼滤波的几大概念">三、卡尔曼滤波的几大概念</h1>
-<h2 id="状态向量state-vector">1、状态向量State Vector</h2>
-<p>系统的状态向量包含了系统中我们关心的状态变量，比如速度<span class="math inline">\(\textbf{v}=[v_x, v_y,v_z]\)</span>，距离<span class="math inline">\(\textbf{d}=[d_x, d_y,d_z]\)</span>，加速度<span class="math inline">\(\textbf{a}=[a_x,a_y,a_z]\)</span>等。我们用<span class="math inline">\(\textbf{x}\)</span>表示系统向量 <span class="math display">\[ \textbf{x} = \begin{bmatrix} \textbf{d}\\ \textbf{v}\\ \textbf{a} \end{bmatrix}\\\]</span></p>
-<p>因为卡尔曼滤波有两个步骤，我们先以每个时刻都进行测量和修正这两个步骤作为讲解。那么，每一时刻的两个步骤的输出对应两个系统向量，一个是预测的系统向量<span class="math inline">\(\textbf{x}^-\)</span>，一个是修正后的系统向量<span class="math inline">\(\textbf{x}^+\)</span>。</p>
-<p><strong><em><strong>ps</strong>:大写字母表示矩阵；小写加粗字母表示向量；小写字母表示变量</em></strong></p>
-<h2 id="状态方程预测方程">2、状态方程&amp;&amp;预测方程</h2>
-<h3 id="状态方程">状态方程</h3>
-<p><strong>状态方程</strong>描述了将上一时刻的状态向量<span class="math inline">\(\textbf{x}_{t-1}\)</span>映射到当前的系统状态<span class="math inline">\(\textbf{x}_t\)</span> <span class="math display">\[ \textbf{x}_t = A_t\textbf{x}_{t-1}+ B_t\textbf{u}_t+\textbf{w}_t \tag{1}\]</span></p>
-<p>其中，矩阵<span class="math inline">\(A\)</span>称为转换矩阵（Transition Matrix），<span class="math inline">\(\textbf{u}_t\)</span>是当前时刻的系统输入，矩阵<span class="math inline">\(B\)</span>称为控制矩阵（Control Matrix）反映了系统输入到系统状态的映射关系，<span class="math inline">\(\textbf{w}_t\)</span>是过程噪声，我们假定其符合均值为0，协方差矩阵为<span class="math inline">\(Q_t\)</span>的高斯噪声。这里要注意的有几点：</p>
-<ol type="1">
-<li>矩阵<span class="math inline">\(A、B\)</span>都随着时间演进进行更新</li>
-<li>从公式1的形式可以看出，卡尔曼滤波的数学建模形式是线性方程，这也是卡尔曼滤波的限制之一。扩展卡尔曼滤波器（Extended Kalman Filter）支持非线性模型。</li>
-<li>这里的状态方程是一个“准确”的表达，因为不准确的部分已经放在噪声项中，要跟下面的预测方程区分开来。这个“准确”的表达由于有噪声（随机向量），所以我们没办法使用它作为输出，只能用它来分析、推导。</li>
-</ol>
-<h3 id="预测方程">预测方程</h3>
-<p><strong>预测方程</strong>跟状态方程基本一样，要强调的一点是，噪声<span class="math inline">\(\textbf{w}_t\)</span>是均值为0的高斯噪声，因此最大概率对应的值为0，因此我们在预测状态向量的时候其实不用管最后一项 <span class="math display">\[ \hat{\textbf{x}}^-_t = \textbf{A}_t\hat{\textbf{x}}^+_{t-1} + \textbf{B}_t\textbf{u}_t\tag{2}\]</span></p>
-<p>这里对系统状态向量上面加上一个帽子表示这是一个估计量，也就是我们实际输出的量。其中<span class="math inline">\(\hat{\textbf{x}}^+ _{t-1}\)</span>表示上一时刻执行完步骤二<strong>更新</strong>后的状态向量，<span class="math inline">\(\hat{\textbf{x}}^- _{t}\)</span>表示当前时候只执行了步骤1<strong>预测</strong>的状态向量。</p>
-<h3 id="理解预测方程">理解预测方程</h3>
-<p>预测方程（公式2）从形式上看只是把状态方程（公式1）去掉了噪声项，但其中包含了很多含义。其中，要时刻记得的是我们把系统状态当作一个随机向量处理，严格的表述需要引入随机过程的相关知识，但其实没太大必要。由于公式（1）中状态向量是一个随机向量，且噪声项是均值为0的高斯噪声，那么状态向量<span class="math inline">\(\textbf{x}_t\)</span>也满足高斯分布，其最大概率的地方就对应这噪声为0的地方，因此我们有理由将这个概率最大处对应的值当作我们的<strong>预测</strong>。</p>
-<figure>
-<img src="./imgs/gaussian.png" alt="" /><figcaption>gaussian</figcaption>
-</figure>
-<h2 id="测量方程测量估计方程">3、测量方程&amp;&amp;测量估计方程</h2>
-<h3 id="测量方程">测量方程</h3>
-<p><strong>测量方程</strong>反映了系统的测量值和系统状态向量之间的关系 <span class="math display">\[ \textbf{z}_t=H_t\textbf{x}_t+v_t\tag{3}\]</span></p>
-<p>其中，<span class="math inline">\(\textbf{z}_t\)</span>是当前时刻的测量值，<span class="math inline">\(H_t\)</span>称为测量矩阵（Measurement Matrix），描述了从系统状态到测量值的转换关系（举一个最简单的关系，系统状态是物体的直线距离，测量值是使用激光笔测出来的光从原点到物体的时间，那么<span class="math inline">\(H\)</span>就是光速的倒数）, <span class="math inline">\(\textbf{v}_t\)</span>是测量噪声，我们假定其符合均值为0，协方差为<span class="math inline">\(R_t\)</span>的高斯噪声。注意这里无论是状态向量还是测量向量都没有加帽子（<span class="math inline">\(\hat{.}\)</span>），表示这是个"准确"的表达式。</p>
-<h3 id="测量估计方程">测量估计方程</h3>
-<p>同样，我们如果忽略噪声项，就变成了对此时测量量的估计（注意状态向量的上标和角标）：</p>
-<p><span class="math display">\[ \hat{\textbf{z}}_t=H_t\hat{\textbf{x}}^-_t\tag{4}\]</span></p>
-<h2 id="测量更新方程">4、测量更新方程</h2>
-<p>上面给出了对测量量的估计，但是现在的情况是，我们有了一个测量值（通过某些测量方式或者传感器数据），这是一个不需要计算得到的量，我们如何用这个测量得出的量来更新我们对状态向量的估计？这就涉及到测量更新方程，这也是卡尔曼滤波里最难的部分，这里先给出更新方程的形式。</p>
-<p><span class="math display">\[ \hat{\textbf{x}}^+_t=\hat{\textbf{x}}^-_t+K_t(z_t-H_t\hat{\textbf{x}}^-_t)\tag{5}\]</span> <span class="math display">\[ K_t=\frac{P^-_tH_t^T}{H_tP^-_tH_t^T+R_t}\tag{6}\]</span></p>
-<p>其中，<span class="math inline">\(K_t\)</span>叫做卡尔曼增益；<span class="math inline">\(P^-_t\)</span>是系统测量值<span class="math inline">\(\hat{\textbf{x}}^-_t\)</span>的误差协方差矩阵。</p>
-<h1 id="四误差和协方差矩阵">四、误差和协方差矩阵</h1>
-<p>根据公式（1）减去公式（2），我们可以得出误差的协方差矩阵的表达形式</p>
-<p><span class="math display">\[ e^-_t \triangleq \textbf{x}_t - \hat{\textbf{x}}^-_t\\\]</span> <span class="math display">\[ P^-_t = \mathbb{E}[\textbf{e}^-_t {\textbf{e}^{-}_{t}}^T]\\\]</span></p>
-<p>把公式（1）和（2）带入误差表达式，可以推导出系统状态的协方差矩阵的递归表达形式</p>
-<p><span class="math display">\[
-\begin{split}
-P^-_t&amp;=\mathbb{E}[\big((A_tx_{t-1}+w_t)-A_tx_{t-1}^+\big)\big((A_tx_{t-1}+w_t)-A_tx_{t-1}^+\big)^T]\\&amp;=\mathbb{E}[\big(A_t(x_{t-1}-x_{t-1}^+)+w_t\big)\big(A_t(x_{t-1}-x_{t-1}^+)+w_t\big)^T]\\ &amp;=\mathbb{E}[A_t(x_{t-1}-x_{t-1}^+)(x_{t-1}-x_{t-1}^+)^TA_t^T]+\mathbb{E}[w_tw_t^T]\\ &amp;=A_tP_{t-1}^+A_t^T+Q_t
-\end{split}\\\]</span></p>
-<p>其中，从第二个等号到第三个等号利用了状态向量和随机噪声 的无关性（协方差为0）。因此我们可以得到下面的公式（7）</p>
-<p><span class="math display">\[P^-_t=A_tP^+_{t-1}A^T_t+Q_t\tag{7}\]</span></p>
-<h1 id="五更新方程的推导">五、更新方程的推导</h1>
-<p>现在我们进行到了这样的情况，我们使用预测方程公式（2）得到了<span class="math inline">\(t\)</span>时刻的系统状态预测量<span class="math inline">\(\textbf{x}_t^-\)</span>；同时，我们在这个时刻得到了一个测量值，且根据测量方程，我们认为它与此时的状态向量满足公式（3）：<span class="math inline">\(\textbf{z}_t=H_t\textbf{x}_t+v_t\)</span> 。那么其实我们可以从公式（3）也得到此时系统状态的另一个估计，由公式（3）将 移动到等式左侧，可以得到：</p>
-<p><span class="math display">\[\textbf{x}^2_t = \textbf{H}_t^{-1}\textbf{z}_t\\\]</span></p>
-<p>这里之所以没有把噪声<span class="math inline">\(\textbf{v}_t\)</span>表示出来，是因为这里将 当作一个随机向量处理，其均值为<span class="math inline">\(\bar{z}_t\)</span>，也就是当前时刻测量得出的量；其方差为<span class="math inline">\(R_t\)</span>（在公式3中给出）</p>
-<p>我们的状态方程也给出了状态向量的一个等式 <span class="math display">\[ \textbf{x}^1_t = \textbf{A}_t\textbf{x}_{t-1}+ \textbf{B}_t\textbf{u}_t+w_t\]</span></p>
-<p>这里用<strong>上标1和2</strong>表示状态向量的两个来源。要强调的是，这两个等式里面都包含了一个随机噪声，因此$^1_t 、^2_t $都是随机向量。同时，他们的分布都符合高斯分布。它们的均值和方差分别是：</p>
-<p><span class="math display">\[
-\begin{split} &amp;\mu_1=x_t^-\\ &amp;\sigma_1^2=P_t^-\\ &amp;\mu_2=H_t^{-1}\bar{z}_t\\ &amp;\sigma_2^2=H_t^{-1}R_t(H_t^{-1})^T\\  \end{split}\\\]</span></p>
-<p>现在有了两个关于状态向量的概率分布，那接下来的事情就简单了。因为这两个状态向量的来源我们可以认为是独立的，因此他们的联合概率分布是各自概率分布的乘积。重点是，高斯分布的乘积依旧是高斯分布！！！！新的高斯分布的均值和方差有如下表达形式：</p>
-<figure>
-<img src="./imgs/joint_gaussian.png" alt="" /><figcaption>joint gaussian</figcaption>
-</figure>
-<p>用上面的式子代入，可以得到联合概率分布的均值和方差： <strong>均值</strong> <span class="math display">\[ \begin{split} \mu_{fused}&amp;=\frac{\mu_1\sigma_2^2+\mu_2\sigma_1^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=\mu_1+\frac{(\mu_2-\mu_1)\sigma_1^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=x_t^-+\frac{(H_t^{-1}\bar{z}_t-x_t^-)P_t^-}{P_t^-+H_t^{-1}R_t(H_t^{-1})^T}\\ &amp;=x_t^-+\frac{P_t^-H_t^T}{H_tP_t^-H_t^T+R_t}(\bar{z}_t-H_tx_t^-)\\ &amp;=x_t^-+K_t(\bar{z}_t-H_tx_t^-) \end{split}\\\]</span></p>
-<p><strong>方差</strong></p>
-<p><span class="math display">\[
-\begin{split} \sigma_{fused}^2 &amp;=\frac{\sigma_1^2\sigma_2^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=\sigma_1^2-\frac{\sigma_1^4}{\sigma_1^2+\sigma_2^2}\\ &amp;=P_t^--\frac{P_t^-H_t^TH_tP_t^-}{H_tP_t^-H_t^T+R_t}\\ &amp;=P_t^--K_tH_tP_t^- \end{split}\\\]</span></p>
-<p>这个<span class="math inline">\(\sigma_{fused}^2\)</span>就是更新后的系统状态误差的协方差矩阵，也就是得到下面的式子</p>
-<p><span class="math display">\[ P^+_{t}=P^-_t-K_tH_tP^-_t\tag{8}\]</span></p>
-<h1 id="六总结">六、总结</h1>
-<p><strong>预测方程</strong> <span class="math display">\[ \hat{\textbf{x}}^-_t = \textbf{A}_t\hat{\textbf{x}}^+_{t-1} + \textbf{B}_t\textbf{u}(t)\tag{2}\]</span> <span class="math display">\[P^-_t=A_tP^+_{t-1}A^T_t+Q_t\tag{7}\]</span></p>
-<p><strong>更新方程</strong> <span class="math display">\[ \hat{\textbf{x}}^+_t=\hat{\textbf{x}}^-_t+K_t(z_t-H_t\hat{\textbf{x}}^-_t)\tag{5}\]</span> <span class="math display">\[ K_t=\frac{P^-_tH_t^T}{H_tP^-_tH_t^T+R_t}\tag{6} \]</span> <span class="math display">\[ P^+_{t}=P^-_t-K_tH_tP^-_t\tag{8} \]</span></p>
-<hr />
-<h1 id="转载须知">转载须知</h1>
-<ol type="1">
-<li>请于文章标题注明转载</li>
-<li>请于文章起始位置注明原始链接</li>
-<li>请在推文文末的【阅读原文】链接上原始链接</li>
-<li>感谢~</li>
 </ol>
 
       
