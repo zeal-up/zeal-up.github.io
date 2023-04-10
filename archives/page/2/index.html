@@ -241,7 +241,7 @@ mjx-container[display="true"] + br {
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -265,6 +265,147 @@ mjx-container[display="true"] + br {
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/" class="post-title-link" itemprop="url">FastDDS关键概念</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-13 18:02:43" itemprop="dateCreated datePublished" datetime="2023-03-13T18:02:43+08:00">2023-03-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-16 18:07:59" itemprop="dateModified" datetime="2023-03-16T18:07:59+08:00">2023-03-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/DDS/" itemprop="url" rel="index"><span itemprop="name">DDS</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="FastDDS关键概念" href="/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::73f7a0f706535d55ad531611b3af6c03" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="架构">架构</h1>
+<p>架构图 <img src="./imgs/fast-dds-architecture.svg" alt="架构图" /></p>
+<p>域（Domain）的概念 <img src="imgs/domain_concept.jpg" alt="Domain" /> <img src="imgs/dds_domain.svg" alt="Domain" /></p>
+<p>数据中心收发模型（DCPS:Data Centric Publisher and Subscriber) <img src="imgs/DataCentricModel.png" alt="DCPS" /></p>
+<h1 id="why-need-a-publisher-and-subscriber">Why need a publisher and subscriber</h1>
+<blockquote>
+<p>These publishers and subscribers don’t need to know about each other ahead of time; they discover each other dynamically at runtime. The data they share is described by a “topic,” and publishers and subscribers send and receive data only for the topics they are interested in. In this pattern, many publishers may publish the same topic, and many subscribers may subscribe to the same topic. Subscribers receive data from all of the publishers that they share a topic with. Publishers send data directly to subscribers, with no need for a broker or centralized application to mediate communications. (https://community.rti.com/static/documentation/connext-dds/6.0.1/doc/manuals/connext_dds/getting_started/cpp11/intro_pubsub_cpp.html)</p>
+</blockquote>
+<h1 id="notes">Notes</h1>
+<p>Publisher 和 Subscriber 负责生成DataWriter&amp;&amp;DataReader，一个Publisher[Subscriber]可以绑定多个DataWriter[DataReader]。每一个DataWriter[DataReader]都会绑定到一个topic，同时可以指定对应的回调函数DataWriterListener[DataReaderListener]</p>
+<h1 id="数据监控fastdds-monitor">数据监控——FastDDS Monitor</h1>
+<p><a target="_blank" rel="noopener" href="https://fast-dds-monitor.readthedocs.io/en/latest/rst/getting_started/tutorial.html">FastDDS Monitor Tutorial</a> ## 原理 FastDDS库有一个内嵌的Participant，叫做Statistic Participant，包含在FastDDS的Statistic Module中。该模块不是默认编译的，因此需要在编译FastDDS的时候指明CMake选项。 实际上是用户开发应用时，在构建<strong>DomainParticipants</strong>阶段，如果通过某种方式指明了要将数据统计信息往外发送，则Statistic Module模块就会自动收集信息，然后往固定的topic发送监控数据。FastDDS Monitor通过这些内嵌的topic，可以监控数据的收发情况。</p>
+<p><a target="_blank" rel="noopener" href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/statistics/statistics.html">如何打开Statistics DataWriters</a> <a target="_blank" rel="noopener" href="https://fast-dds-monitor.readthedocs.io/en/latest/rst/getting_started/tutorial.html">如何使用FastDDS Monitor</a></p>
+<p><strong>注意，如果编译FastDDS的时候打开Statistics Module模块，由于会发送额外的信息，所以会损失性能</strong> &gt; Consequently, by default, Fast DDS does not compile this module because it may entail affecting the application’s performance.(https://fast-dds.docs.eprosima.com/en/latest/fastdds/statistics/statistics.html)</p>
+<figure>
+<img src="imgs/monitor.jpg" alt="" /><figcaption>数据监控窗口</figcaption>
+</figure>
+<h1 id="record-replay">Record &amp;&amp; Replay</h1>
+<blockquote>
+<p>rosbag2 is a ROS 2 application that can be used to capture DDS messages and store them on an SQLite database which allows inspecting and replaying said messages at a later time.</p>
+</blockquote>
+<ol type="1">
+<li>rosbag2可以将在Topic中传送的数据以SQLite的形式保存</li>
+<li>FastDDS没有自己的数据保存和回放工具，官方说明用的是ROS2的<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2">rosbag2</a>包。要使用该包来记录和回放FastDDS的数据需要安装ROS2环境和rosbag2</li>
+<li>由于rosbag2是用来保存ros2的message的，并不是FastDDS的官方工具，因此如果要用rosbag2回放，需要做较多的配置</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/use_cases/rosbag_capture/rosbag_capture.html#rosbag-capture">使用rosbag-capture</a></p>
+<h1 id="limitations">Limitations</h1>
+<ol type="1">
+<li>没有进程管理和启动工具。ROS/Apollo/XPilot都有属于自己的进程调度系统，可以直接按指定顺序启动多个进程并执行相关调度。</li>
+<li>似乎无法实现像ROS的Service这种类似RPC的功能</li>
+</ol>
+<h1 id="reference-resources-link">Reference &amp;&amp; Resources link</h1>
+<ol type="1">
+<li><a target="_blank" rel="noopener" href="https://github.com/eProsima/Fast-DDS">FastDDS Github</a></li>
+<li><a target="_blank" rel="noopener" href="https://fast-dds-monitor.readthedocs.io/en/latest/rst/installation/linux.html">FastDDS Monitor Documentation</a></li>
+<li><a target="_blank" rel="noopener" href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/use_cases/rosbag_capture/rosbag_capture.html#rosbag-capture">使用rosbag-capture</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/eProsima/Fast-DDS-python.git">Fast-DDS-Python</a></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 

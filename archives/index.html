@@ -129,7 +129,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">12</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -153,6 +153,319 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/04/06/lio_sam/pcdRegistration-doc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/04/06/lio_sam/pcdRegistration-doc/" class="post-title-link" itemprop="url">Simple-LIO-SAM——点云匹配算法详解</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-04-06 23:17:19" itemprop="dateCreated datePublished" datetime="2023-04-06T23:17:19+08:00">2023-04-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-04-10 22:06:53" itemprop="dateModified" datetime="2023-04-10T22:06:53+08:00">2023-04-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——点云匹配算法详解" href="/2023/04/06/lio_sam/pcdRegistration-doc/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::6bd455643b6442d6e43dd9a0a5cd9a7a" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="前言">前言</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中激光历程计的点云匹配方法沿用自<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>，这个基于点到线和点到面距离求解最小二乘问题的方法起始被用到很多框架，包括<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>,<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>,<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">Lego-LOAM</a>,各种LOAM的变种，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>及其变种。这段点云匹配代码可以说被重用了很多次，但是各个论文对这部分的描述实际上很少或者基本省略，<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>原始论文对这部分的描述与实际的代码实现差别比较大，导致如果想真正看懂这段代码还是挺难的。这篇文章详细地剖析这部分的原理、实现、以及与论文中不同之处。这里面唯一有一点还没有搞清楚的是对于 <a href="#Degenerate">高斯矩阵退化</a>部分的实现。</p>
+<p>由于本文主要是想讲明白在上述这些SLAM框架中点云匹配的实现，因此对于最小二乘问题的求解不会详细展开，需要这部分知识可以参考<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/113946848">最小二乘问题求解的四种解法</a>或者《视觉SLAM十四讲》中关于最小二乘问题求解的章节。</p>
+<h2 id="点云-局部地图匹配流程scan-2-map">点云-局部地图匹配流程Scan-2-Map</h2>
+<p>在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中，对于每一帧点云<span class="math inline">\(\mathbb{F}_i\)</span>会先进行特征点提取。特征点包括线特征点和平面特征点（具体方法参考本博客文章：xxxx)。我们记提取后的线特征点云为<span class="math inline">\(F^e_i\)</span>，平面特征点云为<span class="math inline">\(F^p_i\)</span>。</p>
+<p>经过一段时间后<span class="math inline">\(1,2,3,...,i-1\)</span>后，我们拥有一系列关键帧的线特征点云<span class="math inline">\(F^e_1,F^e_2,F^e_3,...,F^e_{i-1}\)</span>和平面特征点云<span class="math inline">\(F^p_1,F^p_2,F^p_3,...,F^p_{i-1}\)</span>，以及这些关键帧对应的位姿<span class="math inline">\(T_1,T_2,T_3,...,T_{i-1}\)</span>. 同时对于点云<span class="math inline">\(\mathbb{F}_i\)</span>，我们通过IMU里程计还可以获得该帧点云的初始位姿估计<span class="math inline">\(\hat{T}_i\)</span>，这个位姿估计<span class="math inline">\(\hat{T}_i\)</span>其实就是我们要优化的量。</p>
+<p>在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中，激光里程计匹配的是当前帧点云和局部地图。局部地图是通过当前帧空间以及时间近邻的其他关键帧构建的。 <img src="./imgs/Design-mapOptimization-scan2MapOpt.png" alt="scan2MapOptimization" /></p>
+<p>对于任何一帧点云以及对应的位姿，我们可以将点云转换到地图坐标系： <span class="math display">\[\mathbb{F}^m_i = R_i\mathbb{F}_i+t_i\]</span> 其中<span class="math inline">\(m\)</span>上标指的是地图坐标系，<span class="math inline">\(R_i\)</span>和<span class="math inline">\(t_i\)</span>是位姿<span class="math inline">\(T_i\)</span>中的旋转矩阵和平移向量。</p>
+<p>对选择为构建局部地图的关键帧分别应用上式并累加起来（实际累加后会进行体素降采样）后就构成局部地图<span class="math inline">\(M^e_i\)</span>和<span class="math inline">\(M^p_i\)</span>，<span class="math inline">\(e\)</span>和<span class="math inline">\(p\)</span>下标表示edge和planner。</p>
+<p>同时，我们对当前帧的特征点云<span class="math inline">\(F^e_i\)</span>和<span class="math inline">\(F^p_i\)</span>应用位姿的初始估计<span class="math inline">\(\hat{T}_i\)</span>可以得到在近似地图坐标系下的点云。为了方便后面叙述，这里省略坐标系和关键帧索引的上下标。重申一下我们的输入：</p>
+<ol type="1">
+<li>地图坐标系下的局部点云地图<span class="math inline">\(M^e\)</span>和<span class="math inline">\(M^p\)</span></li>
+<li>雷达坐标系下的当前帧特征点云<span class="math inline">\(F^e\)</span>和<span class="math inline">\(F^p\)</span></li>
+<li>当前帧的初始位姿估计<span class="math inline">\(\hat{T}_i=[\hat{R}_i,\hat{t}_i]\)</span></li>
+</ol>
+<p>我们的目标就是优化位姿<span class="math inline">\(T_i\)</span>使得用这个位姿将<span class="math inline">\(F^e\)</span>和<span class="math inline">\(F^p\)</span>转换到地图坐标系后与地图点云的匹配程度最好。</p>
+<h2 id="几何相关知识">几何相关知识</h2>
+<h3 id="点到线距离">点到线距离</h3>
+<h4 id="论文中计算方法">论文中计算方法</h4>
+<img src="./imgs/LOAM-fig7.png" title="fig:" alt="LOAM-fig7" />
+<center>
+LOAM论文图7：展示如何根据当前帧的边缘点和平面点在局部地图中找到对应的线和平面
+</center>
+<p>上图的子图（a）展示如何对当前帧边缘点点集<span class="math inline">\(F^e\)</span>中的每一个点从局部地图<span class="math inline">\(M^e\)</span>中找到对应的直线。对于每一个边缘点<span class="math inline">\(P^{F^e}_i \in F^e\)</span>，从局部地图的边缘点集合<span class="math inline">\(M^e\)</span>中找到最近点<span class="math inline">\(P^{M^e}_j\)</span>，橘色线是点<span class="math inline">\(j\)</span>所在的激光线束，蓝色线是前后相近的另外两条激光线束。从前后两条激光线束（蓝色线）找出与<span class="math inline">\(e_i\)</span>距离最近的点，并选择两者中距离更小的点作为点<span class="math inline">\(P^{M^e}_l\)</span>，则经过点<span class="math inline">\(P^{M^e}_j\)</span>、<span class="math inline">\(P^{M^e}_l\)</span>组成的线为点<span class="math inline">\(P^{F^e}_i\)</span>对应的直线。那么问题就转化为点<span class="math inline">\(P^{F^e}_i\)</span>到经过点<span class="math inline">\(P^{M^e}_j\)</span>、<span class="math inline">\(P^{M^e}_l\)</span>的直线的距离。</p>
+<p>该距离计算公式如下：</p>
+<p><span class="math display">\[
+d_{e}=\frac{|(P^{F^e}_i - P^{M^e}_j)\times (P^{F^e}_i - P^{M^e}_l)|}{|(P^{M^e}_j - P^{M^e}_l)|}\tag{1}
+\]</span></p>
+<p>公式（1）中分子部分计算的是向量<span class="math inline">\((P^{F^e}_i - P^{M^e}_j)\)</span>和<span class="math inline">\((P^{F^e}_i - P^{M^e}_l)\)</span>的叉积的模长。两个向量的叉积是一个向量，方向于两个向量构成的平面垂直，模长等于两个向量组成的平行四边形面积。公式（1）的分母代表的是该平行四边形对角线的长度。因此分子除以分母就等于直线外一点到直线的距离。</p>
+<h4 id="代码中计算方法">代码中计算方法</h4>
+<p>在论文中对<span class="math inline">\(F^e\)</span>的点找到<span class="math inline">\(M^e\)</span>对应的直线是通过找到两个距离最近的点，但是在代码中是找到距离最近的5个点，然后计算这5个点的协方差，对协方差做特征值分解，最大的特征值对应的特征向量为主方向，并判断这5个点的分布是否接近直线的要求。 代码中寻找点到局部地图的对应直线，然后计算距离和法向量主要是在<code>mapOptimization</code>中的函数<code>cornerOptimization</code>中完成。</p>
+<ol type="1">
+<li><p>对点集<span class="math inline">\(F^e\)</span>中的点从局部地图<span class="math inline">\(M^e\)</span>中找到最近5个点 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 从局部地图（已经提前设置好kdtree）中找到最近的5个点</span></span><br><span class="line"><span class="comment">// pointSel为检索点</span></span><br><span class="line"><span class="comment">// pointSearchInd存储检索结果的5个点在原始点云中的索引</span></span><br><span class="line"><span class="comment">// pointSearchSqDis存储检索出的5个点与检索点的距离的平方</span></span><br><span class="line">kdtreeCornerFromMap-&gt;<span class="built_in">nearestKSearch</span>(pointSel, <span class="number">5</span>, pointSearchInd, pointSearchSqDis);</span><br></pre></td></tr></table></figure></p></li>
+<li><p>计算这5个点的协方差矩阵 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// cx,cy,cz是检索出的5个点的中心坐标</span></span><br><span class="line"><span class="type">float</span> cx = <span class="number">0</span>, cy = <span class="number">0</span>, cz = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; <span class="number">5</span>; j++) &#123;</span><br><span class="line">    cx += laserCloudCornerFromMapDS-&gt;points[pointSearchInd[j]].x;</span><br><span class="line">    cy += laserCloudCornerFromMapDS-&gt;points[pointSearchInd[j]].y;</span><br><span class="line">    cz += laserCloudCornerFromMapDS-&gt;points[pointSearchInd[j]].z;</span><br><span class="line">&#125;</span><br><span class="line">cx /= <span class="number">5</span>; cy /= <span class="number">5</span>;  cz /= <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 协方差矩阵是对称矩阵</span></span><br><span class="line"><span class="type">float</span> a11 = <span class="number">0</span>, a12 = <span class="number">0</span>, a13 = <span class="number">0</span>, a22 = <span class="number">0</span>, a23 = <span class="number">0</span>, a33 = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; <span class="number">5</span>; j++) &#123;</span><br><span class="line">    <span class="type">float</span> ax = laserCloudCornerFromMapDS-&gt;points[pointSearchInd[j]].x - cx;</span><br><span class="line">    <span class="type">float</span> ay = laserCloudCornerFromMapDS-&gt;points[pointSearchInd[j]].y - cy;</span><br><span class="line">    <span class="type">float</span> az = laserCloudCornerFromMapDS-&gt;points[pointSearchInd[j]].z - cz;</span><br><span class="line"></span><br><span class="line">    a11 += ax * ax; a12 += ax * ay; a13 += ax * az;</span><br><span class="line">    a22 += ay * ay; a23 += ay * az;</span><br><span class="line">    a33 += az * az;</span><br><span class="line">&#125;</span><br><span class="line">a11 /= <span class="number">5</span>; a12 /= <span class="number">5</span>; a13 /= <span class="number">5</span>; a22 /= <span class="number">5</span>; a23 /= <span class="number">5</span>; a33 /= <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 存储协方差的值到matA1</span></span><br><span class="line">matA1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>, <span class="number">0</span>) = a11; matA1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>, <span class="number">1</span>) = a12; matA1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>, <span class="number">2</span>) = a13;</span><br><span class="line">matA1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">1</span>, <span class="number">0</span>) = a12; matA1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">1</span>, <span class="number">1</span>) = a22; matA1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">1</span>, <span class="number">2</span>) = a23;</span><br><span class="line">matA1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">2</span>, <span class="number">0</span>) = a13; matA1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">2</span>, <span class="number">1</span>) = a23; matA1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">2</span>, <span class="number">2</span>) = a33;</span><br></pre></td></tr></table></figure></p></li>
+<li><p>计算直线方向，也就是特征值分解，最大特征值对应的特征向量为数据主方向 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 对协方差矩阵做特征值分解，最大特征值对应的特征向量是这5个点的主方向</span></span><br><span class="line">cv::<span class="built_in">eigen</span>(matA1, matD1, matV1);</span><br></pre></td></tr></table></figure></p></li>
+<li><p>计算点到直线距离 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 以下部分是在计算当前点pointSel到检索出的直线的距离和方向，如果距离够近，则认为匹配成功，否则认为匹配失败</span></span><br><span class="line"><span class="comment">// x0,y0,z0是直线外一点</span></span><br><span class="line"><span class="type">float</span> x0 = pointSel.x;</span><br><span class="line"><span class="type">float</span> y0 = pointSel.y;</span><br><span class="line"><span class="type">float</span> z0 = pointSel.z;</span><br><span class="line"><span class="comment">// matV1的第一行就是5个点形成的直线的方向，cx,cy,cz是5个点的中心点</span></span><br><span class="line"><span class="comment">// 因此，x1,y1,z1和x2,y2,z2是经过中心点的直线上的另外两个点，两点之间的距离是0.2米</span></span><br><span class="line"><span class="type">float</span> x1 = cx + <span class="number">0.1</span> * matV1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"><span class="type">float</span> y1 = cy + <span class="number">0.1</span> * matV1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line"><span class="type">float</span> z1 = cz + <span class="number">0.1</span> * matV1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>, <span class="number">2</span>);</span><br><span class="line"><span class="type">float</span> x2 = cx - <span class="number">0.1</span> * matV1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"><span class="type">float</span> y2 = cy - <span class="number">0.1</span> * matV1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line"><span class="type">float</span> z2 = cz - <span class="number">0.1</span> * matV1.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这边是在求[(x0-x1),(y0-y1),(z0-z1)]与[(x0-x2),(y0-y2),(z0-z2)]叉乘得到的向量的模长</span></span><br><span class="line"><span class="comment">// 这个模长是由0.2*V1[0]和点[x0,y0,z0]构成的平行四边形的面积</span></span><br><span class="line"><span class="comment">// 垂直于0,1,2三点构成的平面的向量[XXX,YYY,ZZZ] = [(y0-y1)(z0-z2)-(y0-y2)(z0-z1),-(x0-x1)(z0-z2)+(x0-x2)(z0-z1),(x0-x1)(y0-y2)-(x0-x2)(y0-y1)]</span></span><br><span class="line"><span class="type">float</span> a012 = <span class="built_in">sqrt</span>(((x0 - x1)*(y0 - y2) - (x0 - x2)*(y0 - y1)) * ((x0 - x1)*(y0 - y2) - (x0 - x2)*(y0 - y1)) </span><br><span class="line">                + ((x0 - x1)*(z0 - z2) - (x0 - x2)*(z0 - z1)) * ((x0 - x1)*(z0 - z2) - (x0 - x2)*(z0 - z1)) </span><br><span class="line">                + ((y0 - y1)*(z0 - z2) - (y0 - y2)*(z0 - z1)) * ((y0 - y1)*(z0 - z2) - (y0 - y2)*(z0 - z1)));</span><br><span class="line"></span><br><span class="line"><span class="comment">// l12表示的是0.2*(||V1[0]||)</span></span><br><span class="line"><span class="comment">// 点x1,y1,z1到点x2,y2,z2的距离</span></span><br><span class="line"><span class="type">float</span> l12 = <span class="built_in">sqrt</span>((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) + (z1 - z2)*(z1 - z2));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 求叉乘结果[la&#x27;,lb&#x27;,lc&#x27;]=[(x1-x2),(y1-y2),(z1-z2)]x[XXX,YYY,ZZZ]</span></span><br><span class="line"><span class="comment">// [la,lb,lc]=[la&#x27;,lb&#x27;,lc&#x27;]/a012/l12</span></span><br><span class="line"><span class="comment">// LLL=[la,lb,lc]是0.2*V1[0]这条高上的单位法向量。||LLL||=1；</span></span><br><span class="line"><span class="type">float</span> la = ((y1 - y2)*((x0 - x1)*(y0 - y2) - (x0 - x2)*(y0 - y1)) </span><br><span class="line">          + (z1 - z2)*((x0 - x1)*(z0 - z2) - (x0 - x2)*(z0 - z1))) / a012 / l12;</span><br><span class="line"></span><br><span class="line"><span class="type">float</span> lb = -((x1 - x2)*((x0 - x1)*(y0 - y2) - (x0 - x2)*(y0 - y1)) </span><br><span class="line">            - (z1 - z2)*((y0 - y1)*(z0 - z2) - (y0 - y2)*(z0 - z1))) / a012 / l12;</span><br><span class="line"></span><br><span class="line"><span class="type">float</span> lc = -((x1 - x2)*((x0 - x1)*(z0 - z2) - (x0 - x2)*(z0 - z1)) </span><br><span class="line">            + (y1 - y2)*((y0 - y1)*(z0 - z2) - (y0 - y2)*(z0 - z1))) / a012 / l12;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ld2就是点pointSel(x0,y0,z0)到直线的距离</span></span><br><span class="line"><span class="type">float</span> ld2 = a012 / l12;</span><br></pre></td></tr></table></figure></p></li>
+</ol>
+<h3 id="点到面距离">点到面距离</h3>
+<h4 id="论文中计算方法-1">论文中计算方法</h4>
+再次贴出论文中的图 <img src="./imgs/LOAM-fig7.png" alt="LOAM-fig7" />
+<center>
+LOAM论文图7：展示如何根据当前帧的边缘点和平面点在局部地图中找到对应的线和平面
+</center>
+<p>与计算点到直线的距离类似，对于一个平面点<span class="math inline">\(P^{F^p}_i \in F^p\)</span>，从局部地图平面点集<span class="math inline">\(M^p\)</span>中找到最近点<span class="math inline">\(P^{M^p}_j\)</span>，再从该点所在的激光线束找到另一个点<span class="math inline">\(P^{M^p}_l\)</span>以及前后两条激光线束中找到另外一个最近点<span class="math inline">\(P^{M^p}_m\)</span>，这样就确保了三个点不会共线。 那么问题就转化为已知经过三个点<span class="math inline">\(P^{M^p}_{jlm}\)</span>的平面，求平面外一点<span class="math inline">\(P^{F^p}_i\)</span>到该平面的距离 首先，根据三个点，我们可以计算该平面的法向量，并归一化为单位法向量</p>
+<p><span class="math display">\[
+n_{jlm}=(P^{M^p}_j - P^{M^p}_l)\times (P^{M^p}_j - P^{M^p}_m)
+\]</span></p>
+<p><span class="math display">\[
+n_{jlm} = \frac{n_{jlm}}{|n_{jlm}|}
+\]</span></p>
+<p>于是，点到平面的距离为 <span class="math display">\[
+d_p = |(P^{F^p}_i - P^{M^p}_j)n_{jlm}|\tag{2}
+\]</span></p>
+<h4 id="代码中计算方法-1">代码中计算方法</h4>
+<p>在代码中，也是先根据点<span class="math inline">\(P^{F^p}_i\)</span>从局部地图平面点集中找到最近的5个点，然后对这5个点用最小二乘法（求解超定方程）得到拟合平面的法向量。得到平面方程后就可以直接计算点到平面的距离了。这部分代码在<code>mapOptimization.cpp</code>中<code>surfOptimization</code>函数</p>
+<ol type="1">
+<li><p>从局部地图找到距离最近的5个点 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 与边缘点找直线一样，从局部地图的平面点集中找到与pointSel距离最近的5个点</span></span><br><span class="line">kdtreeSurfFromMap-&gt;<span class="built_in">nearestKSearch</span>(pointSel, <span class="number">5</span>, pointSearchInd, pointSearchSqDis);</span><br></pre></td></tr></table></figure></p></li>
+<li><p>求解方程Ax+By+Cz+1=0方程 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 下面的过程要求解Ax+By+Cz+1=0的平面方程</span></span><br><span class="line"><span class="comment">// 由于有5个点，因此是求解超定方程</span></span><br><span class="line"><span class="comment">// 假设5个点都在平面上，则matA0是系数矩阵，matB0是等号右边的值（都是-1）；matX0是求出来的A，B，C</span></span><br><span class="line">Eigen::Matrix&lt;<span class="type">float</span>, <span class="number">5</span>, <span class="number">3</span>&gt; matA0;</span><br><span class="line">Eigen::Matrix&lt;<span class="type">float</span>, <span class="number">5</span>, <span class="number">1</span>&gt; matB0;</span><br><span class="line">Eigen::Vector3f matX0;</span><br><span class="line"></span><br><span class="line">matA0.<span class="built_in">setZero</span>();</span><br><span class="line">matB0.<span class="built_in">fill</span>(<span class="number">-1</span>);</span><br><span class="line">matX0.<span class="built_in">setZero</span>();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; <span class="number">5</span>; j++) &#123;</span><br><span class="line">    <span class="built_in">matA0</span>(j, <span class="number">0</span>) = laserCloudSurfFromMapDS-&gt;points[pointSearchInd[j]].x;</span><br><span class="line">    <span class="built_in">matA0</span>(j, <span class="number">1</span>) = laserCloudSurfFromMapDS-&gt;points[pointSearchInd[j]].y;</span><br><span class="line">    <span class="built_in">matA0</span>(j, <span class="number">2</span>) = laserCloudSurfFromMapDS-&gt;points[pointSearchInd[j]].z;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这里是求解matA0XmatX0 = matB0方程</span></span><br><span class="line">matX0 = matA0.<span class="built_in">colPivHouseholderQr</span>().<span class="built_in">solve</span>(matB0);</span><br><span class="line"></span><br></pre></td></tr></table></figure></p></li>
+<li><p>求点到平面距离 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">float</span> pa = <span class="built_in">matX0</span>(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"><span class="type">float</span> pb = <span class="built_in">matX0</span>(<span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line"><span class="type">float</span> pc = <span class="built_in">matX0</span>(<span class="number">2</span>, <span class="number">0</span>);</span><br><span class="line"><span class="type">float</span> pd = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// （pa,pb,pc)是平面的法向量，这里是对法向量规一化，变成单位法向量</span></span><br><span class="line"><span class="type">float</span> ps = <span class="built_in">sqrt</span>(pa * pa + pb * pb + pc * pc);</span><br><span class="line">pa /= ps; pb /= ps; pc /= ps; pd /= ps;</span><br></pre></td></tr></table></figure></p></li>
+</ol>
+<h2 id="最小二乘问题求解">最小二乘问题求解</h2>
+<p>从前面两步，我们得到了一些边缘点和平面点到局部地图的距离和距离向量，我们的目标就是优化这些距离。由于我们现在有6个未知数，也就是位姿的6个自由度<span class="math inline">\(T_i=[t_x,t_y,t_z,roll,pitch,yaw]\)</span>，但是我们的点超过6个，因此是求解最小二乘问题。</p>
+<p>最小二乘问题是最优化里的基础问题，这里就不展开公式推导了，具体可以参考这篇文章<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/113946848">最小二乘问题求解的四种解法</a>。</p>
+<p>常见的求解最小二乘问题有高斯牛顿法（Gauss-Newton Method）和列温伯格马夸克法（Levernberg-Marquate），后者是前者的改进。<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>论文里面虽然用的是LM算法，但是在代码中实际用的是GN算法。这里只强调GN算法的核心思路。</p>
+<p>GN算法也是迭代更新的算法，每一步重点在与求出未知量的更新方向和步长，每一步将更行向量叠加到未知量上，让目标函数逐渐收敛。</p>
+<p>在这里，未知量是位姿<span class="math inline">\(T_i\)</span>，目标函数是点到直线点到平面距离<span class="math inline">\(\mathbb{d}\)</span>，因此，我们在每一步迭代中要找到一个<span class="math inline">\(\Delta{T}_i\)</span>，更新未知量<span class="math inline">\(T_i \larr T_i + \Delta{T}_i\)</span>，并使得距离<span class="math inline">\(\mathbb{b}\)</span>逐渐下降。</p>
+<p>在高斯牛顿法中，更新向量的是通过求解增量方程得到 <span class="math display">\[
+J(x)J(x)^T\Delta{x}=-J(x)f(x)\tag{3}
+\]</span></p>
+<p>公式（3）就是高斯牛顿法的增量方程，<span class="math inline">\(J(x)\)</span>是雅克比矩阵，也就是目标函数相对于未知量的偏导；<span class="math inline">\(f(x)\)</span>是目标函数；<span class="math inline">\(\Delta{x}\)</span>就是我们要求的增量。</p>
+<h2 id="代码中点云匹配算法基于gn算法">代码中点云匹配算法（基于GN算法）</h2>
+<p>这部分内容对于数学公式推导部分主要参考<a target="_blank" rel="noopener" href="https://wykxwyc.github.io/2019/08/01/The-Math-Formula-in-LeGO-LOAM/#lmoptimization%E4%B8%AD%E5%A6%82%E4%BD%95%E8%BF%9B%E8%A1%8C%E4%BC%98%E5%8C%96%E8%BF%AD%E4%BB%A3%E8%AE%A1%E7%AE%97">wykxwyc.github.io</a>，但是原文中对于旋转矩阵对欧拉角的求导似乎有点问题，与代码对不上。</p>
+<h3 id="欧拉角转旋转矩阵">欧拉角转旋转矩阵</h3>
+<p>代码中对角度的表达使用欧拉角表达，因此我们需要先将欧拉角转换为旋转矩阵形式。记<span class="math inline">\(x,y,z\)</span>轴的角度为<span class="math inline">\(\alpha,\beta,\gamma\)</span> <span class="math display">\[
+\begin{split}
+R_{\alpha}=
+\begin{bmatrix}
+1&amp;0&amp;0\\
+0&amp;\cos\alpha&amp;-\sin\alpha\\
+0&amp;\sin\alpha&amp;\cos\alpha
+\end{bmatrix}
+\end{split}
+\]</span></p>
+<p><span class="math display">\[
+\begin{split}
+R_{\beta}=
+\begin{bmatrix}
+\cos\beta&amp;0&amp;\sin\beta\\
+0&amp;1&amp;0\\
+-\sin\beta&amp;0&amp;\cos\beta
+\end{bmatrix}
+\end{split}
+\]</span></p>
+<p><span class="math display">\[
+\begin{split}
+R_{\gamma}=
+\begin{bmatrix}
+\cos\gamma&amp;-\sin\gamma&amp;0\\
+\sin\gamma&amp;\cos\gamma&amp;0\\
+0&amp;0&amp;1\\
+\end{bmatrix}
+\end{split}
+\]</span></p>
+<p><strong>PS:</strong> 为了简便起见，我们在后面的推导中使用<span class="math inline">\(c_1,c_2,c_3\)</span>表示<span class="math inline">\(\cos\alpha,\cos\beta,\cos\gamma\)</span>，用<span class="math inline">\(s_1,s_2,s_3\)</span>表示<span class="math inline">\(\sin\alpha,\sin\beta,\sin\gamma\)</span></p>
+<p>根据上面转换关系，使用<span class="math inline">\(Z-X-Y\)</span>顺序，将欧拉角转换为旋转矩阵如下</p>
+<p><span class="math display">\[
+\begin{split}
+\begin{array}{rcl}
+R
+&amp;=&amp;R_yR_xR_z\\
+&amp;=&amp;
+\begin{bmatrix}
+c_2&amp;0&amp;s_2\\
+0&amp;1&amp;0\\
+-s_2&amp;0&amp;c_2
+\end{bmatrix}
+\begin{bmatrix}
+1&amp;0&amp;0\\
+0&amp;c_1&amp;-s_1\\
+0&amp;s_1&amp;c_1
+\end{bmatrix}
+\begin{bmatrix}
+c_3&amp;-s_3&amp;0\\
+s_3&amp;c_3&amp;0\\
+0&amp;0&amp;1
+\end{bmatrix}\\
+&amp;=&amp;
+\begin{bmatrix}
+c_2c_3+s_1s_2s_3&amp;-c_2s_3+s_1s_2c_3&amp;c_1s_2\\
+c_1s_3&amp;c_1c_3&amp;-s_1\\
+-s_2c_3+s_1c_2s_3&amp;s_2s_3+s_1c_2c_3&amp;c_1c_2
+\end{bmatrix}
+\end{array}
+\end{split}
+\]</span></p>
+<h3 id="目标函数对位姿求雅克比矩阵">目标函数对位姿求雅克比矩阵</h3>
+<p><strong>Keep In Mind：位姿<span class="math inline">\(T_i=[t_x,t_y,t_z,\alpha,\beta,\gamma]=[R,t]\)</span>是我们要求的量</strong></p>
+<p>对于当前帧特征点<span class="math inline">\(F^e,F^p\)</span>中的一个点<span class="math inline">\(P_i=[p_x,p_y,p_z]\)</span>（这里没有区分边缘点和平面点，因为两者的偏导公式一样），我们使用函数<span class="math inline">\(G(\cdot)\)</span>将其从雷达坐标系转换到局部坐标系(m上标表示地图坐标系) <span class="math display">\[
+P^m_i=G(P_i,T_i)=R\cdot P_i+t
+\]</span> 我们使用函数<span class="math inline">\(D(\cdot)\)</span>表示该点到局部地图的距离，也就是目标函数 <span class="math display">\[
+loss=D(G(P_i,T_i),Map) = d
+\]</span> 上式中<span class="math inline">\(d\)</span>对于边缘点代表点到直线距离，对于平面点表示点到平面距离</p>
+<p><strong>误差对旋转求偏导</strong> 这里以<span class="math inline">\(x\)</span>轴的旋转<span class="math inline">\(\alpha\)</span>为例</p>
+<p><span class="math display">\[
+\begin{split}
+\begin{array}{rcl}
+\frac{\partial loss}{\partial \alpha}
+&amp;=&amp;
+\frac{\partial D\left(G(P_i,T_i),Map\right)}{\partial \alpha}\\
+&amp;=&amp;
+\frac{\partial D}{\partial G}\cdot \frac{\partial G}{\partial \alpha}\\
+&amp;=&amp;
+\frac{\partial D}{\partial G}\cdot \frac{\partial R\cdot P_i+t}{\partial \alpha}\\
+&amp;=&amp;
+\frac{\partial D}{\partial G}\cdot \frac{\partial R\cdot P_i}{\partial \alpha}\\
+&amp;=&amp;
+\frac{\partial D}{\partial G}\cdot \frac{\partial R}{\partial \alpha}\cdot P_i
+\end{array}
+\end{split}\tag{4}
+\]</span></p>
+<p><strong>误差对平移求偏导</strong> 这里以<span class="math inline">\(x\)</span>轴的平移<span class="math inline">\(t_x\)</span>为例</p>
+<p><span class="math display">\[
+\begin{split}
+\begin{array}{rcl}
+\frac{\partial loss}{\partial t_x}
+&amp;=&amp;
+\frac{\partial D\left(G(P_i,T_i),Map\right)}{\partial t_x}\\
+&amp;=&amp;
+\frac{\partial D}{\partial G}\cdot \frac{\partial G}{\partial t_x}\\
+&amp;=&amp;
+\frac{\partial D}{\partial G}\cdot \frac{\partial R\cdot P_i+t}{\partial t_x}\\
+&amp;=&amp;
+\frac{\partial D}{\partial G}\cdot \frac{\partial R\cdot P_i}{\partial \alpha} + \frac{\partial D}{\partial G}\cdot\frac{\partial t}{\partial t_x}\\
+&amp;=&amp;
+0+\frac{\partial D}{\partial G}\cdot\frac{\partial t}{\partial t_x}\\
+&amp;=&amp;
+\frac{\partial D}{\partial G}
+\end{array}
+\end{split}\tag{5}
+\]</span></p>
+<p><strong>求解<span class="math inline">\(\frac{\partial D}{\partial G}\)</span></strong> 在上面误差对旋转求偏导中旋转矩阵对欧拉角求偏导<span class="math inline">\(\frac{\partial R}{\partial \alpha}\)</span>已经在前面的章节推导过了。公式(4)(5)还有一个未知量就是<span class="math inline">\(\frac{\partial D}{\partial G}\)</span></p>
+<p><span class="math display">\[
+\frac{\partial D}{\partial G} = \frac{\partial d}{\partial P^m_i}
+\]</span> 也就是说<span class="math inline">\(\frac{\partial D}{\partial G}\)</span>求的是损失函数也就是点到线和点到面的距离相对于点（地图坐标系下）的偏导数。这点可以理解成求一个移动方向，使得让点<span class="math inline">\(P^m_i\)</span>沿着这个方向移动，损失函数上升得最快。很容易想到这个方向就是法线方向（对于点到直线的情况则是直线的垂线方向） 因此</p>
+<p><span class="math display">\[
+\frac{\partial D}{\partial G} = \frac{\partial d}{\partial P^m_i}=\big(\frac{\partial d}{\partial x}, \frac{\partial d}{\partial y}, \frac{\partial d}{\partial z}\big)=(n_x,n_y,n_z)
+\]</span></p>
+<h3 id="代码中雅克比矩阵的计算">代码中雅克比矩阵的计算</h3>
+<p>这部分计算主要在<code>mapOptimization.cpp</code>中的<code>LMOptimization</code>函数。这里要注意的是，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>这部分代码计算中还加了坐标系的转换，实际上是没有必要的，这部分代码可以看<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM" title="LeGO-LOAM repo">LeGO-LOAM</a>的代码，是完全一样的 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 计算三轴欧拉角的sin、cos，后面使用旋转矩阵对欧拉角求导中会使用到</span></span><br><span class="line"><span class="comment">// lidar -&gt; camera</span></span><br><span class="line"><span class="type">float</span> srx = <span class="built_in">sin</span>(transformTobeMapped[<span class="number">1</span>]);</span><br><span class="line"><span class="type">float</span> crx = <span class="built_in">cos</span>(transformTobeMapped[<span class="number">1</span>]);</span><br><span class="line"><span class="type">float</span> sry = <span class="built_in">sin</span>(transformTobeMapped[<span class="number">2</span>]);</span><br><span class="line"><span class="type">float</span> cry = <span class="built_in">cos</span>(transformTobeMapped[<span class="number">2</span>]);</span><br><span class="line"><span class="type">float</span> srz = <span class="built_in">sin</span>(transformTobeMapped[<span class="number">0</span>]);</span><br><span class="line"><span class="type">float</span> crz = <span class="built_in">cos</span>(transformTobeMapped[<span class="number">0</span>]);</span><br><span class="line"></span><br><span class="line"><span class="comment">// laserCloudOri是在cornerOptimization、surfOptimization两个函数中找到的有匹配关系的</span></span><br><span class="line"><span class="comment">// 角点和平面点，如果找到的可供优化的点数太少，则跳过此次优化</span></span><br><span class="line"><span class="type">int</span> laserCloudSelNum = laserCloudOri-&gt;<span class="built_in">size</span>();</span><br><span class="line"><span class="keyword">if</span> (laserCloudSelNum &lt; <span class="number">50</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// matA是Jacobians矩阵J</span></span><br><span class="line"><span class="function">cv::Mat <span class="title">matA</span><span class="params">(laserCloudSelNum, <span class="number">6</span>, CV_32F, cv::Scalar::all(<span class="number">0</span>))</span></span>;</span><br><span class="line"><span class="function">cv::Mat <span class="title">matAt</span><span class="params">(<span class="number">6</span>, laserCloudSelNum, CV_32F, cv::Scalar::all(<span class="number">0</span>))</span></span>;</span><br><span class="line"><span class="function">cv::Mat <span class="title">matAtA</span><span class="params">(<span class="number">6</span>, <span class="number">6</span>, CV_32F, cv::Scalar::all(<span class="number">0</span>))</span></span>;</span><br><span class="line"><span class="comment">// matB是目标函数，也就是距离</span></span><br><span class="line"><span class="function">cv::Mat <span class="title">matB</span><span class="params">(laserCloudSelNum, <span class="number">1</span>, CV_32F, cv::Scalar::all(<span class="number">0</span>))</span></span>;</span><br><span class="line"><span class="function">cv::Mat <span class="title">matAtB</span><span class="params">(<span class="number">6</span>, <span class="number">1</span>, CV_32F, cv::Scalar::all(<span class="number">0</span>))</span></span>;</span><br><span class="line"><span class="comment">// matX是高斯-牛顿法计算出的更新向量</span></span><br><span class="line"><span class="function">cv::Mat <span class="title">matX</span><span class="params">(<span class="number">6</span>, <span class="number">1</span>, CV_32F, cv::Scalar::all(<span class="number">0</span>))</span></span>;</span><br><span class="line"><span class="function">cv::Mat <span class="title">matP</span><span class="params">(<span class="number">6</span>, <span class="number">6</span>, CV_32F, cv::Scalar::all(<span class="number">0</span>))</span></span>;</span><br><span class="line"></span><br><span class="line">PointType pointOri, coeff;</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; laserCloudSelNum; i++) &#123;</span><br><span class="line">    <span class="comment">// 坐标系转换这部分可以不用看，没有什么作用</span></span><br><span class="line">    <span class="comment">// lidar -&gt; camera</span></span><br><span class="line">    pointOri.x = laserCloudOri-&gt;points[i].y;</span><br><span class="line">    pointOri.y = laserCloudOri-&gt;points[i].z;</span><br><span class="line">    pointOri.z = laserCloudOri-&gt;points[i].x;</span><br><span class="line">    <span class="comment">// lidar -&gt; camera</span></span><br><span class="line">    coeff.x = coeffSel-&gt;points[i].y;</span><br><span class="line">    coeff.y = coeffSel-&gt;points[i].z;</span><br><span class="line">    coeff.z = coeffSel-&gt;points[i].x;</span><br><span class="line">    coeff.intensity = coeffSel-&gt;points[i].intensity;</span><br><span class="line">    <span class="comment">// in camera</span></span><br><span class="line">    <span class="comment">// 求雅克比矩阵的值，也就是求目标函数（点到线、平面的距离）相对于tx,ty,tz,rx,ry,rz的导数</span></span><br><span class="line">    <span class="comment">// 具体的公式推导看仓库README中本项目博客，高斯牛顿法方程：J^&#123;T&#125;J\Delta&#123;x&#125; = -Jf(x)，\Delta&#123;x&#125;就是要求解的更新向量matX</span></span><br><span class="line">    <span class="comment">// arx是目标函数相对于roll的导数</span></span><br><span class="line">    <span class="type">float</span> arx = (crx*sry*srz*pointOri.x + crx*crz*sry*pointOri.y - srx*sry*pointOri.z) * coeff.x</span><br><span class="line">              + (-srx*srz*pointOri.x - crz*srx*pointOri.y - crx*pointOri.z) * coeff.y</span><br><span class="line">              + (crx*cry*srz*pointOri.x + crx*cry*crz*pointOri.y - cry*srx*pointOri.z) * coeff.z;</span><br><span class="line">    <span class="comment">// ary是目标函数相对于pitch的导数</span></span><br><span class="line">    <span class="type">float</span> ary = ((cry*srx*srz - crz*sry)*pointOri.x </span><br><span class="line">              + (sry*srz + cry*crz*srx)*pointOri.y + crx*cry*pointOri.z) * coeff.x</span><br><span class="line">              + ((-cry*crz - srx*sry*srz)*pointOri.x </span><br><span class="line">              + (cry*srz - crz*srx*sry)*pointOri.y - crx*sry*pointOri.z) * coeff.z;</span><br><span class="line">    <span class="comment">// arz是目标函数相对于yaw的导数</span></span><br><span class="line">    <span class="type">float</span> arz = ((crz*srx*sry - cry*srz)*pointOri.x + (-cry*crz-srx*sry*srz)*pointOri.y)*coeff.x</span><br><span class="line">              + (crx*crz*pointOri.x - crx*srz*pointOri.y) * coeff.y</span><br><span class="line">              + ((sry*srz + cry*crz*srx)*pointOri.x + (crz*sry-cry*srx*srz)*pointOri.y)*coeff.z;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    在求点到直线的距离时，coeff表示的是如下内容</span></span><br><span class="line"><span class="comment">    [la,lb,lc]表示的是点到直线的垂直连线方向，s是长度</span></span><br><span class="line"><span class="comment">    coeff.x = s * la;</span></span><br><span class="line"><span class="comment">    coeff.y = s * lb;</span></span><br><span class="line"><span class="comment">    coeff.z = s * lc;</span></span><br><span class="line"><span class="comment">    coeff.intensity = s * ld2;</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    在求点到平面的距离时，coeff表示的是</span></span><br><span class="line"><span class="comment">    [pa,pb,pc]表示过外点的平面的法向量，s是线的长度</span></span><br><span class="line"><span class="comment">    coeff.x = s * pa;</span></span><br><span class="line"><span class="comment">    coeff.y = s * pb;</span></span><br><span class="line"><span class="comment">    coeff.z = s * pc;</span></span><br><span class="line"><span class="comment">    coeff.intensity = s * pd2;</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// lidar -&gt; camera</span></span><br><span class="line">    matA.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(i, <span class="number">0</span>) = arz;</span><br><span class="line">    matA.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(i, <span class="number">1</span>) = arx;</span><br><span class="line">    matA.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(i, <span class="number">2</span>) = ary;</span><br><span class="line">    <span class="comment">// 目标函数相对于tx的导数等于法向量的x</span></span><br><span class="line">    matA.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(i, <span class="number">3</span>) = coeff.z;</span><br><span class="line">    <span class="comment">// 目标函数相对于ty的导数等于法向量的y</span></span><br><span class="line">    matA.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(i, <span class="number">4</span>) = coeff.x;</span><br><span class="line">    <span class="comment">// 目标函数相对于tz的导数等于法向量的z</span></span><br><span class="line">    matA.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(i, <span class="number">5</span>) = coeff.y;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// matB存储的是目标函数（距离）的负值，因为：J^&#123;T&#125;J\Delta&#123;x&#125; = -Jf(x)</span></span><br><span class="line">    matB.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(i, <span class="number">0</span>) = -coeff.intensity;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="更新">更新</h3>
+<p>得到雅克比矩阵后就可以直接求解高斯-牛顿法里的增量方程 <span class="math display">\[
+J(x)J(x)^T\Delta{x}=-J(x)f(x)\tag{3}
+\]</span></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">cv::<span class="built_in">transpose</span>(matA, matAt);</span><br><span class="line">matAtA = matAt * matA;</span><br><span class="line">matAtB = matAt * matB;</span><br><span class="line"><span class="comment">// 求解高斯-牛顿法中的增量方程：J^&#123;T&#125;J\Delta&#123;x&#125; = -Jf(x)，这里解出来的matX就是更新向量</span></span><br><span class="line"><span class="comment">// matA是雅克比矩阵J</span></span><br><span class="line"><span class="comment">// matAtB是上面等式中等号的右边，负号在matB赋值的时候已经加入</span></span><br><span class="line">cv::<span class="built_in">solve</span>(matAtA, matAtB, matX, cv::DECOMP_QR);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将增量matX叠加到变量（位姿）transformTobeMapped中</span></span><br><span class="line">transformTobeMapped[<span class="number">0</span>] += matX.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">transformTobeMapped[<span class="number">1</span>] += matX.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">transformTobeMapped[<span class="number">2</span>] += matX.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">2</span>, <span class="number">0</span>);</span><br><span class="line">transformTobeMapped[<span class="number">3</span>] += matX.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">3</span>, <span class="number">0</span>);</span><br><span class="line">transformTobeMapped[<span class="number">4</span>] += matX.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">4</span>, <span class="number">0</span>);</span><br><span class="line">transformTobeMapped[<span class="number">5</span>] += matX.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">5</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="高斯矩阵退化">高斯矩阵退化</h3>
+<div id="Degenerate">
+
+</div>
+<p>这部分代码其实有一小段没办法完全理解，就是在进行第一次迭代时会对近似Hessian矩阵做是否退化的的判断，然后对退化的方向进行处理，最后对增量进行重新加权。但是实在没有找到这种用法的出处。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 如果是第一次迭代，判断求解出来的近似Hessian矩阵，也就是J^&#123;T&#125;J:=matAtA是否退化</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">    * 这部分的计算说实话没有找到很好的理论出处，这里只能大概说一下这段代码想要做的事情</span></span><br><span class="line"><span class="comment">    * 这里用matAtA也就是高斯-牛顿中的近似海瑟（Hessian）矩阵H。求解增量方程：J^&#123;T&#125;J\Delta&#123;x&#125; = -Jf(x)</span></span><br><span class="line"><span class="comment">    * 要求H:=J^&#123;T&#125;J可逆，但H不一定可逆。下面的代码通过H的特征值判断H是否退化，并将退化的方向清零matV2。而后又根据</span></span><br><span class="line"><span class="comment">    * matV.inv()*matV2作为更新向量的权重系数，matV是H的特征向量矩阵。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">if</span> (iterCount == <span class="number">0</span>) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="function">cv::Mat <span class="title">matE</span><span class="params">(<span class="number">1</span>, <span class="number">6</span>, CV_32F, cv::Scalar::all(<span class="number">0</span>))</span></span>;</span><br><span class="line">    <span class="function">cv::Mat <span class="title">matV</span><span class="params">(<span class="number">6</span>, <span class="number">6</span>, CV_32F, cv::Scalar::all(<span class="number">0</span>))</span></span>;</span><br><span class="line">    <span class="function">cv::Mat <span class="title">matV2</span><span class="params">(<span class="number">6</span>, <span class="number">6</span>, CV_32F, cv::Scalar::all(<span class="number">0</span>))</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 对近似Hessian矩阵做特征值分解，matE是特征值，matV是特征向量。opencv的matV中每一行是一个特征向量</span></span><br><span class="line">    cv::<span class="built_in">eigen</span>(matAtA, matE, matV);</span><br><span class="line">    matV.<span class="built_in">copyTo</span>(matV2);</span><br><span class="line"></span><br><span class="line">    isDegenerate = <span class="literal">false</span>;</span><br><span class="line">    <span class="type">float</span> eignThre[<span class="number">6</span>] = &#123;<span class="number">100</span>, <span class="number">100</span>, <span class="number">100</span>, <span class="number">100</span>, <span class="number">100</span>, <span class="number">100</span>&#125;;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">5</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">        <span class="keyword">if</span> (matE.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>, i) &lt; eignThre[i]) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; <span class="number">6</span>; j++) &#123;</span><br><span class="line">                matV2.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(i, j) = <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            isDegenerate = <span class="literal">true</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    matP = matV.<span class="built_in">inv</span>() * matV2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当第一次迭代判断到海瑟矩阵退化，后面会使用计算出来的权重matP对增量matX做加权组合</span></span><br><span class="line"><span class="keyword">if</span> (isDegenerate)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="function">cv::Mat <span class="title">matX2</span><span class="params">(<span class="number">6</span>, <span class="number">1</span>, CV_32F, cv::Scalar::all(<span class="number">0</span>))</span></span>;</span><br><span class="line">    matX.<span class="built_in">copyTo</span>(matX2);</span><br><span class="line">    matX = matP * matX2;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="收敛条件判断">收敛条件判断</h3>
+<p>当增量步长达到一定阈值后，认为优化已经收敛，因此可以跳出后续迭代。这里用增量中的角度增量和平移增量的幅度做判断。 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 计算roll、pitch、yaw的迭代步长</span></span><br><span class="line"><span class="type">float</span> deltaR = <span class="built_in">sqrt</span>(</span><br><span class="line">                    <span class="built_in">pow</span>(pcl::<span class="built_in">rad2deg</span>(matX.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">0</span>, <span class="number">0</span>)), <span class="number">2</span>) +</span><br><span class="line">                    <span class="built_in">pow</span>(pcl::<span class="built_in">rad2deg</span>(matX.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">1</span>, <span class="number">0</span>)), <span class="number">2</span>) +</span><br><span class="line">                    <span class="built_in">pow</span>(pcl::<span class="built_in">rad2deg</span>(matX.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">2</span>, <span class="number">0</span>)), <span class="number">2</span>));</span><br><span class="line"><span class="comment">// 计算tx，ty，tz的迭代步长</span></span><br><span class="line"><span class="type">float</span> deltaT = <span class="built_in">sqrt</span>(</span><br><span class="line">                    <span class="built_in">pow</span>(matX.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">3</span>, <span class="number">0</span>) * <span class="number">100</span>, <span class="number">2</span>) +</span><br><span class="line">                    <span class="built_in">pow</span>(matX.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">4</span>, <span class="number">0</span>) * <span class="number">100</span>, <span class="number">2</span>) +</span><br><span class="line">                    <span class="built_in">pow</span>(matX.<span class="built_in">at</span>&lt;<span class="type">float</span>&gt;(<span class="number">5</span>, <span class="number">0</span>) * <span class="number">100</span>, <span class="number">2</span>));</span><br><span class="line"></span><br><span class="line"><span class="comment">// 如果迭代的步长达到设定阈值，则认为已经收敛</span></span><br><span class="line"><span class="keyword">if</span> (deltaR &lt; <span class="number">0.05</span> &amp;&amp; deltaT &lt; <span class="number">0.05</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>; <span class="comment">// converged</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1540,147 +1853,6 @@ p_i^0 = T_ip_i
 <li>节六：IMU预积分模块</li>
 <li>节七：激光里程计模块</li>
 <li>节八：坐标系发布模块</li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zeal">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zeal's Blog">
-      <meta itemprop="description" content="学习记录及分享">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Zeal's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/" class="post-title-link" itemprop="url">FastDDS关键概念</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-03-13 18:02:43" itemprop="dateCreated datePublished" datetime="2023-03-13T18:02:43+08:00">2023-03-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-16 18:07:59" itemprop="dateModified" datetime="2023-03-16T18:07:59+08:00">2023-03-16</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E8%83%BD/DDS/" itemprop="url" rel="index"><span itemprop="name">DDS</span></a>
-        </span>
-    </span>
-
-  
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Changyan：</span>
-    
-    <a title="FastDDS关键概念" href="/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::73f7a0f706535d55ad531611b3af6c03" class="cy_cmt_count" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="架构">架构</h1>
-<p>架构图 <img src="./imgs/fast-dds-architecture.svg" alt="架构图" /></p>
-<p>域（Domain）的概念 <img src="imgs/domain_concept.jpg" alt="Domain" /> <img src="imgs/dds_domain.svg" alt="Domain" /></p>
-<p>数据中心收发模型（DCPS:Data Centric Publisher and Subscriber) <img src="imgs/DataCentricModel.png" alt="DCPS" /></p>
-<h1 id="why-need-a-publisher-and-subscriber">Why need a publisher and subscriber</h1>
-<blockquote>
-<p>These publishers and subscribers don’t need to know about each other ahead of time; they discover each other dynamically at runtime. The data they share is described by a “topic,” and publishers and subscribers send and receive data only for the topics they are interested in. In this pattern, many publishers may publish the same topic, and many subscribers may subscribe to the same topic. Subscribers receive data from all of the publishers that they share a topic with. Publishers send data directly to subscribers, with no need for a broker or centralized application to mediate communications. (https://community.rti.com/static/documentation/connext-dds/6.0.1/doc/manuals/connext_dds/getting_started/cpp11/intro_pubsub_cpp.html)</p>
-</blockquote>
-<h1 id="notes">Notes</h1>
-<p>Publisher 和 Subscriber 负责生成DataWriter&amp;&amp;DataReader，一个Publisher[Subscriber]可以绑定多个DataWriter[DataReader]。每一个DataWriter[DataReader]都会绑定到一个topic，同时可以指定对应的回调函数DataWriterListener[DataReaderListener]</p>
-<h1 id="数据监控fastdds-monitor">数据监控——FastDDS Monitor</h1>
-<p><a target="_blank" rel="noopener" href="https://fast-dds-monitor.readthedocs.io/en/latest/rst/getting_started/tutorial.html">FastDDS Monitor Tutorial</a> ## 原理 FastDDS库有一个内嵌的Participant，叫做Statistic Participant，包含在FastDDS的Statistic Module中。该模块不是默认编译的，因此需要在编译FastDDS的时候指明CMake选项。 实际上是用户开发应用时，在构建<strong>DomainParticipants</strong>阶段，如果通过某种方式指明了要将数据统计信息往外发送，则Statistic Module模块就会自动收集信息，然后往固定的topic发送监控数据。FastDDS Monitor通过这些内嵌的topic，可以监控数据的收发情况。</p>
-<p><a target="_blank" rel="noopener" href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/statistics/statistics.html">如何打开Statistics DataWriters</a> <a target="_blank" rel="noopener" href="https://fast-dds-monitor.readthedocs.io/en/latest/rst/getting_started/tutorial.html">如何使用FastDDS Monitor</a></p>
-<p><strong>注意，如果编译FastDDS的时候打开Statistics Module模块，由于会发送额外的信息，所以会损失性能</strong> &gt; Consequently, by default, Fast DDS does not compile this module because it may entail affecting the application’s performance.(https://fast-dds.docs.eprosima.com/en/latest/fastdds/statistics/statistics.html)</p>
-<figure>
-<img src="imgs/monitor.jpg" alt="" /><figcaption>数据监控窗口</figcaption>
-</figure>
-<h1 id="record-replay">Record &amp;&amp; Replay</h1>
-<blockquote>
-<p>rosbag2 is a ROS 2 application that can be used to capture DDS messages and store them on an SQLite database which allows inspecting and replaying said messages at a later time.</p>
-</blockquote>
-<ol type="1">
-<li>rosbag2可以将在Topic中传送的数据以SQLite的形式保存</li>
-<li>FastDDS没有自己的数据保存和回放工具，官方说明用的是ROS2的<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2">rosbag2</a>包。要使用该包来记录和回放FastDDS的数据需要安装ROS2环境和rosbag2</li>
-<li>由于rosbag2是用来保存ros2的message的，并不是FastDDS的官方工具，因此如果要用rosbag2回放，需要做较多的配置</li>
-</ol>
-<p><a target="_blank" rel="noopener" href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/use_cases/rosbag_capture/rosbag_capture.html#rosbag-capture">使用rosbag-capture</a></p>
-<h1 id="limitations">Limitations</h1>
-<ol type="1">
-<li>没有进程管理和启动工具。ROS/Apollo/XPilot都有属于自己的进程调度系统，可以直接按指定顺序启动多个进程并执行相关调度。</li>
-<li>似乎无法实现像ROS的Service这种类似RPC的功能</li>
-</ol>
-<h1 id="reference-resources-link">Reference &amp;&amp; Resources link</h1>
-<ol type="1">
-<li><a target="_blank" rel="noopener" href="https://github.com/eProsima/Fast-DDS">FastDDS Github</a></li>
-<li><a target="_blank" rel="noopener" href="https://fast-dds-monitor.readthedocs.io/en/latest/rst/installation/linux.html">FastDDS Monitor Documentation</a></li>
-<li><a target="_blank" rel="noopener" href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/use_cases/rosbag_capture/rosbag_capture.html#rosbag-capture">使用rosbag-capture</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/eProsima/Fast-DDS-python.git">Fast-DDS-Python</a></li>
 </ol>
 
       
