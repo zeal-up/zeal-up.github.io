@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库   这是LIOSAM四大部分（点云去畸变、特征提取、预积分、后端优化）中最复杂的一个模块了，完全弄懂这个模块也就离完全理解LIOSAM不远了。 这个模块负责SLAM框架中的后端优化，由于LIOSAM中使用图优化作为后端优化算法，所以有时候笔者也会称这个模块为图优化模块。但是这个模块的 作用不单单是负责后端优化，还有1）、全局地图可视化；">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Simple-LIO-SAM——后端优化模块详解">
+<meta property="og:url" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库   这是LIOSAM四大部分（点云去畸变、特征提取、预积分、后端优化）中最复杂的一个模块了，完全弄懂这个模块也就离完全理解LIOSAM不远了。 这个模块负责SLAM框架中的后端优化，由于LIOSAM中使用图优化作为后端优化算法，所以有时候笔者也会称这个模块为图优化模块。但是这个模块的 作用不单单是负责后端优化，还有1）、全局地图可视化；">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/Design-Pipelines-mapOpt.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/Design-mapOptimization-top.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/Design-mapOptimization-initialGuess.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/Design-mapOptimization-localMap.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/Design-mapOptimization-scan2Map.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/Design-mapOptimization-graphOpt01.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/Design-mapOptimization-graphOpt-odomFactor.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/Design-mapOptimization-graphOpt-loopFactor.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/Design-mapOptimization-graphOpt-optimization.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/Design-mapOptimization-updatePath.png">
+<meta property="article:published_time" content="2023-04-11T14:00:19.000Z">
+<meta property="article:modified_time" content="2023-04-11T15:21:29.714Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="liosam">
+<meta property="article:tag" content="slam">
+<meta property="article:tag" content="graph optimization">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/Design-Pipelines-mapOpt.png">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/","path":"2023/04/11/lio_sam/mapOptimization-doc/","title":"Simple-LIO-SAM——后端优化模块详解"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Simple-LIO-SAM——后端优化模块详解 | Zeal's Blog</title>
+  
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%B7%E8%BE%BE%E9%87%8C%E7%A8%8B%E8%AE%A1%E5%8F%8A%E5%90%8E%E7%AB%AF%E4%BC%98%E5%8C%96%E7%BA%BF%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">雷达里程计及后端优化线程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%B7%E8%BE%BE%E9%87%8C%E7%A8%8B%E8%AE%A1%E7%9A%84%E6%9C%80%E9%AB%98%E9%A2%91%E7%8E%87"><span class="nav-number">1.1.</span> <span class="nav-text">雷达里程计的最高频率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%B9%E4%BA%91%E5%8C%B9%E9%85%8D%E7%9A%84%E5%88%9D%E5%A7%8B%E5%80%BC"><span class="nav-number">1.2.</span> <span class="nav-text">点云匹配的初始值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E5%B1%80%E9%83%A8%E7%82%B9%E4%BA%91%E5%9C%B0%E5%9B%BE"><span class="nav-number">1.3.</span> <span class="nav-text">构建局部点云地图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%B9%E4%BA%91%E5%8C%B9%E9%85%8D"><span class="nav-number">1.4.</span> <span class="nav-text">点云匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%A0%E5%AD%90%E5%9B%BE%E6%9E%84%E5%BB%BA%E5%8F%8A%E4%BC%98%E5%8C%96"><span class="nav-number">1.5.</span> <span class="nav-text">因子图构建及优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0%E5%8E%86%E5%8F%B2%E5%85%B3%E9%94%AE%E5%B8%A7%E4%BD%8D%E5%A7%BF"><span class="nav-number">1.6.</span> <span class="nav-text">更新历史关键帧位姿</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%91%E5%B8%83%E9%87%8C%E7%A8%8B%E8%AE%A1%E5%8F%8A%E5%8F%AF%E8%A7%86%E5%8C%96%E7%82%B9%E4%BA%91"><span class="nav-number">1.7.</span> <span class="nav-text">发布里程计及可视化点云</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9E%E7%8E%AF%E6%A3%80%E6%B5%8B%E7%BA%BF%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">回环检测线程</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Simple-LIO-SAM——后端优化模块详解 | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Simple-LIO-SAM——后端优化模块详解
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-04-11 22:00:19 / 修改时间：23:21:29" itemprop="dateCreated datePublished" datetime="2023-04-11T22:00:19+08:00">2023-04-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
+    </span>
+
+  
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——后端优化模块详解" href="/2023/04/11/lio_sam/mapOptimization-doc/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::fddca820098456617fc64b80ba797a81" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<p><img src="./imgs/Design-Pipelines-mapOpt.png" alt="后端优化" /> 这是<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>四大部分（点云去畸变、特征提取、预积分、后端优化）中最复杂的一个模块了，完全弄懂这个模块也就离完全理解<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>不远了。 这个模块负责SLAM框架中的后端优化，由于<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中使用图优化作为后端优化算法，所以有时候笔者也会称这个模块为图优化模块。但是这个模块的 作用不单单是负责后端优化，还有1）、全局地图可视化；2）、回环检测等功能。</p>
+<p>这个模块一共有三个主要线程执行具体功能，三个线程分别如下： 1. 雷达里程计及后端优化线程 这个线程主要负责执行雷达到地图的匹配，得到较为准确的雷达里程计，然后将雷达里程计、回环检测因子加入因子图进行优化，得到全局优化的关键帧位姿。 2. 回环检测线程 回环检测使用较为费时的ICP算法，因此作为一个单独的线程运行。当检测到合适的回环因子后，会加入全局缓存队列，在雷达里程计线程中被加入因子图优化。 3. 全局地图可视化线程 <a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中对于地图的存储格式是通过一系列关键帧的点云和位姿存储，而不是通过一整个点云存储。为了能够以较低的频率发布全局地图，后端优化模块单独有一个线程 对历史关键帧的点云根据最新的位姿转换到地图坐标系，然后将融合后的全局点云地图发布出去。</p>
+<p>废话不多说，下面分别介绍这三个线程的主要流程和方法</p>
+<h2 id="雷达里程计及后端优化线程">雷达里程计及后端优化线程</h2>
+这个线程的流程主要如下图所示 <img src="./imgs/Design-mapOptimization-top.png" alt="雷达里程计及后端优化线程流程图" />
+<center>
+雷达里程计及后端优化线程流程图
+</center>
+<p>这个线程是点云的回调函数，点云来自<code>FeatureExtraction</code>模块输出的经过特征提取后的点云。整个函数执行过程代码如下 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 特征点云回调函数，也是整个模块核心的计算函数</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">laserCloudInfoHandler</span><span class="params">(<span class="type">const</span> spl_lio_sam::msg::CloudInfo::SharedPtr msgIn)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 提取当前点云时间戳</span></span><br><span class="line">    timeLaserInfoStamp = msgIn-&gt;header.stamp;</span><br><span class="line">    timeLaserInfoCur = <span class="built_in">stamp2Sec</span>(msgIn-&gt;header.stamp);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 提取当前点云的特征角点和特征平面点</span></span><br><span class="line">    cloudInfo = *msgIn;</span><br><span class="line">    pcl::<span class="built_in">fromROSMsg</span>(msgIn-&gt;cloud_corner,  *laserCloudCornerCur);</span><br><span class="line">    pcl::<span class="built_in">fromROSMsg</span>(msgIn-&gt;cloud_surface, *laserCloudSurfCur);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">        * 一共三个线程使用到这把锁</span></span><br><span class="line"><span class="comment">        * 1. 雷达里程计线程，也就是当前线程</span></span><br><span class="line"><span class="comment">        * 2. 发布全局地图线程，执行关键帧点云拷贝转换操作</span></span><br><span class="line"><span class="comment">        * 3. 回环检测线程，执行关键帧姿态拷贝操作</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="function">std::lock_guard&lt;std::mutex&gt; <span class="title">lock</span><span class="params">(mtx)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 记录上一帧的时间戳，两帧之间时间间隔大于mappingProcessInterval才会进行处理</span></span><br><span class="line">    <span class="type">static</span> <span class="type">double</span> timeLastProcessing = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">if</span> (timeLaserInfoCur - timeLastProcessing &gt;= mappingProcessInterval)</span><br><span class="line">    &#123;</span><br><span class="line">        timeLastProcessing = timeLaserInfoCur;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 当前帧位姿初始化</span></span><br><span class="line">        <span class="built_in">RCLCPP_DEBUG</span>(<span class="built_in">get_logger</span>(), <span class="string">&quot;updateInitialGuess&quot;</span>);</span><br><span class="line">        <span class="built_in">updateInitialGuess</span>();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 构建局部地图</span></span><br><span class="line">        <span class="built_in">RCLCPP_DEBUG</span>(<span class="built_in">get_logger</span>(), <span class="string">&quot;extractSurroundingKeyFrames&quot;</span>);</span><br><span class="line">        <span class="built_in">extractSurroundingKeyFrames</span>();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 对当前帧点云做降采样</span></span><br><span class="line">        <span class="built_in">RCLCPP_DEBUG</span>(<span class="built_in">get_logger</span>(), <span class="string">&quot;downsampleCurrentScan&quot;</span>);</span><br><span class="line">        <span class="built_in">downsampleCurrentScan</span>();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将当前帧点云匹配到构建的局部地图，优化当前位姿</span></span><br><span class="line">        <span class="built_in">RCLCPP_DEBUG</span>(<span class="built_in">get_logger</span>(), <span class="string">&quot;scan2MapOptimization&quot;</span>);</span><br><span class="line">        <span class="built_in">scan2MapOptimization</span>();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 计算是否将当前帧采纳为关键帧，加入因子图优化</span></span><br><span class="line">        <span class="built_in">RCLCPP_DEBUG</span>(<span class="built_in">get_logger</span>(), <span class="string">&quot;saveKeyFramesAndFactor&quot;</span>);</span><br><span class="line">        <span class="built_in">saveKeyFramesAndFactor</span>();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 当新的回环因子或者GPS因子加入因子图时，对历史帧执行位姿更新</span></span><br><span class="line">        <span class="built_in">RCLCPP_DEBUG</span>(<span class="built_in">get_logger</span>(), <span class="string">&quot;correctPoses&quot;</span>);</span><br><span class="line">        <span class="built_in">correctPoses</span>();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 发布激光历程计</span></span><br><span class="line">        <span class="built_in">RCLCPP_DEBUG</span>(<span class="built_in">get_logger</span>(), <span class="string">&quot;publishOdometry&quot;</span>);</span><br><span class="line">        <span class="built_in">publishOdometry</span>();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 发布当前帧对齐到地图坐标系的点云和完整轨迹</span></span><br><span class="line">        <span class="built_in">RCLCPP_DEBUG</span>(<span class="built_in">get_logger</span>(), <span class="string">&quot;publishFrames&quot;</span>);</span><br><span class="line">        <span class="built_in">publishFrames</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="雷达里程计的最高频率">雷达里程计的最高频率</h3>
+<p>雷达里程计并不是对每一帧点云都进行处理，这里有一个时间阈值的判断 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (timeLaserInfoCur - timeLastProcessing &gt;= mappingProcessInterval)</span><br></pre></td></tr></table></figure> <code>mappingProcessInterval</code>的默认参数是0.15s，所以在默认参数下，雷达里程计不会超过1/0.15Hz</p>
+<h3 id="点云匹配的初始值">点云匹配的初始值</h3>
+<p>基本所有的精细点云匹配都需要一个较好的初值。<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中的点云匹配使用高斯牛顿算法优化当前帧点云到局部地图的距离（具体算法见本项目博客的相关文章），基于最小二乘法的点云匹配更需要一个优良的初值。 回顾一下我们在<code>ImageProjection</code>也就是点云去畸变模块的内容，在点云去畸变模块，除了对点云做运动畸变校正之外，还从IMU原始输出的角度和预积分模块的输出找到与当前帧点云时间最相近的数据，加入发布的消息中跟随点云一起发布。</p>
+在后端优化模块中，会优先判断接收的消息中是否有设置好的预积分数据，若有，则使用该数据作为该帧点云的初始值，否则，使用IMU的角度增量作为初始值。当然，特殊情况是第一帧的时候会使用IMU输出的角度作为初始值。 <img src="./imgs/Design-mapOptimization-initialGuess.png" alt="初始值选取" />
+<center>
+初始值选取
+</center>
+<p>这里比较特殊的是，初始值是通过计算当前帧的位姿和上一帧的缓存位姿计算位姿增量，然后将该增量应用到上一帧优化后的里程计结果。</p>
+<p><span class="math display">\[
+T_{incre} = \hat{T}_{pre}^{-1}\hat{T}_{cur}\\
+\bar{T}_{cur} = T^{opt}_{pre}T_{incre}
+\]</span></p>
+<p>以使用预积分数据作为初始值为例，上面公式中的<span class="math inline">\(\hat{T}_{pre},\hat{T}_{cur}\)</span>分别是上一次缓存和当前的消息中包含的预积分位姿；<span class="math inline">\(T_{incre}\)</span>计算除了从上一帧到当前帧的位姿增量；<span class="math inline">\(T^{opt}_{pre}\)</span>是上一帧经过点云匹配、图优化之后的里程计结果；<span class="math inline">\(\bar{T}_{cur}\)</span>则是最终采用的当前帧点云的估计值。</p>
+<h3 id="构建局部点云地图">构建局部点云地图</h3>
+<figure>
+<img src="./imgs/Design-mapOptimization-localMap.png" alt="" /><figcaption>构建局部点云地图</figcaption>
+</figure>
+<p>局部点云地图简单说就是根据最后一帧关键帧，找到其空间、时间附近的一些其他关键帧，将这些关键帧的点云都使用对应的位姿转换到地图坐标系下，融合成地图坐标系下的局部地图，后面这个局部地图就是点云匹配的目标点云。这个函数主要是一些几何计算。</p>
+<h3 id="点云匹配">点云匹配</h3>
+<p>这部分用的算法比较复杂，具体参考本项目的另一篇文章<a href="https://zeal-up.github.io/2023/04/06/lio_sam/pcdRegistration-doc/">Simple-LIO-SAM——点云匹配算法详解</a>。 只要明白，经过这个步骤后，在第一步设置的点云位姿初始值已经被点云匹配算法更新为更准确的位姿。 <img src="./imgs/Design-mapOptimization-scan2Map.png" alt="点云匹配" /></p>
+<h3 id="因子图构建及优化">因子图构建及优化</h3>
+<p>这个步骤稍微比较复杂，我们先理一下目前手头有什么： 1. 经过点云匹配校正后的当前帧的位姿 2. 回环检测得到的某一帧关键帧到另一帧关键帧的相对位姿（这个部分在回环检测线程进行，这里只需要当作现有数据即可） 3. gps里程计（由于这部分需要额外的计算，暂且忽略gps的输入）</p>
+<p>PS:这部分需要<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>的知识，可以参考本项目的另外一篇文章：<a href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/">Simple-LIO-SAM——GTSAM快速入门</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>使用上面两个位姿关系构建因子图，并使用因子图优化算法进行整体的优化，得到全局优化下的关键帧位姿 <img src="./imgs/Design-mapOptimization-graphOpt01.png" alt="因子图构建流程" /></p>
+<p><strong>关键帧的选择</strong> 并不是所有的雷达帧都会被当作关键帧，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>使用一种比较简单的方案判断是否将当前帧采纳为关键帧：只有与上一帧关键帧的位姿相差足够大才会采纳为关键帧。</p>
+<p><strong>添加激光里程计因子</strong> <img src="./imgs/Design-mapOptimization-graphOpt-odomFactor.png" alt="激光里程计因子" /></p>
+<p><strong>回环因子</strong> <img src="./imgs/Design-mapOptimization-graphOpt-loopFactor.png" alt="添加回环因子" /></p>
+<p><strong>设置因子图初值并优化</strong> <img src="./imgs/Design-mapOptimization-graphOpt-optimization.png" alt="因子图优化" /></p>
+<h3 id="更新历史关键帧位姿">更新历史关键帧位姿</h3>
+<p>当有新的回环被检测到，该回环关系被加入因子图进行优化。由于回环关系是一种很强约束性的观测，因此，在观测到新的回环之后，因子图优化对历史关键帧的位姿变化会比较大，因此需要对历史关键帧的位姿一起做一次更新。 <img src="./imgs/Design-mapOptimization-updatePath.png" alt="更新历史位姿" /></p>
+<h3 id="发布里程计及可视化点云">发布里程计及可视化点云</h3>
+<p>在原始的<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>代码中这部分还有较多处理，但实际上并没有太多作用。在本项目代码<a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM" title="Simple LIO-SAM">spl</a>中，已经去除了冗余部分。这部分就只是将计算出来的激光里程计往外发布。</p>
+<h2 id="回环检测线程">回环检测线程</h2>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/" title="Simple-LIO-SAM——后端优化模块详解">https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/liosam/" rel="tag"># liosam</a>
+              <a href="/tags/slam/" rel="tag"># slam</a>
+              <a href="/tags/graph-optimization/" rel="tag"># graph optimization</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/04/06/lio_sam/pcdRegistration-doc/" rel="prev" title="Simple-LIO-SAM——点云匹配算法详解">
+                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——点云匹配算法详解
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="fddca820098456617fc64b80ba797a81"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>
