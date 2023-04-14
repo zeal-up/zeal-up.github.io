@@ -21,7 +21,7 @@
 
     <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述  LIOSAM沿用LOAM、LeGO-LOAM的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自imageProjection发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：  特征点的提取根据点的平滑度，而平滑度则通">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Simple-LIO-SAM——特征提取模块">
+<meta property="og:title" content="Simple-LIO-SAM——（六）特征提取模块">
 <meta property="og:url" content="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
 <meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述  LIOSAM沿用LOAM、LeGO-LOAM的做法，从原始点云中提取出边缘点和平面点。边缘点和平面点被下游模块用来做点云匹配和构建地图。 特征提取模块是比较简单的模块，只监听来自imageProjection发布出来的去畸变后点云，同时将提取特征后的点云发布出去。这里有几点需要注意：  特征点的提取根据点的平滑度，而平滑度则通">
@@ -29,7 +29,7 @@
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/imgs/Design-Pipelines-feature.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/imgs/illegal_feature_point.png">
 <meta property="article:published_time" content="2023-03-22T12:03:12.000Z">
-<meta property="article:modified_time" content="2023-03-30T13:29:49.790Z">
+<meta property="article:modified_time" content="2023-04-13T10:50:44.364Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
@@ -41,10 +41,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/","path":"2023/03/22/lio_sam/featureExtraction-doc/","title":"Simple-LIO-SAM——特征提取模块"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/","path":"2023/03/22/lio_sam/featureExtraction-doc/","title":"Simple-LIO-SAM——（六）特征提取模块"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Simple-LIO-SAM——特征提取模块 | Zeal's Blog</title>
+<title>Simple-LIO-SAM——（六）特征提取模块 | Zeal's Blog</title>
   
   <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
   <script src="/js/third-party/analytics/google-analytics.js"></script>
@@ -187,12 +187,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Simple-LIO-SAM——特征提取模块 | Zeal's Blog">
+      <meta itemprop="name" content="Simple-LIO-SAM——（六）特征提取模块 | Zeal's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Simple-LIO-SAM——特征提取模块
+          Simple-LIO-SAM——（六）特征提取模块
         </h1>
 
         <div class="post-meta-container">
@@ -210,7 +210,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-30 21:29:49" itemprop="dateModified" datetime="2023-03-30T21:29:49+08:00">2023-03-30</time>
+      <time title="修改时间：2023-04-13 18:50:44" itemprop="dateModified" datetime="2023-04-13T18:50:44+08:00">2023-04-13</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -231,7 +231,7 @@
     </span>
 
   
-    <span id="/2023/03/22/lio_sam/featureExtraction-doc/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——特征提取模块" title="阅读次数">
+    <span id="/2023/03/22/lio_sam/featureExtraction-doc/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——（六）特征提取模块" title="阅读次数">
       <span class="post-meta-item-icon">
         <i class="far fa-eye"></i>
       </span>
@@ -246,7 +246,7 @@
       </span>
       <span class="post-meta-item-text">Changyan：</span>
     
-    <a title="Simple-LIO-SAM——特征提取模块" href="/2023/03/22/lio_sam/featureExtraction-doc/#SOHUCS" itemprop="discussionUrl">
+    <a title="Simple-LIO-SAM——（六）特征提取模块" href="/2023/03/22/lio_sam/featureExtraction-doc/#SOHUCS" itemprop="discussionUrl">
       <span id="sourceId::e84bd67344741c4da21c259e3e444c5d" class="cy_cmt_count" itemprop="commentCount"></span>
     </a>
   </span>
@@ -313,7 +313,7 @@ c = \frac{1}{|S|\cdot||r_i||}\left|\left|\sum_{j\in S,j\neq i}(r_j-r_i)\right|\r
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/" title="Simple-LIO-SAM——特征提取模块">https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/</a>
+      <a href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/" title="Simple-LIO-SAM——（六）特征提取模块">https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -330,13 +330,13 @@ c = \frac{1}{|S|\cdot||r_i||}\left|\left|\sum_{j\in S,j\neq i}(r_j-r_i)\right|\r
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2023/03/22/lio_sam/imageProjection-doc/" rel="prev" title="Simple-LIO-SAM——点云去畸变模块">
-                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——点云去畸变模块
+                <a href="/2023/03/22/lio_sam/imageProjection-doc/" rel="prev" title="Simple-LIO-SAM——（五）点云去畸变模块">
+                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——（五）点云去畸变模块
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2023/03/27/lio_sam/gtsam-quickstart/" rel="next" title="Simple-LIO-SAM——GTSAM快速入门">
-                  Simple-LIO-SAM——GTSAM快速入门 <i class="fa fa-chevron-right"></i>
+                <a href="/2023/03/27/lio_sam/gtsam-quickstart/" rel="next" title="Simple-LIO-SAM——（七）GTSAM快速入门">
+                  Simple-LIO-SAM——（七）GTSAM快速入门 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>

@@ -21,7 +21,7 @@
 
     <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库   这是LIOSAM四大部分（点云去畸变、特征提取、预积分、后端优化）中最复杂的一个模块了，完全弄懂这个模块也就离完全理解LIOSAM不远了。 这个模块负责SLAM框架中的后端优化，由于LIOSAM中使用图优化作为后端优化算法，所以有时候笔者也会称这个模块为图优化模块。但是这个模块的 作用不单单是负责后端优化，还有1）、全局地图可视化；">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Simple-LIO-SAM——后端优化模块详解">
+<meta property="og:title" content="Simple-LIO-SAM——（十）后端优化模块详解">
 <meta property="og:url" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
 <meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库   这是LIOSAM四大部分（点云去畸变、特征提取、预积分、后端优化）中最复杂的一个模块了，完全弄懂这个模块也就离完全理解LIOSAM不远了。 这个模块负责SLAM框架中的后端优化，由于LIOSAM中使用图优化作为后端优化算法，所以有时候笔者也会称这个模块为图优化模块。但是这个模块的 作用不单单是负责后端优化，还有1）、全局地图可视化；">
@@ -39,7 +39,7 @@
 <meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/loopClosure.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/Design-mapOptimization-loopThread.png">
 <meta property="article:published_time" content="2023-04-11T14:00:19.000Z">
-<meta property="article:modified_time" content="2023-04-13T10:29:05.113Z">
+<meta property="article:modified_time" content="2023-04-13T10:51:23.768Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
@@ -52,10 +52,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/","path":"2023/04/11/lio_sam/mapOptimization-doc/","title":"Simple-LIO-SAM——后端优化模块详解"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/","path":"2023/04/11/lio_sam/mapOptimization-doc/","title":"Simple-LIO-SAM——（十）后端优化模块详解"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Simple-LIO-SAM——后端优化模块详解 | Zeal's Blog</title>
+<title>Simple-LIO-SAM——（十）后端优化模块详解 | Zeal's Blog</title>
   
   <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
   <script src="/js/third-party/analytics/google-analytics.js"></script>
@@ -198,12 +198,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Simple-LIO-SAM——后端优化模块详解 | Zeal's Blog">
+      <meta itemprop="name" content="Simple-LIO-SAM——（十）后端优化模块详解 | Zeal's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Simple-LIO-SAM——后端优化模块详解
+          Simple-LIO-SAM——（十）后端优化模块详解
         </h1>
 
         <div class="post-meta-container">
@@ -221,7 +221,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-04-13 18:29:05" itemprop="dateModified" datetime="2023-04-13T18:29:05+08:00">2023-04-13</time>
+      <time title="修改时间：2023-04-13 18:51:23" itemprop="dateModified" datetime="2023-04-13T18:51:23+08:00">2023-04-13</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -242,7 +242,7 @@
     </span>
 
   
-    <span id="/2023/04/11/lio_sam/mapOptimization-doc/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——后端优化模块详解" title="阅读次数">
+    <span id="/2023/04/11/lio_sam/mapOptimization-doc/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——（十）后端优化模块详解" title="阅读次数">
       <span class="post-meta-item-icon">
         <i class="far fa-eye"></i>
       </span>
@@ -257,7 +257,7 @@
       </span>
       <span class="post-meta-item-text">Changyan：</span>
     
-    <a title="Simple-LIO-SAM——后端优化模块详解" href="/2023/04/11/lio_sam/mapOptimization-doc/#SOHUCS" itemprop="discussionUrl">
+    <a title="Simple-LIO-SAM——（十）后端优化模块详解" href="/2023/04/11/lio_sam/mapOptimization-doc/#SOHUCS" itemprop="discussionUrl">
       <span id="sourceId::fddca820098456617fc64b80ba797a81" class="cy_cmt_count" itemprop="commentCount"></span>
     </a>
   </span>
@@ -364,7 +364,7 @@ T_{incre} = \hat{T}_{pre}^{-1}\hat{T}_{cur}\\
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/" title="Simple-LIO-SAM——后端优化模块详解">https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/</a>
+      <a href="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/" title="Simple-LIO-SAM——（十）后端优化模块详解">https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -382,8 +382,8 @@ T_{incre} = \hat{T}_{pre}^{-1}\hat{T}_{cur}\\
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2023/04/06/lio_sam/pcdRegistration-doc/" rel="prev" title="Simple-LIO-SAM——点云匹配算法详解">
-                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——点云匹配算法详解
+                <a href="/2023/04/06/lio_sam/pcdRegistration-doc/" rel="prev" title="Simple-LIO-SAM——（九）点云匹配算法详解">
+                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——（九）点云匹配算法详解
                 </a>
             </div>
             <div class="post-nav-item">

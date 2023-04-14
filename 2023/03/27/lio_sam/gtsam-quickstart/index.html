@@ -21,7 +21,7 @@
 
     <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  前言 LIOSAM其中的两大模块imuPreintegration和mapOptimization都依赖了因子图优化框架——GTSAM。 为了确保本项目的自洽性以及后面章节讲解的展开，不介绍一下因子图后端优化算法似乎说不过去。但是笔者目前对因子图的原理还没有进行非常详细的推导，因此这部分 内容会偏向如何对GTSAM快速入门。当然，最快">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Simple-LIO-SAM——GTSAM快速入门">
+<meta property="og:title" content="Simple-LIO-SAM——（七）GTSAM快速入门">
 <meta property="og:url" content="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
 <meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  前言 LIOSAM其中的两大模块imuPreintegration和mapOptimization都依赖了因子图优化框架——GTSAM。 为了确保本项目的自洽性以及后面章节讲解的展开，不介绍一下因子图后端优化算法似乎说不过去。但是笔者目前对因子图的原理还没有进行非常详细的推导，因此这部分 内容会偏向如何对GTSAM快速入门。当然，最快">
@@ -31,7 +31,7 @@
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/imgs/gtsam-minExample.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/imgs/ImuFactorGraph.png">
 <meta property="article:published_time" content="2023-03-27T13:28:48.000Z">
-<meta property="article:modified_time" content="2023-03-29T11:16:46.294Z">
+<meta property="article:modified_time" content="2023-04-13T10:50:58.540Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
@@ -44,10 +44,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/","path":"2023/03/27/lio_sam/gtsam-quickstart/","title":"Simple-LIO-SAM——GTSAM快速入门"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/","path":"2023/03/27/lio_sam/gtsam-quickstart/","title":"Simple-LIO-SAM——（七）GTSAM快速入门"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Simple-LIO-SAM——GTSAM快速入门 | Zeal's Blog</title>
+<title>Simple-LIO-SAM——（七）GTSAM快速入门 | Zeal's Blog</title>
   
   <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
   <script src="/js/third-party/analytics/google-analytics.js"></script>
@@ -190,12 +190,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Simple-LIO-SAM——GTSAM快速入门 | Zeal's Blog">
+      <meta itemprop="name" content="Simple-LIO-SAM——（七）GTSAM快速入门 | Zeal's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Simple-LIO-SAM——GTSAM快速入门
+          Simple-LIO-SAM——（七）GTSAM快速入门
         </h1>
 
         <div class="post-meta-container">
@@ -213,7 +213,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-29 19:16:46" itemprop="dateModified" datetime="2023-03-29T19:16:46+08:00">2023-03-29</time>
+      <time title="修改时间：2023-04-13 18:50:58" itemprop="dateModified" datetime="2023-04-13T18:50:58+08:00">2023-04-13</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -234,7 +234,7 @@
     </span>
 
   
-    <span id="/2023/03/27/lio_sam/gtsam-quickstart/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——GTSAM快速入门" title="阅读次数">
+    <span id="/2023/03/27/lio_sam/gtsam-quickstart/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——（七）GTSAM快速入门" title="阅读次数">
       <span class="post-meta-item-icon">
         <i class="far fa-eye"></i>
       </span>
@@ -249,7 +249,7 @@
       </span>
       <span class="post-meta-item-text">Changyan：</span>
     
-    <a title="Simple-LIO-SAM——GTSAM快速入门" href="/2023/03/27/lio_sam/gtsam-quickstart/#SOHUCS" itemprop="discussionUrl">
+    <a title="Simple-LIO-SAM——（七）GTSAM快速入门" href="/2023/03/27/lio_sam/gtsam-quickstart/#SOHUCS" itemprop="discussionUrl">
       <span id="sourceId::0d35c30bd7aedf439c2d1184605769ac" class="cy_cmt_count" itemprop="commentCount"></span>
     </a>
   </span>
@@ -365,7 +365,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/" title="Simple-LIO-SAM——GTSAM快速入门">https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/</a>
+      <a href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/" title="Simple-LIO-SAM——（七）GTSAM快速入门">https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -383,13 +383,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2023/03/22/lio_sam/featureExtraction-doc/" rel="prev" title="Simple-LIO-SAM——特征提取模块">
-                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——特征提取模块
+                <a href="/2023/03/22/lio_sam/featureExtraction-doc/" rel="prev" title="Simple-LIO-SAM——（六）特征提取模块">
+                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——（六）特征提取模块
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2023/03/30/lio_sam/imuPreintegration-doc/" rel="next" title="Simple-LIO-SAM——IMU预积分模块">
-                  Simple-LIO-SAM——IMU预积分模块 <i class="fa fa-chevron-right"></i>
+                <a href="/2023/03/30/lio_sam/imuPreintegration-doc/" rel="next" title="Simple-LIO-SAM——（八）IMU预积分模块">
+                  Simple-LIO-SAM——（八）IMU预积分模块 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>

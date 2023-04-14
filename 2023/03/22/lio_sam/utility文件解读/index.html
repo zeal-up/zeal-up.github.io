@@ -21,14 +21,14 @@
 
     <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  这是LIOSAM里一个最基础的文件，主要有几个重要功能： 1. 作为所有其他节点的基类，放置所有从配置文件读取的配置字 2. 提供一些实用函数 3. 配置QoS 配置基类 LIOSAM为了方便配置，把所有节点的配置项都写在同一个文件Simple-LIO-SAM&#x2F;config&#x2F;params.yaml，同时构建了一个基类ParamServ">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Simple-LIO-SAM——utility文件解读">
+<meta property="og:title" content="Simple-LIO-SAM——（四）utility文件解读">
 <meta property="og:url" content="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
 <meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  这是LIOSAM里一个最基础的文件，主要有几个重要功能： 1. 作为所有其他节点的基类，放置所有从配置文件读取的配置字 2. 提供一些实用函数 3. 配置QoS 配置基类 LIOSAM为了方便配置，把所有节点的配置项都写在同一个文件Simple-LIO-SAM&#x2F;config&#x2F;params.yaml，同时构建了一个基类ParamServ">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/imgs/Design-Class.png">
 <meta property="article:published_time" content="2023-03-22T03:18:09.000Z">
-<meta property="article:modified_time" content="2023-03-22T13:32:22.022Z">
+<meta property="article:modified_time" content="2023-04-13T10:50:22.740Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
@@ -40,10 +40,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/","path":"2023/03/22/lio_sam/utility文件解读/","title":"Simple-LIO-SAM——utility文件解读"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/","path":"2023/03/22/lio_sam/utility文件解读/","title":"Simple-LIO-SAM——（四）utility文件解读"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Simple-LIO-SAM——utility文件解读 | Zeal's Blog</title>
+<title>Simple-LIO-SAM——（四）utility文件解读 | Zeal's Blog</title>
   
   <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
   <script src="/js/third-party/analytics/google-analytics.js"></script>
@@ -186,12 +186,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Simple-LIO-SAM——utility文件解读 | Zeal's Blog">
+      <meta itemprop="name" content="Simple-LIO-SAM——（四）utility文件解读 | Zeal's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Simple-LIO-SAM——utility文件解读
+          Simple-LIO-SAM——（四）utility文件解读
         </h1>
 
         <div class="post-meta-container">
@@ -201,9 +201,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2023-03-22 11:18:09 / 修改时间：21:32:22" itemprop="dateCreated datePublished" datetime="2023-03-22T11:18:09+08:00">2023-03-22</time>
+      <time title="创建时间：2023-03-22 11:18:09" itemprop="dateCreated datePublished" datetime="2023-03-22T11:18:09+08:00">2023-03-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-04-13 18:50:22" itemprop="dateModified" datetime="2023-04-13T18:50:22+08:00">2023-04-13</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -224,7 +230,7 @@
     </span>
 
   
-    <span id="/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——utility文件解读" title="阅读次数">
+    <span id="/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——（四）utility文件解读" title="阅读次数">
       <span class="post-meta-item-icon">
         <i class="far fa-eye"></i>
       </span>
@@ -239,7 +245,7 @@
       </span>
       <span class="post-meta-item-text">Changyan：</span>
     
-    <a title="Simple-LIO-SAM——utility文件解读" href="/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/#SOHUCS" itemprop="discussionUrl">
+    <a title="Simple-LIO-SAM——（四）utility文件解读" href="/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/#SOHUCS" itemprop="discussionUrl">
       <span id="sourceId::6ed3eebc09d2237963daad43bab3bc96" class="cy_cmt_count" itemprop="commentCount"></span>
     </a>
   </span>
@@ -305,7 +311,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/" title="Simple-LIO-SAM——utility文件解读">https://zeal-up.github.io/2023/03/22/lio_sam/utility文件解读/</a>
+      <a href="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/" title="Simple-LIO-SAM——（四）utility文件解读">https://zeal-up.github.io/2023/03/22/lio_sam/utility文件解读/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -322,13 +328,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/" rel="prev" title="Simple-LIO-SAM——总体流程认识">
-                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——总体流程认识
+                <a href="/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/" rel="prev" title="Simple-LIO-SAM——（三）总体流程认识">
+                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——（三）总体流程认识
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2023/03/22/lio_sam/imageProjection-doc/" rel="next" title="Simple-LIO-SAM——点云去畸变模块">
-                  Simple-LIO-SAM——点云去畸变模块 <i class="fa fa-chevron-right"></i>
+                <a href="/2023/03/22/lio_sam/imageProjection-doc/" rel="next" title="Simple-LIO-SAM——（五）点云去畸变模块">
+                  Simple-LIO-SAM——（五）点云去畸变模块 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>

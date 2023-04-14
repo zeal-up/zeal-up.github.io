@@ -21,7 +21,7 @@
 
     <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述  点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了LeGO-LOAM，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用  去除激光雷达点云的运动畸变 检索每一帧点云对应的IMU输出角度、IMU里程计位姿（发布自ImuPreintegration），以便MapOptimization模块用">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Simple-LIO-SAM——点云去畸变模块">
+<meta property="og:title" content="Simple-LIO-SAM——（五）点云去畸变模块">
 <meta property="og:url" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
 <meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述  点云去畸变模块(imageProjection.cpp文件，文件命名应该是继承了LeGO-LOAM，其实我觉得应该叫做数据预处理模块更合适）主要有以下几个作用  去除激光雷达点云的运动畸变 检索每一帧点云对应的IMU输出角度、IMU里程计位姿（发布自ImuPreintegration），以便MapOptimization模块用">
@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-deskewInfo.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-projectPointCloud.png">
 <meta property="article:published_time" content="2023-03-22T07:55:36.000Z">
-<meta property="article:modified_time" content="2023-03-30T13:30:17.702Z">
+<meta property="article:modified_time" content="2023-04-13T10:50:34.432Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
@@ -45,10 +45,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/","path":"2023/03/22/lio_sam/imageProjection-doc/","title":"Simple-LIO-SAM——点云去畸变模块"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/","path":"2023/03/22/lio_sam/imageProjection-doc/","title":"Simple-LIO-SAM——（五）点云去畸变模块"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Simple-LIO-SAM——点云去畸变模块 | Zeal's Blog</title>
+<title>Simple-LIO-SAM——（五）点云去畸变模块 | Zeal's Blog</title>
   
   <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
   <script src="/js/third-party/analytics/google-analytics.js"></script>
@@ -191,12 +191,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Simple-LIO-SAM——点云去畸变模块 | Zeal's Blog">
+      <meta itemprop="name" content="Simple-LIO-SAM——（五）点云去畸变模块 | Zeal's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Simple-LIO-SAM——点云去畸变模块
+          Simple-LIO-SAM——（五）点云去畸变模块
         </h1>
 
         <div class="post-meta-container">
@@ -214,7 +214,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-30 21:30:17" itemprop="dateModified" datetime="2023-03-30T21:30:17+08:00">2023-03-30</time>
+      <time title="修改时间：2023-04-13 18:50:34" itemprop="dateModified" datetime="2023-04-13T18:50:34+08:00">2023-04-13</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -235,7 +235,7 @@
     </span>
 
   
-    <span id="/2023/03/22/lio_sam/imageProjection-doc/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——点云去畸变模块" title="阅读次数">
+    <span id="/2023/03/22/lio_sam/imageProjection-doc/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——（五）点云去畸变模块" title="阅读次数">
       <span class="post-meta-item-icon">
         <i class="far fa-eye"></i>
       </span>
@@ -250,7 +250,7 @@
       </span>
       <span class="post-meta-item-text">Changyan：</span>
     
-    <a title="Simple-LIO-SAM——点云去畸变模块" href="/2023/03/22/lio_sam/imageProjection-doc/#SOHUCS" itemprop="discussionUrl">
+    <a title="Simple-LIO-SAM——（五）点云去畸变模块" href="/2023/03/22/lio_sam/imageProjection-doc/#SOHUCS" itemprop="discussionUrl">
       <span id="sourceId::92a09cadad63fefbcbc8404aeb27c1f1" class="cy_cmt_count" itemprop="commentCount"></span>
     </a>
   </span>
@@ -322,7 +322,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/" title="Simple-LIO-SAM——点云去畸变模块">https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/</a>
+      <a href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/" title="Simple-LIO-SAM——（五）点云去畸变模块">https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -339,13 +339,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/" rel="prev" title="Simple-LIO-SAM——utility文件解读">
-                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——utility文件解读
+                <a href="/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/" rel="prev" title="Simple-LIO-SAM——（四）utility文件解读">
+                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——（四）utility文件解读
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2023/03/22/lio_sam/featureExtraction-doc/" rel="next" title="Simple-LIO-SAM——特征提取模块">
-                  Simple-LIO-SAM——特征提取模块 <i class="fa fa-chevron-right"></i>
+                <a href="/2023/03/22/lio_sam/featureExtraction-doc/" rel="next" title="Simple-LIO-SAM——（六）特征提取模块">
+                  Simple-LIO-SAM——（六）特征提取模块 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>

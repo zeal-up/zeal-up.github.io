@@ -21,7 +21,7 @@
 
     <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述  IMU预积分模块无论在VIO或者LIO中都是一个非常重要的模块。VIO或者LIO中的I，也就是Inertial指的是惯性，基本上在这类SLAM框架里指的就是IMU里程计。 IMU可以输出车辆坐标系下的三轴加速度、三轴角速度、三轴地磁计（九轴IMU）。我们都知道，加速度的积分是速度、速度的积分是距离，角速度的积分是角度，地磁计可">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Simple-LIO-SAM——IMU预积分模块">
+<meta property="og:title" content="Simple-LIO-SAM——（八）IMU预积分模块">
 <meta property="og:url" content="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
 <meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述  IMU预积分模块无论在VIO或者LIO中都是一个非常重要的模块。VIO或者LIO中的I，也就是Inertial指的是惯性，基本上在这类SLAM框架里指的就是IMU里程计。 IMU可以输出车辆坐标系下的三轴加速度、三轴角速度、三轴地磁计（九轴IMU）。我们都知道，加速度的积分是速度、速度的积分是距离，角速度的积分是角度，地磁计可">
@@ -36,7 +36,7 @@
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/imgs/Design-imuPreintegration-setBias.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/imgs/Design-imuPreintegration-imuHandler.png">
 <meta property="article:published_time" content="2023-03-30T12:55:54.000Z">
-<meta property="article:modified_time" content="2023-03-31T14:32:13.959Z">
+<meta property="article:modified_time" content="2023-04-13T10:51:09.076Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
@@ -48,10 +48,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/","path":"2023/03/30/lio_sam/imuPreintegration-doc/","title":"Simple-LIO-SAM——IMU预积分模块"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/","path":"2023/03/30/lio_sam/imuPreintegration-doc/","title":"Simple-LIO-SAM——（八）IMU预积分模块"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Simple-LIO-SAM——IMU预积分模块 | Zeal's Blog</title>
+<title>Simple-LIO-SAM——（八）IMU预积分模块 | Zeal's Blog</title>
   
   <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
   <script src="/js/third-party/analytics/google-analytics.js"></script>
@@ -194,12 +194,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Simple-LIO-SAM——IMU预积分模块 | Zeal's Blog">
+      <meta itemprop="name" content="Simple-LIO-SAM——（八）IMU预积分模块 | Zeal's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Simple-LIO-SAM——IMU预积分模块
+          Simple-LIO-SAM——（八）IMU预积分模块
         </h1>
 
         <div class="post-meta-container">
@@ -217,7 +217,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-03-31 22:32:13" itemprop="dateModified" datetime="2023-03-31T22:32:13+08:00">2023-03-31</time>
+      <time title="修改时间：2023-04-13 18:51:09" itemprop="dateModified" datetime="2023-04-13T18:51:09+08:00">2023-04-13</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -238,7 +238,7 @@
     </span>
 
   
-    <span id="/2023/03/30/lio_sam/imuPreintegration-doc/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——IMU预积分模块" title="阅读次数">
+    <span id="/2023/03/30/lio_sam/imuPreintegration-doc/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——（八）IMU预积分模块" title="阅读次数">
       <span class="post-meta-item-icon">
         <i class="far fa-eye"></i>
       </span>
@@ -253,7 +253,7 @@
       </span>
       <span class="post-meta-item-text">Changyan：</span>
     
-    <a title="Simple-LIO-SAM——IMU预积分模块" href="/2023/03/30/lio_sam/imuPreintegration-doc/#SOHUCS" itemprop="discussionUrl">
+    <a title="Simple-LIO-SAM——（八）IMU预积分模块" href="/2023/03/30/lio_sam/imuPreintegration-doc/#SOHUCS" itemprop="discussionUrl">
       <span id="sourceId::447e7d053e8cf00fca42d617e062a049" class="cy_cmt_count" itemprop="commentCount"></span>
     </a>
   </span>
@@ -352,7 +352,7 @@ imuHandler
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/" title="Simple-LIO-SAM——IMU预积分模块">https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/</a>
+      <a href="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/" title="Simple-LIO-SAM——（八）IMU预积分模块">https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -369,13 +369,13 @@ imuHandler
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2023/03/27/lio_sam/gtsam-quickstart/" rel="prev" title="Simple-LIO-SAM——GTSAM快速入门">
-                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——GTSAM快速入门
+                <a href="/2023/03/27/lio_sam/gtsam-quickstart/" rel="prev" title="Simple-LIO-SAM——（七）GTSAM快速入门">
+                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——（七）GTSAM快速入门
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2023/04/06/lio_sam/pcdRegistration-doc/" rel="next" title="Simple-LIO-SAM——点云匹配算法详解">
-                  Simple-LIO-SAM——点云匹配算法详解 <i class="fa fa-chevron-right"></i>
+                <a href="/2023/04/06/lio_sam/pcdRegistration-doc/" rel="next" title="Simple-LIO-SAM——（九）点云匹配算法详解">
+                  Simple-LIO-SAM——（九）点云匹配算法详解 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
