@@ -39,7 +39,7 @@
 <meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/loopClosure.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/imgs/Design-mapOptimization-loopThread.png">
 <meta property="article:published_time" content="2023-04-11T14:00:19.000Z">
-<meta property="article:modified_time" content="2023-04-14T02:11:57.464Z">
+<meta property="article:modified_time" content="2023-04-18T14:44:36.813Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
@@ -221,7 +221,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-04-14 10:11:57" itemprop="dateModified" datetime="2023-04-14T10:11:57+08:00">2023-04-14</time>
+      <time title="修改时间：2023-04-18 22:44:36" itemprop="dateModified" datetime="2023-04-18T22:44:36+08:00">2023-04-18</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -277,12 +277,12 @@
 <li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
 <li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
 </ul>
-<p><img src="./imgs/Design-Pipelines-mapOpt.png" alt="后端优化" /> 这是<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>四大部分（点云去畸变、特征提取、预积分、后端优化）中最复杂的一个模块了，完全弄懂这个模块也就离完全理解<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>不远了。 这个模块负责SLAM框架中的后端优化，由于<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中使用图优化作为后端优化算法，所以有时候笔者也会称这个模块为图优化模块。但是这个模块的 作用不单单是负责后端优化，还有1）、全局地图可视化；2）、回环检测等功能。</p>
+<p><img src="./imgs/Design-Pipelines-mapOpt.png" alt="后端优化" /> 这是<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>四大部分（点云去畸变、特征提取、预积分、后端优化）中最复杂的一个模块了，完全弄懂这个模块也就离完全理解<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>不远了。 这个模块负责SLAM框架中的后端优化，由于<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中使用图优化作为后端优化算法，所以有时候笔者也会称这个模块为图优化模块。但是这个模块的 作用不单单是负责后端优化，还有1）、全局地图可视化；2）、回环检测等功能。</p>
 <p>这个模块一共有三个主要线程执行具体功能，三个线程分别如下：</p>
 <ol type="1">
 <li>雷达里程计及后端优化线程 这个线程主要负责执行雷达到地图的匹配，得到较为准确的雷达里程计，然后将雷达里程计、回环检测因子加入因子图进行优化，得到全局优化的关键帧位姿。</li>
 <li>回环检测线程 回环检测使用较为费时的ICP算法，因此作为一个单独的线程运行。当检测到合适的回环因子后，会加入全局缓存队列，在雷达里程计线程中被加入因子图优化。</li>
-<li>全局地图可视化线程 <a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中对于地图的存储格式是通过一系列关键帧的点云和位姿存储，而不是通过一整个点云存储。为了能够以较低的频率发布全局地图，后端优化模块单独有一个线程 对历史关键帧的点云根据最新的位姿转换到地图坐标系，然后将融合后的全局点云地图发布出去。</li>
+<li>全局地图可视化线程 <a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中对于地图的存储格式是通过一系列关键帧的点云和位姿存储，而不是通过一整个点云存储。为了能够以较低的频率发布全局地图，后端优化模块单独有一个线程 对历史关键帧的点云根据最新的位姿转换到地图坐标系，然后将融合后的全局点云地图发布出去。</li>
 </ol>
 <p>废话不多说，下面分别介绍这三个线程的主要流程和方法</p>
 <h2 id="雷达里程计及后端优化线程">雷达里程计及后端优化线程</h2>
@@ -294,7 +294,7 @@
 <h3 id="雷达里程计的最高频率">雷达里程计的最高频率</h3>
 <p>雷达里程计并不是对每一帧点云都进行处理，这里有一个时间阈值的判断 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (timeLaserInfoCur - timeLastProcessing &gt;= mappingProcessInterval)</span><br></pre></td></tr></table></figure> <code>mappingProcessInterval</code>的默认参数是0.15s，所以在默认参数下，雷达里程计不会超过1/0.15Hz</p>
 <h3 id="点云匹配的初始值">点云匹配的初始值</h3>
-<p>基本所有的精细点云匹配都需要一个较好的初值。<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中的点云匹配使用高斯牛顿算法优化当前帧点云到局部地图的距离（具体算法见本项目博客的相关文章），基于最小二乘法的点云匹配更需要一个优良的初值。 回顾一下我们在<code>ImageProjection</code>也就是点云去畸变模块的内容，在点云去畸变模块，除了对点云做运动畸变校正之外，还从IMU原始输出的角度和预积分模块的输出找到与当前帧点云时间最相近的数据，加入发布的消息中跟随点云一起发布。</p>
+<p>基本所有的精细点云匹配都需要一个较好的初值。<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中的点云匹配使用高斯牛顿算法优化当前帧点云到局部地图的距离（具体算法见本项目博客的相关文章），基于最小二乘法的点云匹配更需要一个优良的初值。 回顾一下我们在<code>ImageProjection</code>也就是点云去畸变模块的内容，在点云去畸变模块，除了对点云做运动畸变校正之外，还从IMU原始输出的角度和预积分模块的输出找到与当前帧点云时间最相近的数据，加入发布的消息中跟随点云一起发布。</p>
 在后端优化模块中，会优先判断接收的消息中是否有设置好的预积分数据，若有，则使用该数据作为该帧点云的初始值，否则，使用IMU的角度增量作为初始值。当然，特殊情况是第一帧的时候会使用IMU输出的角度作为初始值。 <img src="./imgs/Design-mapOptimization-initialGuess.png" alt="初始值选取" />
 <center>
 初始值选取
@@ -314,22 +314,22 @@ T_{incre} = \hat{T}_{pre}^{-1}\hat{T}_{cur}\\
 <p>这部分用的算法比较复杂，具体参考本项目的另一篇文章<a href="https://zeal-up.github.io/2023/04/06/lio_sam/pcdRegistration-doc/">Simple-LIO-SAM——点云匹配算法详解</a>。 只要明白，经过这个步骤后，在第一步设置的点云位姿初始值已经被点云匹配算法更新为更准确的位姿。 <img src="./imgs/Design-mapOptimization-scan2Map.png" alt="点云匹配" /></p>
 <h3 id="因子图构建及优化">因子图构建及优化</h3>
 <p>这个步骤稍微比较复杂，我们先理一下目前手头有什么： 1. 经过点云匹配校正后的当前帧的位姿 2. 回环检测得到的某一帧关键帧到另一帧关键帧的相对位姿（这个部分在回环检测线程进行，这里只需要当作现有数据即可） 3. gps里程计（由于这部分需要额外的计算，暂且忽略gps的输入）</p>
-<p>PS:这部分需要<a target="_blank" rel="noopener" href="https://gtsam.org/" title="gtsam.org">GTSAM</a>的知识，可以参考本项目的另外一篇文章：<a href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/">Simple-LIO-SAM——GTSAM快速入门</a></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>使用上面两个位姿关系构建因子图，并使用因子图优化算法进行整体的优化，得到全局优化下的关键帧位姿 <img src="./imgs/Design-mapOptimization-graphOpt01.png" alt="因子图构建流程" /></p>
-<p><strong>关键帧的选择</strong> 并不是所有的雷达帧都会被当作关键帧，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>使用一种比较简单的方案判断是否将当前帧采纳为关键帧：只有与上一帧关键帧的位姿相差足够大才会采纳为关键帧。</p>
+<p>PS:这部分需要<a target="_blank" rel="noopener" href="https://gtsam.org/">GTSAM</a>的知识，可以参考本项目的另外一篇文章：<a href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/">Simple-LIO-SAM——GTSAM快速入门</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>使用上面两个位姿关系构建因子图，并使用因子图优化算法进行整体的优化，得到全局优化下的关键帧位姿 <img src="./imgs/Design-mapOptimization-graphOpt01.png" alt="因子图构建流程" /></p>
+<p><strong>关键帧的选择</strong> 并不是所有的雷达帧都会被当作关键帧，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>使用一种比较简单的方案判断是否将当前帧采纳为关键帧：只有与上一帧关键帧的位姿相差足够大才会采纳为关键帧。</p>
 <p><strong>添加激光里程计因子</strong> <img src="./imgs/Design-mapOptimization-graphOpt-odomFactor.png" alt="激光里程计因子" /></p>
 <p><strong>回环因子</strong> <img src="./imgs/Design-mapOptimization-graphOpt-loopFactor.png" alt="添加回环因子" /></p>
 <p><strong>设置因子图初值并优化</strong> <img src="./imgs/Design-mapOptimization-graphOpt-optimization.png" alt="因子图优化" /></p>
 <h3 id="更新历史关键帧位姿">更新历史关键帧位姿</h3>
 <p>当有新的回环被检测到，该回环关系被加入因子图进行优化。由于回环关系是一种很强约束性的观测，因此，在观测到新的回环之后，因子图优化对历史关键帧的位姿变化会比较大，因此需要对历史关键帧的位姿一起做一次更新。 <img src="./imgs/Design-mapOptimization-updatePath.png" alt="更新历史位姿" /></p>
 <h3 id="发布里程计及可视化点云">发布里程计及可视化点云</h3>
-<p>在原始的<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>代码中这部分还有较多处理，但实际上并没有太多作用。在本项目代码<a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM" title="Simple LIO-SAM">spl</a>中，已经去除了冗余部分。这部分就只是将计算出来的激光里程计往外发布。</p>
+<p>在原始的<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>代码中这部分还有较多处理，但实际上并没有太多作用。在本项目代码<a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">spl</a>中，已经去除了冗余部分。这部分就只是将计算出来的激光里程计往外发布。</p>
 <h2 id="回环检测线程">回环检测线程</h2>
 回环检测是SLAM中很重要的一个环节。通过检查当前位置是否已经是到达过的位置，并对重复到达的位置匹配计算位姿。如下图中，<span class="math inline">\(x_5\)</span>与<span class="math inline">\(x_2\)</span>够成回环，<span class="math inline">\(f_5(x_5,x_2)\)</span>是两个位置间的相对位置关系。通过回环之间的约束，对因子图优化器提供很强的信息，使得整体的位姿估计达到全局最优的状态。 <img src="./imgs/loopClosure.png" alt="回环因子" />
 <center>
 回环因子示意图
 </center>
-<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>中回环检测使用ICP算法，计算最新的关键帧与可能形成回环的位置的点云匹配，并只有在匹配分数非常好的情况下才采纳这个回环结果。由于这部分是比较耗费计算时间的，并且，回环关系只需要以比较低的状态加入因子图即可，因此，在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM" title="liosam仓库">LIOSAM</a>的<code>mapOptimization.cpp</code>中是使用一个独立线程执行回环检测： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> MO = std::<span class="built_in">make_shared</span>&lt;mapOptimization&gt;(options);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 回环检测独立线程</span></span><br><span class="line"><span class="function">std::thread <span class="title">loopthread</span><span class="params">(&amp;mapOptimization::loopClosureThread, MO)</span></span>;</span><br></pre></td></tr></table></figure></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中回环检测使用ICP算法，计算最新的关键帧与可能形成回环的位置的点云匹配，并只有在匹配分数非常好的情况下才采纳这个回环结果。由于这部分是比较耗费计算时间的，并且，回环关系只需要以比较低的状态加入因子图即可，因此，在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>的<code>mapOptimization.cpp</code>中是使用一个独立线程执行回环检测： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> MO = std::<span class="built_in">make_shared</span>&lt;mapOptimization&gt;(options);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 回环检测独立线程</span></span><br><span class="line"><span class="function">std::thread <span class="title">loopthread</span><span class="params">(&amp;mapOptimization::loopClosureThread, MO)</span></span>;</span><br></pre></td></tr></table></figure></p>
 <p>同时，这个线程内部也默认被设为较低的执行频率（默认1Hz） <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">  * 回环检测独立线程</span></span><br><span class="line"><span class="comment">  * 1. 由于回环检测中用到了点云匹配，较为耗时，所以独立为单独的线程运行</span></span><br><span class="line"><span class="comment">  * 2. 新的回环关系被检测出来时被主线程加入因子图中优化</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">loopClosureThread</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (loopClosureEnableFlag == <span class="literal">false</span>)</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 默认 1</span></span><br><span class="line">    <span class="function">rclcpp::Rate <span class="title">rate</span><span class="params">(loopClosureFrequency)</span></span>;</span><br><span class="line">    <span class="keyword">while</span> (rclcpp::<span class="built_in">ok</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        rate.<span class="built_in">sleep</span>();</span><br><span class="line">        <span class="built_in">performLoopClosure</span>();</span><br><span class="line">        <span class="built_in">visualizeLoopClosure</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 回环检测线程的整体流程如下： <img src="./imgs/Design-mapOptimization-loopThread.png" alt="回环检测线程流程图" />
 <center>

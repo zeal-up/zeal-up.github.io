@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  LIOSAM介绍 LIOSAM（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光——惯性里程计历程方法。 作者TixiaoShan是SLAM届大神，在LIOSAM之前发表过LeGO-LOAM，在LIOSAM之后发布了LVI-SAM，在LIO">
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  LIOSAM介绍 LIOSAM（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光惯性里程计方法。 作者TixiaoShan是SLAM届大神，在LIOSAM之前发表过LeGO-LOAM，在LIOSAM之后发布了LVI-SAM——在LIOSAM">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Simple-LIO-SAM——（一）项目简介">
 <meta property="og:url" content="https://zeal-up.github.io/2023/03/13/lio_sam/intro/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
-<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  LIOSAM介绍 LIOSAM（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光——惯性里程计历程方法。 作者TixiaoShan是SLAM届大神，在LIOSAM之前发表过LeGO-LOAM，在LIOSAM之后发布了LVI-SAM，在LIO">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  LIOSAM介绍 LIOSAM（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光惯性里程计方法。 作者TixiaoShan是SLAM届大神，在LIOSAM之前发表过LeGO-LOAM，在LIOSAM之后发布了LVI-SAM——在LIOSAM">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/13/lio_sam/intro/imgs/org_files.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/13/lio_sam/intro/imgs/org_rqtgraph.png">
@@ -36,7 +36,7 @@
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/13/lio_sam/intro/imgs/Design-imageProjection_top0.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/13/lio_sam/intro/imgs/Design-imageProjection_top1.png">
 <meta property="article:published_time" content="2023-03-13T11:45:58.000Z">
-<meta property="article:modified_time" content="2023-04-14T01:58:06.182Z">
+<meta property="article:modified_time" content="2023-04-18T14:29:16.850Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
@@ -129,7 +129,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#liosam%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">LIOSAM介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E9%A1%B9%E7%9B%AE%E7%9B%AE%E7%9A%84%E5%8F%8A%E7%89%B9%E7%82%B9%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.</span> <span class="nav-text">本项目目的及特点介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%9C%80%E6%96%B0%E7%9A%84ros2-humble%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.1.</span> <span class="nav-text">基于最新的ROS2-humble实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8C%96"><span class="nav-number">2.2.</span> <span class="nav-text">简化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%9D%E9%A2%98%E5%8F%91%E5%B8%83%E7%9A%84%E7%AE%80%E5%8C%96"><span class="nav-number">2.2.1.</span> <span class="nav-text">话题发布的简化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9D%90%E6%A0%87%E7%B3%BB%E7%AE%80%E5%8C%96"><span class="nav-number">2.2.2.</span> <span class="nav-text">坐标系简化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%9D%E7%95%99%E7%AE%97%E6%B3%95%E5%8F%8A%E5%AE%9A%E4%B9%89%E5%AE%8C%E6%95%B4%E6%80%A7"><span class="nav-number">2.2.3.</span> <span class="nav-text">保留算法及定义完整性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E5%96%84%E7%9A%84%E6%B3%A8%E9%87%8A%E5%8F%8A%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="nav-number">2.3.</span> <span class="nav-text">完善的注释及流程图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E9%A1%B9%E7%9B%AE%E6%89%80%E6%9C%89%E7%AB%A0%E8%8A%82"><span class="nav-number">3.</span> <span class="nav-text">本项目所有章节</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#liosam%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">LIOSAM介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E9%A1%B9%E7%9B%AE%E7%9B%AE%E7%9A%84"><span class="nav-number">2.</span> <span class="nav-text">本项目目的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%82%E7%94%A8%E4%BA%BA%E7%BE%A4"><span class="nav-number">3.</span> <span class="nav-text">适用人群</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#simple-lio-sam%E9%A1%B9%E7%9B%AE%E7%89%B9%E7%82%B9%E4%B8%8Eliosam%E5%8C%BA%E5%88%AB"><span class="nav-number">4.</span> <span class="nav-text">Simple-LIO-SAM项目特点&#x2F;与LIOSAM区别</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E6%9C%80%E6%96%B0%E7%9A%84ros2%E5%8F%91%E8%A1%8C%E7%89%88humble%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.1.</span> <span class="nav-text">基于最新的ROS2发行版humble实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E7%AE%B1%E5%8D%B3%E7%94%A8docker%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83"><span class="nav-number">4.2.</span> <span class="nav-text">开箱即用docker开发环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%80%E5%8C%96"><span class="nav-number">4.3.</span> <span class="nav-text">简化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%9D%E9%A2%98%E5%8F%91%E5%B8%83%E7%9A%84%E7%AE%80%E5%8C%96"><span class="nav-number">4.3.1.</span> <span class="nav-text">话题发布的简化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9D%90%E6%A0%87%E7%B3%BB%E7%AE%80%E5%8C%96"><span class="nav-number">4.3.2.</span> <span class="nav-text">坐标系简化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E7%95%99%E7%AE%97%E6%B3%95%E5%8F%8A%E5%AE%9A%E4%B9%89%E5%AE%8C%E6%95%B4%E6%80%A7"><span class="nav-number">4.4.</span> <span class="nav-text">保留算法及定义完整性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E5%96%84%E7%9A%84%E6%B3%A8%E9%87%8A%E5%8F%8A%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="nav-number">4.5.</span> <span class="nav-text">完善的注释及流程图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E9%A1%B9%E7%9B%AE%E6%89%80%E6%9C%89%E7%AB%A0%E8%8A%82"><span class="nav-number">5.</span> <span class="nav-text">本项目所有章节</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -217,7 +217,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-04-14 09:58:06" itemprop="dateModified" datetime="2023-04-14T09:58:06+08:00">2023-04-14</time>
+      <time title="修改时间：2023-04-18 22:29:16" itemprop="dateModified" datetime="2023-04-18T22:29:16+08:00">2023-04-18</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -274,30 +274,73 @@
 <li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
 </ul>
 <h2 id="liosam介绍">LIOSAM介绍</h2>
-<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光——惯性里程计历程方法。 作者<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan" title="作者Github">TixiaoShan</a>是SLAM届大神，在LIOSAM之前发表过LeGO-LOAM，在LIOSAM之后发布了LVI-SAM，在LIOSAM基础上又加入了语义定位因子。 由于网上关于<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>的解读已经有很多了，这里不会进行太过详细的复述，具体的内容解析会放在后面讲解代码的时候慢慢仔细阐述。</p>
-<p>简单来说，LIOSAM整体的框架与其他方法区别在与： 1. 使用因子图作为后端优化框架，将IMU预积分与雷达点云匹配及回环检测等紧耦合 1. 使用当前帧-局部地图匹配而不是对全局地图匹配来加速点云匹配速度 1. 基于位置关系选择回环帧，并使用点云匹配计算回环因子 1. 使用高频IMU并进行简单积分对点云做运动畸变校正</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光惯性里程计方法。 作者<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan">TixiaoShan</a>是SLAM届大神，在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>之前发表过<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM">LeGO-LOAM</a>，在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>之后发布了<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2104.10831">LVI-SAM</a>——在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>基础上又加入了语义定位因子。 网上关于<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>的解读已经有很多，这里不会进行太过详细的复述，具体的内容解析会放在后面系列文章慢慢仔细阐述。</p>
+<p>简单来说，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>整体的框架与其他方法区别在与：</p>
+<ol type="1">
+<li>使用因子图作为后端优化框架，将IMU预积分与雷达点云匹配及回环检测等紧耦合</li>
+<li>使用当前帧-局部地图匹配而不是对全局地图匹配来加速点云匹配速度</li>
+<li>基于位置关系选择回环帧，并使用点云匹配计算回环因子</li>
+<li>使用高频IMU并进行简单积分对点云做运动畸变校正</li>
+</ol>
 <p>另外，LIOSAM作者的工程功底很好，LIOSAM代码库被github上很多SLAM开源项目作为code base</p>
-<h2 id="本项目目的及特点介绍">本项目目的及特点介绍</h2>
-<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>源代码虽然不能说庞大，甚至可以说简单，因为整个代码库主要只要5个文件。 <img src="./imgs/org_files.png" alt="原始src目录" /> 但是里面每个模块都通过ROS的topic与其他模块有紧密的联系。 整个的流程对新手十分不友好，下图是LIOSAM原本运行时的<code>rqt_graph</code></p>
-<figure>
-<img src="./imgs/org_rqtgraph.png" alt="" /><figcaption>原始rqt_graph</figcaption>
-</figure>
-<p>第二个复杂之处在与LIOSAM框架设计到的知识点和工具较多，至少要熟悉<code>ROS,gtsam,pcl</code>几个库，算法层面需要熟悉<code>点云匹配、IMU积分、因子图、三维转换</code>等。 对于熟悉SLAM的人来说可能较为简单上手，但是对于新入门的人来说则一开始会一头雾水。</p>
-<p>基于上述这些原因，笔者进行了<a href="Simple%20Lio%20Sam">SPL-LIO-SAM</a>项目，希望能够以最大幅度帮助初学者理解<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>框架及里面的算法细节。 本项目对<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>做了如下改进</p>
-<h3 id="基于最新的ros2-humble实现">基于最新的ROS2-humble实现</h3>
-<p>虽然LIOSAM源码中有一个ros2分支，但该分支的维护者并不是原作者，而且已经长时间没有人维护，且该分支存在一些bug没有被修复。为了能够在进行本项目的学习过程中 熟悉最新的ROS2框架，笔者在LIOSAM的ros2分支基础上，修复了存在的bug，同时将功能较为独立的<code>Transformfusion</code>类抽取成独立的类。</p>
+<h2 id="本项目目的">本项目目的</h2>
+<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>源代码虽然不能说庞大，甚至可以说简单，因为整个代码库主要只要5个文件。 <img src="./imgs/org_files.png" alt="LIOSAM原代码src目录" />
+<center>
+LIOSAM原代码src目录
+</center>
+<p>但是原代码里面每个模块都通过ROS的topic与其他模块有紧密的联系，且非常多的冗余代码和topic，这导致了 整个的流程对新手十分不友好，下图是LIOSAM原本运行时的<code>rqt_graph</code></p>
+<img src="./imgs/org_rqtgraph.png" title="fig:" alt="原始LIOSAM运行时rqt_graph" />
+<center>
+原始LIOSAM运行时rqt_graph
+</center>
+<p>第二个复杂之处在于<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>框架涉及到的知识点和工具较多，至少要熟悉<code>ROS,gtsam,pcl</code>几个库，算法层面需要熟悉<code>点云匹配、IMU积分、因子图、三维转换</code>等。 对于熟悉SLAM的人来说可能较为简单上手，但是对于新入门的人来说则一开始会一头雾水。</p>
+<p>基于上述这些原因，笔者基于<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>改进，完成了<a href="Simple-LIO-SAM">SPL-LIO-SAM</a>项目，希望能够以最大幅度帮助初学者理解<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>框架及里面的算法细节。</p>
+<h2 id="适用人群">适用人群</h2>
+<p>如果你是SLAM大牛，那本项目可能对你没有用处。如果你是以下人群之一，笔者相信本项目可以让你受益匪浅。</p>
+<ol type="1">
+<li>SLAM初学者。本项目对代码注释和讲解可以说细致到令人发指，因此十分适合初学者学习。</li>
+<li>接触过SLAM，希望将SLAM算法工程化，并加以实现。</li>
+<li>SLAM学习者或工程师，但是希望对<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>,<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM">LeGO-LOAM</a>,<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2104.10831">LVI-SAM</a>,<a target="_blank" rel="noopener" href="https://github.com/laboshinl/loam_velodyne">loam_velodyne</a>其中任何一种算法进行精细学习</li>
+</ol>
+<h2 id="simple-lio-sam项目特点与liosam区别">Simple-LIO-SAM项目特点/与LIOSAM区别</h2>
+<h3 id="基于最新的ros2发行版humble实现">基于最新的ROS2发行版humble实现</h3>
+<p>虽然<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>源码中有一个ros2分支，但该分支的维护者并不是原作者，而且已经长时间没有人维护，且该分支存在一些bug没有被修复。为了能够在进行本项目的学习过程中 熟悉最新的ROS2框架，笔者在LIOSAM的ros2分支基础上，修复了存在的bug，同时将功能较为独立的<code>Transformfusion</code>类抽取成独立的类。</p>
+<h3 id="开箱即用docker开发环境">开箱即用docker开发环境</h3>
 <p>为了便于上手及部署，笔者同时准备了适配的docker镜像供学习者使用。</p>
 <h3 id="简化">简化</h3>
 <h4 id="话题发布的简化">话题发布的简化</h4>
-<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>原始代码中有很多中间结果的发布，这些中间结果可以用来可视化及调试程序，但是对于学习者和开发者而言不仅意义不大，而且会在初始学习源码阶段误导学习者。 本项目在话题发布上进行<code>大幅度简化</code>，简化后的设计如下： <img src="./imgs/Design-Node%26%26Topics.png" alt="节点及话题设计" /></p>
-<p>简化后运行时的<code>rqt_graph</code>: <img src="./imgs/spl_liosam_rosgraph.png" alt="简化后的ros—grpah" /></p>
+<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>原始代码中有很多中间结果的发布，这些中间结果可以用来可视化及调试程序，但是对于学习者和开发者而言不仅意义不大，而且会在初始学习源码阶段误导学习者。 本项目在话题发布上进行<code>大幅度简化</code>，简化后的设计如下： <img src="./imgs/Design-Node%26%26Topics.png" alt="Simple-LIO-SAM节点及话题设计" />
+<center>
+Simple-LIO-SAM节点及话题设计
+</center>
+简化后运行时的<code>rqt_graph</code>: <img src="./imgs/spl_liosam_rosgraph.png" alt="Simple-LIO-SAM的rqt_grpah" />
+<center>
+Simple-LIO-SAM的rqt_grpah
+</center>
 <h4 id="坐标系简化">坐标系简化</h4>
-<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>中实用的坐标系并不复杂，但是作者提供的<code>urdf</code>包含了太多为了兼容性考虑的坐标系，这些坐标系对于实际运行和理解并没有用。因此，本项目基于ROS对坐标系的约束，将 坐标系关系树简化为如下： <img src="./imgs/Design-CoordinateSystem.png" alt="简化后的坐标系关系" /></p>
-<h4 id="保留算法及定义完整性">保留算法及定义完整性</h4>
-<p>虽然本项目去除了很多非必要话题，同时对于一些非必要代码也进行了简化，但对一些学习算法有帮助的细节依旧保留。比如激光里程计在发布的时候有<code>mapping/odometry</code>和<code>mapping/odometry_incremental</code>两个话题，两个话题虽然类似但是背后却有很不同的函数，但同时两者合一又不影响算法的运行。因此采取的做法时在代码中保留这部分代码，同时加以解释，但发布时只发布其中一个话题。</p>
+<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中实用的坐标系并不复杂，但是作者提供的<code>urdf</code>包含了太多为了兼容性考虑的坐标系，这些坐标系对于实际运行和理解并没有用。因此，本项目基于ROS对坐标系的约束，将 坐标系关系树简化为如下： <img src="./imgs/Design-CoordinateSystem.png" alt="Simple-LIO-SAM的坐标系关系" />
+<center>
+Simple-LIO-SAM的坐标系关系
+</center>
+<h3 id="保留算法及定义完整性">保留算法及定义完整性</h3>
+<p>虽然本项目去除了很多非必要topic，同时对于一些非必要代码也进行了简化，但对一些学习算法有帮助的细节依旧保留。比如激光里程计在发布的时候有<code>mapping/odometry</code>和<code>mapping/odometry_incremental</code>两个话题，这两个话题虽然类似但是背后却有很不同的含义，但同时两者合一又不影响算法的运行。因此采取的做法时在代码中保留这部分代码，同时加以解释，但发布时只发布其中一个话题。</p>
 <h3 id="完善的注释及流程图">完善的注释及流程图</h3>
-<p>网上其实对<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>源码的注释并不少，比如<a target="_blank" rel="noopener" href="https://github.com/chennuo0125-HIT/LIO-SAM-note" title="LIO-SAM-note">LIO-SAM-note</a>和<a target="_blank" rel="noopener" href="https://github.com/smilefacehh/LIO-SAM-DetailedNote" title="LIO-SAM-DetailedNote">LIO-SAM-DetailedNote</a>，还有一些blog也对源码做了解释，但是都不太完美，同时缺少流程性的组织。本项目借鉴了一些开源项目的注释，并加以完善，可以说，本项目是目前对<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>注释最完善的开源项目。 <img src="./imgs/comments.png" alt="部分注释图" /></p>
-<p>为了最为清晰的展示<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258" title="liosam论文">LIOSAM</a>算法不同模块的流程，该项目还对各个模块流程进行梳理，建立了完善的流程图设计 <img src="./imgs/Design-Pipelines.png" alt="Pipeline" /> <img src="./imgs/Design-imageProjection_top0.png" alt="imageProjection_top0" /> <img src="./imgs/Design-imageProjection_top1.png" alt="imageProjection_top0" /></p>
+网上对<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>源码的注释其实并不少，比如<a target="_blank" rel="noopener" href="https://github.com/chennuo0125-HIT/LIO-SAM-note">LIO-SAM-note</a>和<a target="_blank" rel="noopener" href="https://github.com/smilefacehh/LIO-SAM-DetailedNote">LIO-SAM-DetailedNote</a>，还有一些blog也对源码做了解释，但是都不太完美，同时缺少项目性的组织。本项目借鉴了一些开源项目的注释，并加以完善，可以说，本项目是目前对<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>注释最完善的开源项目。<a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">Simple-LIO-SAM代码</a> <img src="./imgs/comments.png" alt="Simple-LIO-SAM部分注释图" />
+<center>
+Simple-LIO-SAM部分注释图
+</center>
+为了最为清晰的展示<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>算法不同模块的流程，该项目还对各个模块流程进行梳理，建立了完善的流程图设计 <img src="./imgs/Design-Pipelines.png" alt="算法Pipeline梳理" />
+<center>
+算法Pipeline梳理
+</center>
+<img src="./imgs/Design-imageProjection_top0.png" title="fig:" alt="点云去畸变流程图-top" />
+<center>
+点云去畸变流程图-top
+</center>
+<img src="./imgs/Design-imageProjection_top1.png" title="fig:" alt="点云去畸变流程图-细节示例1" />
+<center>
+点云去畸变流程图-细节示例
+</center>
 <h2 id="本项目所有章节">本项目所有章节</h2>
 <ol type="1">
 <li><a href="https://zeal-up.github.io/2023/03/13/lio_sam/intro/">Simple-LIO-SAM——（一）项目简介</a></li>
