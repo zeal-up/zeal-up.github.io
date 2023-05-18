@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="前言 原本以为Allan方差应该是一个简单的方差计算方法，但是经过两天的各种探索和资料学习，发现这玩意的原理远比想象中的复杂。详细的公式推导需要设计到随机信号的频谱分析、IMU各种误差模型等内容。并且，Allan方差一开始用来分析原子钟晶体振荡频率的误差分析，后续这种分析方法被用到IMU的误差分析，并且IEEE也制订了相应标准（见参考资料1），这一系列的发展过程其实很长，同时也有不同的定义。以上种">
+<meta property="og:type" content="article">
+<meta property="og:title" content="惯性测量单元Allan方差分析详解">
+<meta property="og:url" content="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="前言 原本以为Allan方差应该是一个简单的方差计算方法，但是经过两天的各种探索和资料学习，发现这玩意的原理远比想象中的复杂。详细的公式推导需要设计到随机信号的频谱分析、IMU各种误差模型等内容。并且，Allan方差一开始用来分析原子钟晶体振荡频率的误差分析，后续这种分析方法被用到IMU的误差分析，并且IEEE也制订了相应标准（见参考资料1），这一系列的发展过程其实很长，同时也有不同的定义。以上种">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/imgs/01-imu-axis.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/imgs/02-imu-errors.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/imgs/03-variance.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/imgs/04-general-covariance">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/imgs/05-allan-covariance.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/imgs/06-overlapping-sample.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/imgs/07-allan-log-curve.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/imgs/08-display-of-errors-in-curve.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/imgs/09-psd-2-allan.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/imgs/10-white-noise-psd.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/imgs/11-white-noise-psd-integrated.png">
+<meta property="article:published_time" content="2023-04-19T07:37:57.000Z">
+<meta property="article:modified_time" content="2023-04-20T14:53:24.050Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="传感器标定">
+<meta property="article:tag" content="Allan方差">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/imgs/01-imu-axis.png">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/","path":"2023/04/19/sensors/AllanVariance/","title":"惯性测量单元Allan方差分析详解"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>惯性测量单元Allan方差分析详解 | Zeal's Blog</title>
+  
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+  <a target="_blank" rel="noopener" href="https://github.com/zeal-up" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%83%AF%E6%80%A7%E6%B5%8B%E9%87%8F%E5%8D%95%E5%85%83imuinertial-measuremnt-unit%E8%AF%AF%E5%B7%AE%E9%A1%B9"><span class="nav-number">2.</span> <span class="nav-text">惯性测量单元（IMU：Inertial Measuremnt Unit）误差项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%92%E5%BA%A6%E9%9A%8F%E6%9C%BA%E6%B8%B8%E8%B5%B0arwangle-random-walkv.s.-%E8%A7%92%E9%80%9F%E7%8E%87%E9%9A%8F%E6%9C%BA%E6%B8%B8%E8%B5%B0arrw"><span class="nav-number">2.1.</span> <span class="nav-text">角度随机游走（ARW:Angle Random Walk）v.s. 角速率随机游走（ARRW）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#allan%E6%96%B9%E5%B7%AE"><span class="nav-number">3.</span> <span class="nav-text">Allan方差</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%96%B9%E5%B7%AE"><span class="nav-number">3.1.</span> <span class="nav-text">数据方差</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E4%B8%8D%E5%90%8C%E6%97%B6%E9%97%B4%E5%B0%BA%E5%BA%A6%E4%B8%8A%E7%9A%84%E8%AF%AF%E5%B7%AE%E5%88%BB%E7%94%BB"><span class="nav-number">3.2.</span> <span class="nav-text">对不同时间尺度上的误差刻画</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#allan%E6%96%B9%E5%B7%AE%E5%AE%9A%E4%B9%89"><span class="nav-number">3.3.</span> <span class="nav-text">Allan方差定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%92%E9%80%9F%E5%BA%A6%E7%9A%84allan%E6%96%B9%E5%B7%AE%E8%AE%A1%E7%AE%97"><span class="nav-number">3.4.</span> <span class="nav-text">角速度的Allan方差计算</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E5%8F%A0%E5%88%86%E6%AE%B5%E6%B3%95%E8%AE%A1%E7%AE%97allan%E6%96%B9%E5%B7%AE"><span class="nav-number">3.5.</span> <span class="nav-text">重叠分段法计算Allan方差</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#allan%E6%96%B9%E5%B7%AE%E5%8F%8C%E5%AF%B9%E6%95%B0%E6%9B%B2%E7%BA%BF"><span class="nav-number">4.</span> <span class="nav-text">Allan方差双对数曲线</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%92%E5%BA%A6%E9%9A%8F%E6%9C%BA%E6%B8%B8%E8%B5%B0%E7%99%BD%E5%99%AA%E5%A3%B0%E5%BC%BA%E5%BA%A6"><span class="nav-number">4.1.</span> <span class="nav-text">角度随机游走&#x2F;白噪声强度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%B6%E5%81%8F%E4%B8%8D%E7%A8%B3%E5%AE%9A%E6%80%A7"><span class="nav-number">4.2.</span> <span class="nav-text">零偏不稳定性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9F%E7%8E%87%E9%9A%8F%E6%9C%BA%E6%B8%B8%E8%B5%B0"><span class="nav-number">4.3.</span> <span class="nav-text">速率随机游走</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%90%8C%E7%9A%84%E6%96%9C%E7%8E%87%E5%AF%B9%E5%BA%94%E4%B8%8D%E5%90%8C%E7%9A%84%E8%AF%AF%E5%B7%AE%E9%A1%B9"><span class="nav-number">4.4.</span> <span class="nav-text">为什么不同的斜率对应不同的误差项？？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E9%87%8D%E7%82%B9"><span class="nav-number">5.</span> <span class="nav-text">应用重点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E7%9A%84imu%E5%BB%BA%E6%A8%A1%E6%96%B9%E5%BC%8F%E9%9C%80%E8%A6%81%E4%B8%8D%E5%90%8C%E7%9A%84%E7%B3%BB%E6%95%B0"><span class="nav-number">5.1.</span> <span class="nav-text">不同的IMU建模方式需要不同的系数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E4%BD%8D"><span class="nav-number">5.2.</span> <span class="nav-text">单位</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="惯性测量单元Allan方差分析详解 | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          惯性测量单元Allan方差分析详解
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-04-19 15:37:57" itemprop="dateCreated datePublished" datetime="2023-04-19T15:37:57+08:00">2023-04-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-04-20 22:53:24" itemprop="dateModified" datetime="2023-04-20T22:53:24+08:00">2023-04-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E4%BC%A0%E6%84%9F%E5%99%A8%E6%A0%87%E5%AE%9A/" itemprop="url" rel="index"><span itemprop="name">传感器标定</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/04/19/sensors/AllanVariance/" class="post-meta-item leancloud_visitors" data-flag-title="惯性测量单元Allan方差分析详解" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="惯性测量单元Allan方差分析详解" href="/2023/04/19/sensors/AllanVariance/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::aa4c05f956521692fdd7a55fc75da757" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="前言">前言</h2>
+<p>原本以为Allan方差应该是一个简单的方差计算方法，但是经过两天的各种探索和资料学习，发现这玩意的原理远比想象中的复杂。详细的公式推导需要设计到随机信号的频谱分析、IMU各种误差模型等内容。并且，Allan方差一开始用来分析原子钟晶体振荡频率的误差分析，后续这种分析方法被用到IMU的误差分析，并且IEEE也制订了相应标准（见<a target="_blank" rel="noopener" href="http://www.i2nav.com/ueditor/jsp/upload/file/20211008/1633700373874080110.pdf">参考资料1</a>），这一系列的发展过程其实很长，同时也有不同的定义。以上种种，让读者放弃了摸清Allan方差的详细来龙去脉和公式推导，毕竟，工程师和数学家还是有区别的……但是关于Allan方差的解释和应用网上的博文也都不够全面，单看某一篇文章很难获取对Allan方差的直观理解（没有找到一篇很好的文章能够说明Allan方差的定义和双对数曲线不同斜率段对应的噪声项是怎么来的）。</p>
+<p>本文对以下内容做了梳理：</p>
+<ol type="1">
+<li>IMU的噪声项及其含义</li>
+<li>Allan方差的定义和推导</li>
+<li>对陀螺仪的数据计算Allan方差的方法</li>
+<li>Allan方差双对数曲线的含义和分析</li>
+<li>关键概念解读</li>
+</ol>
+<p><code>PS: 笔者水平有限，本文只是笔者对Allan方差学习的总结，并不是一篇严格的理论推导文章</code></p>
+<h2 id="惯性测量单元imuinertial-measuremnt-unit误差项">惯性测量单元（IMU：Inertial Measuremnt Unit）误差项</h2>
+<p>这部分可以参考<a target="_blank" rel="noopener" href="https://hexagondownloads.blob.core.windows.net/public/Novatel/assets/Documents/Bulletins/APN064/APN064.pdf">参考资料2</a></p>
+<img src="./imgs/01-imu-axis.png" title="fig:" alt="IMU模型" />
+<center>
+IMU模型
+</center>
+<p>IMU的输出可以看上图，典型的六轴IMU输出三个轴的加速度和三个轴的角速度。对加速度做积分可以得到速度、再做一次积分可以得到位移；对角速度积分可以得到角度。</p>
+<p>电子器件输出都会有误差，又叫噪声。IMU的噪声项主要有以下几种：</p>
+<img src="./imgs/02-imu-errors.png" alt="IMU误差示意图" /> <cneter>IMU误差示意图
+</center>
+<ol type="1">
+<li>零偏（Bias），单位<code>deg/hr,m/s^2</code> 零偏这个词似乎不太准确，因为在非零输出时也会有偏差。如果把IMU的输出当作一个遵循高斯分布的随机信号，在静止时该随机信号的均值应该是零，但是由于bias，该均值并不是0。见上面的<code>IMU误差示意图</code>可以较好地理解。要注意的是零偏是会随着时间改变的，因此在很多卡尔曼滤波模型中会把Bias当作一个状态量。</li>
+<li>零偏可重复性（Bias Repeatability），单位<code>deg/hr,m/s^2</code> 每次上电零偏的稳定程度。</li>
+<li>零偏稳定性（Bias Stability），单位<code>deg/hr/hr,m/s^2/hr</code> 有时也叫零偏不稳定性（Bias Instability）。描述零偏的稳定程度，也可以理解为零偏的噪声。（有些文章也会叫做零偏的角度随机游走）。</li>
+<li>比例因子（Scale Factor） 比如比例因子是1.2,那么当真值是10m/s<sup>2的时候，IMU的输出可能是12m/s</sup>2。</li>
+<li>角度随机游走（ARW:Angle Random Walk），单位：<span class="math inline">\(deg/\sqrt{hr}\)</span>,<span class="math inline">\(m/s/\sqrt{hr}\)</span> 这是一个比较难理解的量，实际上笔者也没法完全理解。简单理解就是当信号叠加上一个白噪声之后，对该信号的积分就包含了白噪声的积分，白噪声的积分不再是一个白噪声，而是一个马尔科夫模型，也就是此时的噪声是上一时刻的噪声加上一个白噪声。那么放在这里，对于陀螺仪的输出（角速度）一般是用来做积分得到角度，那么角速度的白噪声的积分就会得到角度的偏差，因此叫做角度随机游走。有时候角度随机游走的值又叫做白噪声强度，比如在<a target="_blank" rel="noopener" href="https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model">kalibr:IMU-Noise-Model</a>中就有这样的描述： &gt; White Noise Terms: The parameters for the "white noise" processes are often specified in the datasheet of the sensor manufacturer. A bit misleading, they are commonly denoted as angular random walk in case of the gyro, and velocity random walk for the accel</li>
+<li>速率随机游走（RRW:Rate Random Walk） 与角度随机游走类似，速率随机游走可以看作是角加速度的误差积分导致的角速度的误差。速率随机游走对应的是陀螺仪在长时间下才会发生改变的误差项，因此可以用来近似当作<code>Bias</code>使用。在<a target="_blank" rel="noopener" href="https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model">kalibr:IMU-Noise-Model</a>中使用速率随机游走系数当作零偏参数。</li>
+</ol>
+<h3 id="角度随机游走arwangle-random-walkv.s.-角速率随机游走arrw">角度随机游走（ARW:Angle Random Walk）v.s. 角速率随机游走（ARRW）</h3>
+<p>这个很容易弄混淆的一个概念。对应到加速度计上应该叫速度随机游走和加速度随机游走。因为讲解Allan方差的时候一般会以陀螺仪为示例，因此在文中可能只出现角度随机游走和角速率随机游走。角速率随机游走又会被简写成速率随机游走，比如参考资料1的IEEE标准。下面这段百度百科的描述反而清晰： &gt; 角速率传感器的性能参数中包含角度随机游走（ARW）和角速率随机游走（ARRW），前者反映了角速率信号中白噪声的特性，积分后表现为角度随机游走；后者为角速率本身的随机游走，可认为是角加速度白噪声的积分结果。</p>
+<h2 id="allan方差">Allan方差</h2>
+<p>Allan方差又叫阿伦方差，可以用Allan方差用来描述物理器件的不同噪声参数。Allan方差相比于普通的方差具有更好的描述长时间误差的优势（具体也不太清楚）。Allan方差现在好像基本被用来当作IMU噪声标定的标准方法了。</p>
+<h3 id="数据方差">数据方差</h3>
+<figure>
+<img src="./imgs/03-variance.png" alt="" /><figcaption>数据方差及标准差计算方法</figcaption>
+</figure>
+<p>（上图引用自<a target="_blank" rel="noopener" href="http://www.i2nav.com/index/newListDetail_zw?newskind_id=13a8654e060c40c69e5f3d4c13069078&amp;newsinfo_id=c2bb31af75944e5ab665dc23b60b5fba">新手入门系列3——Allan方差分析方法的直观理解</a>）</p>
+<p>系数<span class="math inline">\(\frac{1}{N-1}\)</span>使得这样计算出来的方差是数据方差的无偏估计（概率统计原理）。</p>
+<h3 id="对不同时间尺度上的误差刻画">对不同时间尺度上的误差刻画</h3>
+<p>上面的数据方差计算方法对数据的整个序列计算误差水平，无法细分出不同时间尺度上的误差波动情况。为了能够刻画不同时间周期下数据的波动情况，我们可以先对数据分块，对每块数据取平均作为该块数据的代表。假设原始数据的采样时间是<span class="math inline">\(\tau_0\)</span>，每3个数据分成一块，则每块的间隔时间<span class="math inline">\(\tau = 3\tau_0\)</span>。分块之后，我们再将<span class="math inline">\(M\)</span>个数据块计算方差，最后求这个方差的数学期望，作为我们最后的方差</p>
+<figure>
+<img src="./imgs/04-general-covariance" alt="" /><figcaption>通用样本方差计算方法</figcaption>
+</figure>
+<p><span class="math display">\[
+\begin{split}
+\begin{array}{rcl}
+\sigma^2_{g}(M,\tau)
+&amp;=&amp;
+&lt;\sigma^2(M,\tau)&gt;\\
+&amp;=&amp;
+&lt;\frac{1}{M-1}\sum^M_{i=1}\big(\bar{y}_i-\frac{1}{M}\sum^M_{j=1}\bar{y}_j\big)^2&gt;\\
+\end{array}
+\end{split}\tag{1}
+\]</span></p>
+<p>上式中<span class="math inline">\(&lt;\cdot&gt;\)</span>表示求统计平均（期望）</p>
+<h3 id="allan方差定义">Allan方差定义</h3>
+<p>Allan方差是上述通用样本方差分析在<span class="math inline">\(M=2\)</span>时的一个特例，也就是在公式（1）中令<span class="math inline">\(M=2\)</span></p>
+<p><span class="math display">\[
+\begin{split}
+\begin{array}{rcl}
+\sigma^2(\tau)
+&amp;=&amp;
+&lt;\sigma^2(2,\tau)&gt;\\
+&amp;=&amp;
+&lt;\sum^2_{i=1}\big(\bar{y}_i-\frac{1}{2}\sum^2_{j=1}\bar{y}_j\big)^2&gt;\\
+&amp;=&amp;
+&lt;\frac{1}{2}(\bar{y}_2-\bar{y}_1)^2&gt;\\
+&amp;=&amp;
+\frac{1}{2}&lt;(\bar{y}_2-\bar{y}_1)^2&gt;
+\end{array}
+\end{split}\tag{2}
+\]</span></p>
+<p>注意，Allan方差是<span class="math inline">\(\tau\)</span>的函数</p>
+<figure>
+<img src="./imgs/05-allan-covariance.png" alt="" /><figcaption>Allan方差定义</figcaption>
+</figure>
+<h3 id="角速度的allan方差计算">角速度的Allan方差计算</h3>
+<p>这里只推导一种方式，根据<a target="_blank" rel="noopener" href="http://www.i2nav.com/ueditor/jsp/upload/file/20211008/1633700373874080110.pdf">IEEE Standard</a></p>
+<p>令陀螺仪的角度输出为<span class="math inline">\(\Omega(t^\prime)\)</span>，则角度为</p>
+<p><span class="math display">\[
+\theta(t)=\int^t\Omega(t^\prime)dt^\prime
+\]</span></p>
+<p>对于离散时间形式，时间点<span class="math inline">\(t=k\tau_0,k=1,2,3,...,N\)</span>。其中<span class="math inline">\(\tau_0\)</span>是陀螺仪的输出时间间隔，<span class="math inline">\(N\)</span>为总体样本数量。则，在时间段<span class="math inline">\(t_k\)</span>到<span class="math inline">\(t_k+\tau\)</span>之间，角速度的平均值是：</p>
+<p><span class="math display">\[
+\bar{\Omega}_k(\tau)=\frac{\theta_{k+m}-\theta_k}{\tau}\tag{3}
+\]</span></p>
+<p>其中<span class="math inline">\(\tau=m\tau_0\)</span></p>
+<p>将公式（3）带入上文Allan方差的定义公式（2）中可以得到：</p>
+<p><span class="math display">\[
+\begin{split}
+\begin{array}{rcl}
+\sigma^2(\tau)
+&amp;=&amp;
+\frac{1}{2}&lt;(\bar{\Omega }_{k+m}-\bar{\Omega }_k)^2&gt;\\
+&amp;=&amp;
+\frac{1}{2\tau^2}&lt;(\theta_{k+2m}-2\theta_{k+m}+\theta_k)^2&gt;
+\end{array}
+\end{split}\tag{4}
+\]</span></p>
+<p>将公式（4）的期望代替为在整个数据样本（数量为N）上求平均，可以得到如下形式</p>
+<p><span class="math display">\[
+\begin{split}
+\begin{array}{rcl}
+\sigma^2(\tau)
+&amp;=&amp;
+\frac{1}{2\tau^2(N-2m)}\sum^{N-2m}_{k=1}(\theta_{k+2m}-2\theta_{k+m}+\theta_k)^2
+\end{array}
+\end{split}\tag{5}
+\]</span></p>
+<h3 id="重叠分段法计算allan方差">重叠分段法计算Allan方差</h3>
+<p>这部分主要参考：<a target="_blank" rel="noopener" href="https://telesens.co/wp-content/uploads/2017/05/AllanVariance5087-1.pdf">Allan Variance: Noise Analysis for Gyroscopes</a> 在公式（5）中，对每<span class="math inline">\(m\)</span>个原始数据作为一段。切割方式有很多种，在图<code>Allan方差定义</code>中，每段数据都不重叠。另一种分割方法是让每段数据都重叠，如下图所示</p>
+<figure>
+<img src="./imgs/06-overlapping-sample.png" alt="" /><figcaption>重叠采样计算Allan方差</figcaption>
+</figure>
+<p>上图中<span class="math inline">\(m=3\)</span>，也就是每4个原始数据作为一组，组与组之前相差<span class="math inline">\(\tau_0\)</span>长度。</p>
+<p>Allan方差的计算方式与公式（5）保持一致。</p>
+<h2 id="allan方差双对数曲线">Allan方差双对数曲线</h2>
+<p>根据公式（5），Allan方差是时间周期<span class="math inline">\(\tau=m\tau_0\)</span>的函数，我们根据不同的<span class="math inline">\(\tau\)</span>，计算出对应的Allan方差，并将<span class="math inline">\(log_{10}(\tau)\)</span>作为x，<span class="math inline">\(log_{10}(\sigma(\tau))\)</span>作为y，画出曲线，如下图：</p>
+<figure>
+<img src="./imgs/07-allan-log-curve.png" alt="" /><figcaption>Allan方差双对数曲线</figcaption>
+</figure>
+<p>注意，y轴是Allan方差的开根，又叫Allan</p>
+<p>Allan方差双对数曲线可以用不同斜率的直线拟合，不同斜率部分的直线代表不同的含义。</p>
+<p>这里讲述一下如何从双对数曲线分析信号的不同误差成分（以陀螺仪为例）</p>
+<h3 id="角度随机游走白噪声强度">角度随机游走/白噪声强度</h3>
+<p>角度随机游走对应到双对数曲线中斜率为<span class="math inline">\(-\frac{1}{2}\)</span>的直线，取值可以直接读取<span class="math inline">\(\tau=1\)</span>处的值。</p>
+<h3 id="零偏不稳定性">零偏不稳定性</h3>
+<p>零偏不稳定性对应双对数曲线中斜率为0的直线，也就是双对数曲线中最小值位置。</p>
+<h3 id="速率随机游走">速率随机游走</h3>
+<p>速率随机游走对应双对数曲线中斜率为<span class="math inline">\(\frac{1}{2}\)</span>的直线，取值时取该直线与<span class="math inline">\(\tau=3\)</span>的交点。</p>
+<p>上面三个误差项是我们用得比较多的误差项，画成图如下：</p>
+<figure>
+<img src="./imgs/08-display-of-errors-in-curve.png" alt="" /><figcaption>三种误差项在双对数曲线中的示意图</figcaption>
+</figure>
+<h3 id="为什么不同的斜率对应不同的误差项">为什么不同的斜率对应不同的误差项？？</h3>
+<p>说实话，笔者对这个部分也是一知半解，说实话，也没有必要完全弄明白，里面涉及到时域信号分析太多基础知识了。这里根据<a target="_blank" rel="noopener" href="http://www.i2nav.com/ueditor/jsp/upload/file/20211008/1633700373874080110.pdf">IEEE Standard</a>里一些内容根据自己的理解简单讲述一下。 噪声的双边功率谱密度(PSD:Power Sepctral Density)与Allan方差有如下关系：</p>
+<figure>
+<img src="./imgs/09-psd-2-allan.png" alt="" /><figcaption>功率谱密度与Allan方差的关系</figcaption>
+</figure>
+<p>上式中可以看作Allan方差是噪声能量经过一个<span class="math inline">\(sin^4(x)/(x)^2\)</span>为转移函数的滤波器，这个函数是由Allan方差计算决定的。这个滤波器的带宽跟<span class="math inline">\(\tau\)</span>有关，因此，不同的<span class="math inline">\(\tau\)</span>对应的Allan方差来分析噪声的不同频段特性。</p>
+<p>以白噪声为例，其功率谱密度为</p>
+<figure>
+<img src="./imgs/10-white-noise-psd.png" alt="" /><figcaption>白噪声PSD</figcaption>
+</figure>
+<p>将其带入<code>功率谱密度与Allan方差关系</code>的公式中，并进行公式中的积分，可以得到如下结果:</p>
+<figure>
+<img src="./imgs/11-white-noise-psd-integrated.png" alt="" /><figcaption>白噪声PSD转换成Allan方差</figcaption>
+</figure>
+<p>对上式 <span class="math inline">\(\sigma^2\big(\tau\big)=\frac{N^2}{\tau}\)</span> 开根后求对数后可以得到</p>
+<p><span class="math display">\[
+log(\sigma(\tau)) = N - \frac{1}{2}log(\tau)
+\]</span></p>
+<p>刚好可以得到一条斜率为<span class="math inline">\(-\frac{1}{2}\)</span>的直线，且当<span class="math inline">\(\tau=1\)</span>的时候可以得到<span class="math inline">\(N\)</span>。这也对应了上文中从Allan方差双对数曲线中求角度随机游走的方式。</p>
+<h2 id="应用重点">应用重点</h2>
+<h3 id="不同的imu建模方式需要不同的系数">不同的IMU建模方式需要不同的系数</h3>
+<p>强调这一点是因为<a target="_blank" rel="noopener" href="https://github.com/gaowenliang/imu_utils">imu_utils</a>工具标定的输出结果和<a target="_blank" rel="noopener" href="https://github.com/ethz-asl/kalibr">kalibr</a>的模型要求是不一样的。</p>
+<p><strong>在GTSAM中</strong></p>
+<p>在GTSAM中使用IMUFactor时需要IMU的几个参数：</p>
+<ol type="1">
+<li>IMU零偏Bias的初始值。但是这个参数可以先设置为0,后续逐步更新。（Bias是IMUFactor中的一个变量，会随时间改变）。</li>
+<li>IMU加速度（3轴）和陀螺仪（3轴）的噪声参数。</li>
+<li>IMU加速度（3轴）和陀螺仪（3轴）的Bias噪声参数。</li>
+</ol>
+<p>上面2、3两点的参数可以使用<a target="_blank" rel="noopener" href="https://github.com/gaowenliang/imu_utils">imu_utils</a>的标定结果。</p>
+<p>其中第2点对应的是Allan方差双对数曲线（后文详细讲解）中斜率为<code>-1/2</code>的直线与 <span class="math inline">\(\tau =1s\)</span>的交点（IEEE标准）。（可以直接取双对数曲线 <span class="math inline">\(\tau = 1s\)</span>处的值，因为"据说"惯性单元在1Hz的时候对应的噪声强度主要由白噪声强度左右。这段话出自<a target="_blank" rel="noopener" href="https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model">kalibr:IMU-Noise-Model</a>，<a target="_blank" rel="noopener" href="https://github.com/gaowenliang/imu_utils">imu_utils</a>也是直接取这一点的值） &gt;This is only true since the noise power in most inertial sensors is dominated by "white noise" at a frequency of approximately 1Hz.</p>
+<p>第3点描述的是Bias的不稳定性，有些地方也叫Bias随机游走。这个参数对应的是<code>Bias [In]Stability</code>。Bias Stability可以直接从Allan方差双对数曲线中读出来（后文详解）</p>
+<p>之所以GTSAM需要这些参数是因为GTSAM中对IMU的建模方法跟大部分算法相同，都是把IMU的Bias当作状态，认为Bias会随着时间变化而缓慢改变（这也是较为正确的做法）。因此需要标定出Bias的稳定性。</p>
+<p><strong>在[kalibr]中</strong> 在[kalibr]中对IMU的建模是使用下面的公式：</p>
+<p><span class="math display">\[\tilde{w}(t) = w(t)+b(t)+n(t)\]</span></p>
+<p>其中<span class="math inline">\(w(t)\)</span>代表真值，<span class="math inline">\(b(t)\)</span>是Bias，<span class="math inline">\(n(t)\)</span>是噪声。因此在[kalibr]中使用角度随机游走系数作为<span class="math inline">\(n(t)\)</span>。同时使用角速率随机游走作为<span class="math inline">\(b(t)\)</span>。一开始对这点很迷惑，为什么角速率随机游走可以用来作为<span class="math inline">\(b(t)\)</span>。后面我在一个issue的回答中得到答案：<a target="_blank" rel="noopener" href="https://github.com/ethz-asl/kalibr/issues/63">issues63</a>。[kalibr]对IMU的建模形式实际上是不够准确的，因为这里将<span class="math inline">\(b(t)\)</span>当作一个恒定的量求解，实际上这是一个随着时间缓慢变化的量。而角速率随机游走则可以部分用力刻画这一偏差。<code>事实上还是很难理解</code></p>
+<h3 id="单位">单位</h3>
+<blockquote>
+<p>First, it is important to realize that Hertz (Hz) is defined as the inverse of seconds, which means that a noise density specification of X°/s/√Hz is exactly equivalent to an angle random walk specification of X°/√s with no conversion necessary. 出自：https://www.vectornav.com/resources/inertial-navigation-primer/specifications--and--error-budgets/specs-imuspecs</p>
+</blockquote>
+<h2 id="参考资料">参考资料</h2>
+<p>【1】<a target="_blank" rel="noopener" href="http://www.i2nav.com/ueditor/jsp/upload/file/20211008/1633700373874080110.pdf">IEEE Standard Specification Format Guide and Test Procedure for Single-Axis Laser Gyros, AnnexC, IEEE Std 647-1995, 1995</a></p>
+<p>【2】<a target="_blank" rel="noopener" href="https://hexagondownloads.blob.core.windows.net/public/Novatel/assets/Documents/Bulletins/APN064/APN064.pdf">IMU Errors and Their Effects</a></p>
+<p>【3】<a target="_blank" rel="noopener" href="https://github.com/ethz-asl/kalibr/wiki/IMU-Noise-Model">kalibr:IMU-Noise-Model</a></p>
+<p>【4】<a target="_blank" rel="noopener" href="https://github.com/gaowenliang/imu_utils">imu_utils</a></p>
+<p>【5】<a target="_blank" rel="noopener" href="http://www.i2nav.com/index/newListDetail_zw?newskind_id=13a8654e060c40c69e5f3d4c13069078&amp;newsinfo_id=c2bb31af75944e5ab665dc23b60b5fba">新手入门系列3——Allan方差分析方法的直观理解</a></p>
+<p>【6】<a target="_blank" rel="noopener" href="https://telesens.co/wp-content/uploads/2017/05/AllanVariance5087-1.pdf">Allan Variance: Noise Analysis for Gyroscopes</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/" title="惯性测量单元Allan方差分析详解">https://zeal-up.github.io/2023/04/19/sensors/AllanVariance/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E4%BC%A0%E6%84%9F%E5%99%A8%E6%A0%87%E5%AE%9A/" rel="tag"># 传感器标定</a>
+              <a href="/tags/Allan%E6%96%B9%E5%B7%AE/" rel="tag"># Allan方差</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/04/11/lio_sam/mapOptimization-doc/" rel="prev" title="Simple-LIO-SAM——（十）后端优化模块详解">
+                  <i class="fa fa-chevron-left"></i> Simple-LIO-SAM——（十）后端优化模块详解
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="aa4c05f956521692fdd7a55fc75da757"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"covS4Q3Q0SaMRjqI2VomagVm-gzGzoHsz","app_key":"iK7kdlu4InjORoPr3oksi1IM","server_url":"https://covs4q3q.lc-cn-n1-shared.com","security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>

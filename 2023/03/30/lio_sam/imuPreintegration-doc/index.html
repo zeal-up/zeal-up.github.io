@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述  IMU预积分模块无论在VIO或者LIO中都是一个非常重要的模块。VIO或者LIO中的I，也就是Inertial指的是惯性，基本上在这类SLAM框架里指的就是IMU里程计。 IMU可以输出车辆坐标系下的三轴加速度、三轴角速度、三轴地磁计（九轴IMU）。我们都知道，加速度的积分是速度、速度的积分是距离，角速度的积分是角度，地磁计可">
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  IMU预积分  Simple-LIO-SAM总体流程图  IMU预积分模块无论在VIO或者LIO中都是一个非常重要的模块。VIO或者LIO中的I，也就是Inertial指的是惯性单元，基本上在这类SLAM框架里指的就是IMU里程计。 IMU可以输出车辆坐标系下的三轴加速度、三轴角速度、三轴地磁计（九轴IMU）。我们都知道，加速度的积分">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Simple-LIO-SAM——（八）IMU预积分模块">
 <meta property="og:url" content="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
-<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  总述  IMU预积分模块无论在VIO或者LIO中都是一个非常重要的模块。VIO或者LIO中的I，也就是Inertial指的是惯性，基本上在这类SLAM框架里指的就是IMU里程计。 IMU可以输出车辆坐标系下的三轴加速度、三轴角速度、三轴地磁计（九轴IMU）。我们都知道，加速度的积分是速度、速度的积分是距离，角速度的积分是角度，地磁计可">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 知乎专栏 🌀 项目仓库  IMU预积分  Simple-LIO-SAM总体流程图  IMU预积分模块无论在VIO或者LIO中都是一个非常重要的模块。VIO或者LIO中的I，也就是Inertial指的是惯性单元，基本上在这类SLAM框架里指的就是IMU里程计。 IMU可以输出车辆坐标系下的三轴加速度、三轴角速度、三轴地磁计（九轴IMU）。我们都知道，加速度的积分">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/imgs/Design-Pipelines-IMU.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/imgs/Design-imuPreintegration-top01.png">
@@ -36,7 +36,7 @@
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/imgs/Design-imuPreintegration-setBias.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/imgs/Design-imuPreintegration-imuHandler.png">
 <meta property="article:published_time" content="2023-03-30T12:55:54.000Z">
-<meta property="article:modified_time" content="2023-04-18T14:44:19.228Z">
+<meta property="article:modified_time" content="2023-04-20T13:47:44.668Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
@@ -129,7 +129,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">总述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#imu%E9%A2%84%E7%A7%AF%E5%88%86%E6%A8%A1%E5%9D%97%E7%9A%84%E6%95%B4%E4%BD%93%E6%A1%86%E6%9E%B6%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="nav-number">2.</span> <span class="nav-text">IMU预积分模块的整体框架流程图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%81%8F%E5%B7%AE%E4%BC%B0%E8%AE%A1%E5%92%8Cimu%E9%87%8C%E7%A8%8B%E8%AE%A1"><span class="nav-number">3.</span> <span class="nav-text">偏差估计和IMU里程计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%81%8F%E5%B7%AE%E4%BC%B0%E8%AE%A1%E7%BA%BF%E7%A8%8B%E5%8D%B3odometryhandler"><span class="nav-number">4.</span> <span class="nav-text">偏差估计线程——即odometryHandler</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">4.1.</span> <span class="nav-text">系统初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A4%E6%96%AD%E6%98%AF%E5%90%A6%E5%BA%94%E8%AF%A5%E9%87%8D%E7%BD%AE%E5%9B%A0%E5%AD%90%E5%9B%BE"><span class="nav-number">4.2.</span> <span class="nav-text">判断是否应该重置因子图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E4%BC%98%E5%8C%96%E9%98%9F%E5%88%97%E4%B8%ADimu%E5%8E%9F%E5%A7%8B%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E7%A7%AF%E5%88%86"><span class="nav-number">4.3.</span> <span class="nav-text">对优化队列中IMU原始数据进行积分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%A0%E5%AD%90%E5%9B%BE%E4%BC%98%E5%8C%96"><span class="nav-number">4.4.</span> <span class="nav-text">因子图优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%A0%E9%80%92%E4%BC%98%E5%8C%96%E7%BB%93%E6%9E%9C"><span class="nav-number">4.5.</span> <span class="nav-text">传递优化结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#imu%E9%87%8C%E7%A8%8B%E8%AE%A1%E7%BA%BF%E7%A8%8B%E5%8D%B3imuhandler"><span class="nav-number">5.</span> <span class="nav-text">IMU里程计线程——即imuHandler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E8%A6%81%E7%82%B9"><span class="nav-number">6.</span> <span class="nav-text">代码要点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9D%90%E6%A0%87%E7%B3%BB%E8%BD%AC%E6%8D%A2"><span class="nav-number">6.1.</span> <span class="nav-text">坐标系转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5"><span class="nav-number">6.2.</span> <span class="nav-text">时间同步</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E9%A1%B9%E7%9B%AE%E6%89%80%E6%9C%89%E7%AB%A0%E8%8A%82"><span class="nav-number">7.</span> <span class="nav-text">本项目所有章节</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#imu%E9%A2%84%E7%A7%AF%E5%88%86"><span class="nav-number">1.</span> <span class="nav-text">IMU预积分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#imu%E9%A2%84%E7%A7%AF%E5%88%86%E6%A8%A1%E5%9D%97%E7%9A%84%E6%95%B4%E4%BD%93%E6%A1%86%E6%9E%B6%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="nav-number">2.</span> <span class="nav-text">IMU预积分模块的整体框架流程图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%B6%E5%81%8F%E4%BC%B0%E8%AE%A1%E5%92%8Cimu%E9%87%8C%E7%A8%8B%E8%AE%A1"><span class="nav-number">3.</span> <span class="nav-text">零偏估计和IMU里程计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%B6%E5%81%8F%E4%BC%B0%E8%AE%A1%E7%BA%BF%E7%A8%8B%E5%8D%B3odometryhandler"><span class="nav-number">4.</span> <span class="nav-text">零偏估计线程——即odometryHandler</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">4.1.</span> <span class="nav-text">系统初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A4%E6%96%AD%E6%98%AF%E5%90%A6%E5%BA%94%E8%AF%A5%E9%87%8D%E7%BD%AE%E5%9B%A0%E5%AD%90%E5%9B%BE"><span class="nav-number">4.2.</span> <span class="nav-text">判断是否应该重置因子图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E4%BC%98%E5%8C%96%E9%98%9F%E5%88%97%E4%B8%ADimu%E5%8E%9F%E5%A7%8B%E6%95%B0%E6%8D%AE%E8%BF%9B%E8%A1%8C%E7%A7%AF%E5%88%86"><span class="nav-number">4.3.</span> <span class="nav-text">对优化队列中IMU原始数据进行积分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%A0%E5%AD%90%E5%9B%BE%E4%BC%98%E5%8C%96"><span class="nav-number">4.4.</span> <span class="nav-text">因子图优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%A0%E9%80%92%E4%BC%98%E5%8C%96%E7%BB%93%E6%9E%9C"><span class="nav-number">4.5.</span> <span class="nav-text">传递优化结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#imu%E9%87%8C%E7%A8%8B%E8%AE%A1%E7%BA%BF%E7%A8%8B%E5%8D%B3imuhandler"><span class="nav-number">5.</span> <span class="nav-text">IMU里程计线程——即imuHandler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E8%A6%81%E7%82%B9"><span class="nav-number">6.</span> <span class="nav-text">代码要点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9D%90%E6%A0%87%E7%B3%BB%E8%BD%AC%E6%8D%A2"><span class="nav-number">6.1.</span> <span class="nav-text">坐标系转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5"><span class="nav-number">6.2.</span> <span class="nav-text">时间同步</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E9%A1%B9%E7%9B%AE%E6%89%80%E6%9C%89%E7%AB%A0%E8%8A%82"><span class="nav-number">7.</span> <span class="nav-text">本项目所有章节</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -142,12 +142,12 @@
   <nav class="site-state">
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-count">15</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -217,7 +217,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-04-18 22:44:19" itemprop="dateModified" datetime="2023-04-18T22:44:19+08:00">2023-04-18</time>
+      <time title="修改时间：2023-04-20 21:47:44" itemprop="dateModified" datetime="2023-04-20T21:47:44+08:00">2023-04-20</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -273,68 +273,75 @@
 <li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
 <li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
 </ul>
-<h2 id="总述">总述</h2>
-<p><img src="./imgs/Design-Pipelines-IMU.png" alt="Pipelines-ImuPreintegration" /> IMU预积分模块无论在VIO或者LIO中都是一个非常重要的模块。VIO或者LIO中的<code>I</code>，也就是<code>Inertial</code>指的是惯性，基本上在这类SLAM框架里指的就是IMU里程计。 IMU可以输出车辆坐标系下的三轴加速度、三轴角速度、三轴地磁计（九轴IMU）。我们都知道，加速度的积分是速度、速度的积分是距离，角速度的积分是角度，地磁计可以计算与地磁北极的偏角，因此，如果IMU的输出是准确的话，使用IMU原始数据并进行积分就可以得到车辆的位姿。然而，目前无论多么高精度的IMU，都很难在较长时间下保持较高的准确度，而且积分会对误差也进行积分，导致IMU里程计只能用来做短时间内的位姿校正。</p>
-<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>是IMU里程计和激光雷达里程计紧耦合的SLAM框架。“紧耦合”三个字在IMU预积分模块得到明显的表达。如果用一句话说明IMU预积分模块的作用，那就是：利用IMU数据，为车辆位姿提供一个较好的位姿初始估计。由于目前的激光雷达大部分是10Hz，部分可以达到20Hz以上，因此，在两帧雷达点云期间，车辆会发生旋转和位移，如果旋转和位移很小，那么点云匹配就能够单独算出一个较准确的里程计（在运动缓慢的情况下，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>即使去除了IMU预积分也可以工作，只需要不启动imuPreintegration节点即可）；但是如果旋转和位移较大，点云匹配就可以失败；IMU一般拥有较高频率（200Hz以上），因此可以为两帧雷达点云的匹配提供较好的初始位姿值。</p>
-<p>前面提到单纯利用IMU数据做积分，时间一场误差累积会很大，无法提供良好的初始位姿估计，因此需要融合其他传感器校正IMU积分算法。在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中，通过不断从激光里程计获取最新的里程计信息，作为IMU积分算法的观测来达到校正IMU积分算法的目的。</p>
-<p><em>PS：此部分代码很大程度利用了<a target="_blank" rel="noopener" href="https://gtsam.org/">GTSAM</a>，因此，需要提前阅读本项目《Simple-LIO-SAM——GTSAM快速入门》一章</em></p>
+<h2 id="imu预积分">IMU预积分</h2>
+<figure>
+<img src="./imgs/Design-Pipelines-IMU.png" alt="" /><figcaption>Simple-LIO-SAM总体流程图</figcaption>
+</figure>
+<p><code>IMU预积分模块</code>无论在VIO或者LIO中都是一个非常重要的模块。VIO或者LIO中的<code>I</code>，也就是<code>Inertial</code>指的是惯性单元，基本上在这类SLAM框架里指的就是IMU里程计。 IMU可以输出车辆坐标系下的三轴加速度、三轴角速度、三轴地磁计（九轴IMU）。我们都知道，加速度的积分是速度、速度的积分是距离，角速度的积分是角度，地磁计可以计算与地磁北极的偏角，因此，如果IMU的输出是准确的话，使用IMU原始数据并进行积分就可以得到车辆的位姿。然而，目前无论多么高精度的IMU，都很难在较长时间下保持较高的准确度，而且积分会对误差也进行积分，导致IMU里程计只能用来做短时间内的位姿校正。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>是IMU里程计和激光雷达里程计紧耦合的SLAM框架。“紧耦合”三个字在IMU预积分模块得到明显的表达。如果用一句话说明IMU预积分模块的作用，那就是：利用IMU数据，为车辆位姿提供一个较好的位姿初始估计。由于目前的激光雷达大部分是10Hz，部分可以达到20Hz以上，因此，在两帧雷达点云期间，车辆会发生旋转和位移，如果旋转和位移很小，那么点云匹配就能够单独算出一个较准确的里程计（在运动缓慢的情况下，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>即使去除了IMU预积分也可以工作，只需要不启动<code>ImuPreintegration</code>节点即可）。但是如果旋转和位移较大，点云匹配就很可能失败。IMU一般拥有较高频率（200Hz以上），因此可以为两帧雷达点云的匹配提供较好的初始位姿值。</p>
+<p>前面提到单纯利用IMU数据做积分，时间一长累积误差会很大，无法提供良好的初始位姿估计，因此需要融合其他传感器校正IMU积分算法。在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中，通过不断从激光里程计获取最新的里程计信息，作为IMU积分算法的观测来达到校正IMU积分算法的目的。</p>
+<p><em>PS：此部分代码很大程度利用了<a target="_blank" rel="noopener" href="https://gtsam.org/">GTSAM</a>，因此，需要提前阅读本项目<a href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/">Simple-LIO-SAM——（七）GTSAM快速入门</a></em></p>
 <h2 id="imu预积分模块的整体框架流程图">IMU预积分模块的整体框架流程图</h2>
-<img src="./imgs/Design-imuPreintegration-top01.png" title="fig:预积分模块流程图" alt="整体框架流程图" />
-<center>
-预积分模块流程图
-</center>
-<h2 id="偏差估计和imu里程计">偏差估计和IMU里程计</h2>
-<p>这个模块容易让人看晕的地方在与模块里有两个队列缓存IMU原始数据，同时有两个IMU预积分器。只所以需要有两个预积分器的原因在于，<a target="_blank" rel="noopener" href="https://gtsam.org/">GTSAM</a>中对于IMU的预积分，在预测时（predict）需要指明上一时刻的<code>bias</code>，也就是IMU的积分误差。通常这个<code>bias</code>会随着时间慢慢改变，因此不能用离线标定的数据直接使用。于是，在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中，有一个线程（LaserHandler）会利用激光里程计当作额外的观测量，不断估计最新的<code>bias</code>值。而另一个线程（ImuHandler）则可以一直利用最新的<code>bias</code>值对实时接收到的IMU数据做积分，并发布为IMU里程计。</p>
-<p>为了简单起见，我们将用来做偏差估计的队列和预积分器叫做<strong>优化队列</strong>和<strong>优化预积分器</strong>；将用来实时对IMU数据积分并发布IMU里程计的队列和预积分器叫做<strong>IMU队列</strong>和<strong>IMU预积分器</strong>。</p>
-一图胜千言，下面这幅图描述了两个队列是如何被耦合起来输出更为准确的IMU预积分结果。其中<code>imuQueOpt</code>是优化队列，<code>imuQueImu</code>是IMU队列，两者命令与代码中一致。 <img src="./imgs/TwoImuQues.png" alt="两个IMU队列" />
-<center>
-线程交互图
-</center>
-<h2 id="偏差估计线程即odometryhandler">偏差估计线程——即odometryHandler</h2>
+<figure>
+<img src="./imgs/Design-imuPreintegration-top01.png" title="预积分模块流程图" alt="" /><figcaption>Simple-LIO-SAM预积分模块整体框架流程图</figcaption>
+</figure>
+<h2 id="零偏估计和imu里程计">零偏估计和IMU里程计</h2>
+<p>这个模块容易让人看晕的地方在于模块里有两个队列缓存IMU原始数据，同时有两个IMU预积分器。之所以需要有两个预积分器的原因在于，<a target="_blank" rel="noopener" href="https://gtsam.org/">GTSAM</a>中对于IMU的预积分，在预测时（predict）需要指明上一时刻的<code>bias</code>，也就是IMU的零偏。通常这个<code>bias</code>会随着时间慢慢改变，因此不能用离线标定的数据直接使用。于是，在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中，有一个线程（LaserHandler）会利用激光里程计当作额外的观测量，不断估计最新的<code>bias</code>值。而另一个线程（ImuHandler）则可以一直利用最新的<code>bias</code>值对实时接收到的IMU数据做积分，并发布为IMU里程计。</p>
+<p>为了简单起见，我们将用来做零偏估计的队列和预积分器叫做<strong>优化队列</strong>和<strong>优化预积分器</strong>；将用来实时对IMU数据积分并发布IMU里程计的队列和预积分器叫做<strong>IMU队列</strong>和<strong>IMU预积分器</strong>。</p>
+<p>一图胜千言，下面这幅图描述了两个队列是如何被耦合起来输出更为准确的IMU预积分结果。其中<code>imuQueOpt</code>是优化队列，<code>imuQueImu</code>是IMU队列，两者命令与代码中一致。</p>
+<figure>
+<img src="./imgs/TwoImuQues.png" alt="" /><figcaption>两个IMU队列及线程交互图</figcaption>
+</figure>
+<h2 id="零偏估计线程即odometryhandler">零偏估计线程——即odometryHandler</h2>
 <p>这个回调函数占据了预积分模块大部分内容，而且有较多的重置条件和与<code>imuHandler</code>线程同步的操作，比较容易弄混。</p>
 <p>这个回调函数会在接收到新的一帧雷达里程计（发自<code>MapOptimization</code>模块），主要操作上图中的<code>imuQueOpt</code>和<code>优化预积分器</code>。每当节点新收到一帧雷达里程计时，就会执行<code>预积分模块流程图</code>中左侧的一系列操作。主要目的就是利用雷达里程计做观测数据，实时更新IMU的偏差<code>bias</code>。同时，更新过的<code>bias</code>会传递到<code>IMU预积分器</code>。</p>
 <h3 id="系统初始化">系统初始化</h3>
-<img src="./imgs/Design-imuPreintegration-sysinit.png" title="fig:" alt="SystemInitialization" />
-<center>
-系统初始化流程
-</center>
+<figure>
+<img src="./imgs/Design-imuPreintegration-sysinit.png" alt="" /><figcaption>系统初始化流程</figcaption>
+</figure>
 <p>当接收到第一帧雷达里程计时，需要对系统做初始化操作。主要包括因子图、因子图优化器、两个预积分器的初始化。由于初始化操作需要将第一帧雷达里程计的位姿作为先验因子，因此不能在构造函数中初始化。</p>
 <h3 id="判断是否应该重置因子图">判断是否应该重置因子图</h3>
-<img src="./imgs/Design-imuPreintegration-reset.png" title="fig:" alt="ResetSystem" />
-<center>
-重置系统
-</center>
+<figure>
+<img src="./imgs/Design-imuPreintegration-reset.png" alt="" /><figcaption>重置系统</figcaption>
+</figure>
 <p>为了保证拥有足够的实时性（预积分模块需要与IMU频率保持一致），<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>的预积分模块在因子图中里程计因子数量大于100时会重置因子图与优化器。操作主要是从当前的因子图优化器拿出最新结果，并当作先验因子构造新的因子图。</p>
 <h3 id="对优化队列中imu原始数据进行积分">对优化队列中IMU原始数据进行积分</h3>
-<img src="./imgs/Design-imuPreintegration-integraOpt.png" title="fig:" alt="IntegrateOpt" />
-<center>
-积分优化队列
-</center>
-<p>这里要重新回顾上文的<code>线程交互图</code>。偏差估计线程的主要目的就是为IMU里程计线程提供最新的<code>bias</code>估计，因此每当到达新的一帧雷达里程计，意味着有新的观测到达，<code>bias</code>就可以进行更新。于是需要对优化队列中在当前雷达里程计时间之前的IMU原始数据用IMU预积分器进行积分，然后构造IMU因子。将IMU因子和雷达里程计加入因子图优化，得出最新的<code>bias</code>估计。</p>
+<figure>
+<img src="./imgs/Design-imuPreintegration-integraOpt.png" alt="" /><figcaption>积分优化队列</figcaption>
+</figure>
+<p>这里要重新回顾上文的<code>线程交互图</code>。零偏估计线程的主要目的就是为IMU里程计线程提供最新的<code>bias</code>估计，因此每当到达新的一帧雷达里程计，意味着有新的观测到达，<code>bias</code>就可以进行更新。于是需要对优化队列中在当前雷达里程计时间之前的IMU原始数据用IMU预积分器进行积分，然后构造IMU因子。将IMU因子和雷达里程计加入因子图优化，得出最新的<code>bias</code>估计。</p>
 <h3 id="因子图优化">因子图优化</h3>
-<img src="./imgs/Design-imuPreintegration-factorgraph.png" title="fig:" alt="FactorGraphOptimization" />
-<center>
-因子图优化
-</center>
-<p><a target="_blank" rel="noopener" href="https://gtsam.org/">GTSAM</a>可以使用IMU预积分器构造IMU因子。利用<a target="_blank" rel="noopener" href="https://gtsam.org/">GTSAM</a>可以用因子图优化出<code>速度</code>,<code>IMU bias</code>,<code>位姿</code>的估计。</p>
+<figure>
+<img src="./imgs/Design-imuPreintegration-factorgraph.png" alt="" /><figcaption>因子图优化部分</figcaption>
+</figure>
+<p><a target="_blank" rel="noopener" href="https://gtsam.org/">GTSAM</a>可以使用IMU预积分器构造IMU因子。利用<a target="_blank" rel="noopener" href="https://gtsam.org/">GTSAM</a>可以用因子图优化出<code>速度</code>,<code>IMU bias</code>,<code>位姿</code>的估计。其中<code>IMU bias</code>是我们要重点关注的内容。</p>
 <h3 id="传递优化结果">传递优化结果</h3>
-<p><img src="./imgs/Design-imuPreintegration-setBias.png" alt="TransferOptimizationResults" /> 使用因子图优化出最新的IMU偏差估计之后，实际上还有优化后的位姿，这个位姿和IMU偏差会用来重置另外一个预积分器——IMU预积分器。IMU预积分器是在另一个回调函数中被主要使用，回顾<code>线程交互图</code>的下半部分和<code>模块流程图</code>的右侧流程。同时，设置完<code>IMU预积分器</code>之后，会将<code>imuQueImu</code>中剩余的其他IMU原始数据放入<code>IMU预积分器</code>做积分，这样<code>IMU预积分器</code>就一直保持最新状态，在<code>imuHandler</code>中可以实时积分并发布IMU里程计。</p>
+<figure>
+<img src="./imgs/Design-imuPreintegration-setBias.png" alt="" /><figcaption>传递优化结果</figcaption>
+</figure>
+<p>使用因子图优化出最新的IMU bias 之后，实际上还有优化后的位姿，这个位姿和IMU偏差会用来重置另外一个预积分器——<code>IMU预积分器</code>。IMU预积分器是在另一个回调函数中被主要使用，回顾<code>线程交互图</code>的下半部分和<code>模块流程图</code>的右侧流程。同时，设置完<code>IMU预积分器</code>之后，会将<code>imuQueImu</code>中剩余的其他IMU原始数据放入<code>IMU预积分器</code>做积分，这样<code>IMU预积分器</code>就一直保持最新状态，在<code>imuHandler</code>中可以实时积分并发布IMU里程计。</p>
 <h2 id="imu里程计线程即imuhandler">IMU里程计线程——即imuHandler</h2>
-这个回调函数比起odometryHandler就要简单很多。这个回调函数的主要功能就只有两个：1）不断地将新收到的IMU数据塞入两个放置IMU原始数据的队列——<code>线程交互图</code>中的imuQueOpt和imuQueImu；2）使用<code>IMU预积分器</code>对收到的IMU数据做积分，并将结果作为IMU里程计发布。 主要流程如下图： <img src="./imgs/Design-imuPreintegration-imuHandler.png" alt="imuHandler" />
-<center>
-imuHandler
-</center>
+<p>这个回调函数比起odometryHandler就要简单很多。这个回调函数的主要功能就只有两个：</p>
+<p>1、不断地将新收到的IMU数据塞入两个放置IMU原始数据的队列——<code>线程交互图</code>中的imuQueOpt和imuQueImu； 2、使用<code>IMU预积分器</code>对收到的IMU数据做积分，并将结果作为IMU里程计发布。</p>
+<p>主要流程如下图：</p>
+<figure>
+<img src="./imgs/Design-imuPreintegration-imuHandler.png" alt="" /><figcaption>IMU里程计线程</figcaption>
+</figure>
 <p>这个回调函数比较简单，就不再赘述。</p>
 <h2 id="代码要点">代码要点</h2>
 <h3 id="坐标系转换">坐标系转换</h3>
 <p>IMU预积分模块中代码涉及到多次坐标系转换。主要是要明白IMU积分的原理和<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中坐标系的转换关系。关于坐标系有几个注意要点：</p>
 <p><strong>1. 所有IMU原始数据都会先旋转到与雷达的坐标系朝向一致后再进行处理</strong></p>
-<p>在<code>imuHandler</code>中每收到一个IMU数据就先旋转再存放。<a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM/blob/dda6459aaf79913ab27d1950ccac14e07ce8ec71/src/imuPreintegration.cpp#L555-L556">code</a> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将IMU数据旋转到lidar的旋转朝向</span></span><br><span class="line">sensor_msgs::msg::Imu thisImu = <span class="built_in">imuConverter</span>(*imu_raw);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 缓存IMU数据</span></span><br><span class="line">imuQueOpt.<span class="built_in">push_back</span>(thisImu);</span><br><span class="line">imuQueImu.<span class="built_in">push_back</span>(thisImu);</span><br></pre></td></tr></table></figure></p>
+<p>在<code>imuHandler</code>中每收到一个IMU数据就先旋转再存放。<a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM/blob/dda6459aaf79913ab27d1950ccac14e07ce8ec71/src/imuPreintegration.cpp#L555-L556">code</a></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将IMU数据旋转到lidar的旋转朝向</span></span><br><span class="line">sensor_msgs::msg::Imu thisImu = <span class="built_in">imuConverter</span>(*imu_raw);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 缓存IMU数据</span></span><br><span class="line">imuQueOpt.<span class="built_in">push_back</span>(thisImu);</span><br><span class="line">imuQueImu.<span class="built_in">push_back</span>(thisImu);</span><br></pre></td></tr></table></figure>
 <p><strong>2. 里程计都是对齐到雷达坐标系</strong></p>
-<p>所有在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>框架中发布出来的里程计，无论是IMU里程计或者是雷达里程计，度量的都是雷达在地图坐标系下的位姿。但是在IMU预积分模块的偏差估计线程中，使用IMU数据做积分，又需要使用雷达里程计作为观测，两者要同时加入因子图中，所以必须统一两者的坐标系。IMU原始数据在上面提到的第一个注意要点已经旋转到对齐雷达的方向，两者之间还差一个平移。因此，在接收到雷达里程计时，会先平移到旋转后的IMU坐标系，最后再平移回来。 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM/blob/dda6459aaf79913ab27d1950ccac14e07ce8ec71/src/imuPreintegration.cpp#L298-L300">雷达里程计平移到旋转后的IMU坐标系代码</a> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化因子图的prior状态</span></span><br><span class="line"><span class="comment">// 将雷达里程计位姿平移到IMU坐标系，只是做了平移</span></span><br><span class="line">prevPose_ = lidarPose.<span class="built_in">compose</span>(lidar2Imu);</span><br></pre></td></tr></table></figure></p>
-<p><a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM/blob/dda6459aaf79913ab27d1950ccac14e07ce8ec71/src/imuPreintegration.cpp#L585-L587">将IMU里程计对齐到雷达坐标系代码</a> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将IMU里程计完全对齐到雷达（剩下一个平移关系）</span></span><br><span class="line">gtsam::Pose3 imuPose = gtsam::<span class="built_in">Pose3</span>(currentState.<span class="built_in">quaternion</span>(), currentState.<span class="built_in">position</span>());</span><br><span class="line">gtsam::Pose3 lidarPose = imuPose.<span class="built_in">compose</span>(imu2Lidar);</span><br></pre></td></tr></table></figure></p>
+<p>所有在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>框架中发布出来的里程计，无论是IMU里程计或者是雷达里程计，度量的都是雷达在地图坐标系下的位姿。但是在IMU预积分模块的零偏估计线程中，使用IMU数据做积分，又需要使用雷达里程计作为观测，两者要同时加入因子图中，所以必须统一两者的坐标系。IMU原始数据在上面提到的第一个注意要点已经旋转到对齐雷达的方向，两者之间还差一个平移。因此，在接收到雷达里程计时，会先平移到旋转后的IMU坐标系，最后再平移回来。 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM/blob/dda6459aaf79913ab27d1950ccac14e07ce8ec71/src/imuPreintegration.cpp#L298-L300">雷达里程计平移到旋转后的IMU坐标系代码</a></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化因子图的prior状态</span></span><br><span class="line"><span class="comment">// 将雷达里程计位姿平移到IMU坐标系，只是做了平移</span></span><br><span class="line">prevPose_ = lidarPose.<span class="built_in">compose</span>(lidar2Imu);</span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM/blob/dda6459aaf79913ab27d1950ccac14e07ce8ec71/src/imuPreintegration.cpp#L585-L587">将IMU里程计对齐到雷达坐标系代码</a></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将IMU里程计完全对齐到雷达（剩下一个平移关系）</span></span><br><span class="line">gtsam::Pose3 imuPose = gtsam::<span class="built_in">Pose3</span>(currentState.<span class="built_in">quaternion</span>(), currentState.<span class="built_in">position</span>());</span><br><span class="line">gtsam::Pose3 lidarPose = imuPose.<span class="built_in">compose</span>(imu2Lidar);</span><br></pre></td></tr></table></figure>
 <h3 id="时间同步">时间同步</h3>
-<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>框架中各个模块都是进行异步通信（ros topic），因此在每个模块里面都有几个队列保存数据，处理的时候再根据时间戳做同步。IMU预积分模块中有多个地方对数据做了时间戳同步。 比如在更新完<code>bias</code>之后，对IMU队列做积分时，会先抛弃早于最新的雷达里程计时间之前的数据。<a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM/blob/dda6459aaf79913ab27d1950ccac14e07ce8ec71/src/imuPreintegration.cpp#L480-L486">code link</a> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 同样先做IMU数据队列和雷达里程计的时间同步</span></span><br><span class="line"><span class="type">double</span> lastImuQT = <span class="number">-1</span>;</span><br><span class="line"><span class="keyword">while</span> (!imuQueImu.<span class="built_in">empty</span>() &amp;&amp; <span class="built_in">stamp2Sec</span>(imuQueImu.<span class="built_in">front</span>().header.stamp) &lt; currentLidarOdomTime - <span class="type">sync_t</span>)</span><br><span class="line">&#123;</span><br><span class="line">    lastImuQT = <span class="built_in">stamp2Sec</span>(imuQueImu.<span class="built_in">front</span>().header.stamp);</span><br><span class="line">    imuQueImu.<span class="built_in">pop_front</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>框架中各个模块都是进行异步通信（ros topic），因此在每个模块里面都有几个队列保存数据，处理的时候再根据时间戳做同步。IMU预积分模块中有多个地方对数据做了时间戳同步。 比如在更新完<code>bias</code>之后，对IMU队列做积分时，会先抛弃早于最新的雷达里程计时间之前的数据。<a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM/blob/dda6459aaf79913ab27d1950ccac14e07ce8ec71/src/imuPreintegration.cpp#L480-L486">code link</a></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 同样先做IMU数据队列和雷达里程计的时间同步</span></span><br><span class="line"><span class="type">double</span> lastImuQT = <span class="number">-1</span>;</span><br><span class="line"><span class="keyword">while</span> (!imuQueImu.<span class="built_in">empty</span>() &amp;&amp; <span class="built_in">stamp2Sec</span>(imuQueImu.<span class="built_in">front</span>().header.stamp) &lt; currentLidarOdomTime - <span class="type">sync_t</span>)</span><br><span class="line">&#123;</span><br><span class="line">    lastImuQT = <span class="built_in">stamp2Sec</span>(imuQueImu.<span class="built_in">front</span>().header.stamp);</span><br><span class="line">    imuQueImu.<span class="built_in">pop_front</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="本项目所有章节">本项目所有章节</h2>
 <ol type="1">
 <li><a href="https://zeal-up.github.io/2023/03/13/lio_sam/intro/">Simple-LIO-SAM——（一）项目简介</a></li>
