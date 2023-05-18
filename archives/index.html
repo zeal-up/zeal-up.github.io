@@ -313,7 +313,7 @@ mjx-container[display="true"] + br {
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-04-20 22:53:24" itemprop="dateModified" datetime="2023-04-20T22:53:24+08:00">2023-04-20</time>
+      <time title="修改时间：2023-05-18 16:49:48" itemprop="dateModified" datetime="2023-05-18T16:49:48+08:00">2023-05-18</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -356,7 +356,12 @@ mjx-container[display="true"] + br {
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="前言">前言</h2>
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="前言">前言</h2>
 <p>原本以为Allan方差应该是一个简单的方差计算方法，但是经过两天的各种探索和资料学习，发现这玩意的原理远比想象中的复杂。详细的公式推导需要设计到随机信号的频谱分析、IMU各种误差模型等内容。并且，Allan方差一开始用来分析原子钟晶体振荡频率的误差分析，后续这种分析方法被用到IMU的误差分析，并且IEEE也制订了相应标准（见<a target="_blank" rel="noopener" href="http://www.i2nav.com/ueditor/jsp/upload/file/20211008/1633700373874080110.pdf">参考资料1</a>），这一系列的发展过程其实很长，同时也有不同的定义。以上种种，让读者放弃了摸清Allan方差的详细来龙去脉和公式推导，毕竟，工程师和数学家还是有区别的……但是关于Allan方差的解释和应用网上的博文也都不够全面，单看某一篇文章很难获取对Allan方差的直观理解（没有找到一篇很好的文章能够说明Allan方差的定义和双对数曲线不同斜率段对应的噪声项是怎么来的）。</p>
 <p>本文对以下内容做了梳理：</p>
 <ol type="1">
@@ -398,7 +403,7 @@ IMU模型
 <h3 id="对不同时间尺度上的误差刻画">对不同时间尺度上的误差刻画</h3>
 <p>上面的数据方差计算方法对数据的整个序列计算误差水平，无法细分出不同时间尺度上的误差波动情况。为了能够刻画不同时间周期下数据的波动情况，我们可以先对数据分块，对每块数据取平均作为该块数据的代表。假设原始数据的采样时间是<span class="math inline">\(\tau_0\)</span>，每3个数据分成一块，则每块的间隔时间<span class="math inline">\(\tau = 3\tau_0\)</span>。分块之后，我们再将<span class="math inline">\(M\)</span>个数据块计算方差，最后求这个方差的数学期望，作为我们最后的方差</p>
 <figure>
-<img src="./imgs/04-general-covariance" alt="" /><figcaption>通用样本方差计算方法</figcaption>
+<img src="./imgs/04-general-covariance.png" alt="" /><figcaption>通用样本方差计算方法</figcaption>
 </figure>
 <p><span class="math display">\[
 \begin{split}
