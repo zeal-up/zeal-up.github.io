@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  李群李代数基础概念 群（Groups） &amp;&amp; 李群（LieGroups） 群的定义 群是一种 集合 加上 一种运算 的代数结构，这种运算需要满足几个条件（可以不用记住） 例 ：旋转矩阵（集合）和矩阵乘法（运算），矩阵乘法对于旋转矩阵具有很良好的性质（符合群运算的定义），于是旋转矩阵是一种">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SLAM基础——李代数基础概念及公式">
+<meta property="og:url" content="https://zeal-up.github.io/2023/05/31/slam-theory/lie-group-01/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  李群李代数基础概念 群（Groups） &amp;&amp; 李群（LieGroups） 群的定义 群是一种 集合 加上 一种运算 的代数结构，这种运算需要满足几个条件（可以不用记住） 例 ：旋转矩阵（集合）和矩阵乘法（运算），矩阵乘法对于旋转矩阵具有很良好的性质（符合群运算的定义），于是旋转矩阵是一种">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-05-31T13:56:58.000Z">
+<meta property="article:modified_time" content="2023-06-14T03:31:48.495Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="slam">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/05/31/slam-theory/lie-group-01/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/05/31/slam-theory/lie-group-01/","path":"2023/05/31/slam-theory/lie-group-01/","title":"SLAM基础——李代数基础概念及公式"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SLAM基础——李代数基础概念及公式 | Zeal's Blog</title>
+  
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+  <a target="_blank" rel="noopener" href="https://github.com/zeal-up" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9D%8E%E7%BE%A4%E6%9D%8E%E4%BB%A3%E6%95%B0%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">李群李代数基础概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BE%A4groups-%E6%9D%8E%E7%BE%A4liegroups"><span class="nav-number">1.1.</span> <span class="nav-text">群（Groups） &amp;&amp; 李群（LieGroups）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BE%A4%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">1.1.1.</span> <span class="nav-text">群的定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E6%AD%A3%E4%BA%A4%E7%BE%A4"><span class="nav-number">1.1.2.</span> <span class="nav-text">特殊正交群</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E6%AC%A7%E5%BC%8F%E7%BE%A4"><span class="nav-number">1.1.3.</span> <span class="nav-text">特殊欧式群</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9D%8E%E7%BE%A4"><span class="nav-number">1.1.4.</span> <span class="nav-text">李群</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%8E%E4%BB%A3%E6%95%B0"><span class="nav-number">1.2.</span> <span class="nav-text">李代数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%8D%E5%AF%B9%E7%A7%B0%E7%9F%A9%E9%98%B5%E7%AC%A6%E5%8F%B7"><span class="nav-number">1.2.1.</span> <span class="nav-text">反对称矩阵符号</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9D%8E%E4%BB%A3%E6%95%B0%E4%B8%8E%E6%9D%8E%E7%BE%A4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">1.2.2.</span> <span class="nav-text">李代数与李群的关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%B9%E6%95%B0%E6%98%A0%E5%B0%84log%E5%92%8C%E6%8C%87%E6%95%B0%E6%98%A0%E5%B0%84exp"><span class="nav-number">1.2.3.</span> <span class="nav-text">对数映射（log）和指数映射（exp）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#so3%E4%B8%8A%E7%9A%84%E5%AF%B9%E6%95%B0%E6%98%A0%E5%B0%84mathfrakso3%E7%9A%84%E6%8C%87%E6%95%B0%E6%98%A0%E5%B0%84"><span class="nav-number">2.</span> <span class="nav-text">SO(3)上的对数映射&#x2F;\(\mathfrak{so}(3)\)的指数映射</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mathfrakso3%E7%9A%84%E6%8C%87%E6%95%B0%E6%98%A0%E5%B0%84"><span class="nav-number">2.1.</span> <span class="nav-text">\(\mathfrak{so}(3)\)的指数映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#so3%E4%B8%8A%E7%9A%84%E5%AF%B9%E6%95%B0%E6%98%A0%E5%B0%84"><span class="nav-number">2.2.</span> <span class="nav-text">SO(3)上的对数映射</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E6%95%B0%E6%98%A0%E5%B0%84%E7%9A%84%E4%B8%80%E9%98%B6%E8%BF%91%E4%BC%BC"><span class="nav-number">2.3.</span> <span class="nav-text">指数映射的一阶近似</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9D%8E%E7%BE%A4%E6%9D%8E%E4%BB%A3%E6%95%B0%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">李群李代数总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bch%E8%BF%91%E4%BC%BC"><span class="nav-number">4.</span> <span class="nav-text">BCH近似</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bch%E8%BF%91%E4%BC%BC%E5%8F%B3%E4%B9%98%E5%BD%A2%E5%BC%8F"><span class="nav-number">4.1.</span> <span class="nav-text">BCH近似右乘形式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bch%E8%BF%91%E4%BC%BC%E7%9A%84%E5%85%B6%E4%BB%96%E8%A1%A8%E8%BE%BE%E5%BD%A2%E5%BC%8F"><span class="nav-number">4.2.</span> <span class="nav-text">BCH近似的其他表达形式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#so3%E4%B8%8A%E7%9A%84%E6%9D%8E%E4%BB%A3%E6%95%B0%E6%B1%82%E5%AF%BC"><span class="nav-number">5.</span> <span class="nav-text">\(SO(3)\)上的李代数求导</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%8E%E4%BB%A3%E6%95%B0%E7%A9%BA%E9%97%B4%E6%B1%82%E5%AF%BC"><span class="nav-number">5.1.</span> <span class="nav-text">李代数空间求导</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%8E%E7%BE%A4%E7%A9%BA%E9%97%B4%E6%B1%82%E5%AF%BC"><span class="nav-number">5.2.</span> <span class="nav-text">李群空间求导</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/05/31/slam-theory/lie-group-01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="SLAM基础——李代数基础概念及公式 | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SLAM基础——李代数基础概念及公式
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-05-31 21:56:58" itemprop="dateCreated datePublished" datetime="2023-05-31T21:56:58+08:00">2023-05-31</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-06-14 11:31:48" itemprop="dateModified" datetime="2023-06-14T11:31:48+08:00">2023-06-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/Theory/" itemprop="url" rel="index"><span itemprop="name">Theory</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/05/31/slam-theory/lie-group-01/" class="post-meta-item leancloud_visitors" data-flag-title="SLAM基础——李代数基础概念及公式" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="SLAM基础——李代数基础概念及公式" href="/2023/05/31/slam-theory/lie-group-01/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::2cf0b705b902423269f4cebef74df287" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="李群李代数基础概念">李群李代数基础概念</h2>
+<h3 id="群groups-李群liegroups">群（Groups） &amp;&amp; 李群（LieGroups）</h3>
+<h4 id="群的定义">群的定义</h4>
+<p>群是一种 <strong><em>集合</em></strong> 加上 <strong><em>一种运算</em></strong> 的代数结构，这种运算需要满足几个条件（可以不用记住）</p>
+<p><strong>例</strong> ：旋转矩阵（集合）和矩阵乘法（运算），矩阵乘法对于旋转矩阵具有很良好的性质（符合群运算的定义），于是旋转矩阵是一种群。</p>
+<h4 id="特殊正交群">特殊正交群</h4>
+<p>特殊正交群（Special Orthogonal Group）记为<span class="math inline">\(SO(n)\)</span>，又叫旋转矩阵群。 例：<strong><em>三维</em></strong> 旋转矩阵构成特殊正交群<span class="math inline">\(SO(3)\)</span></p>
+<p><span class="math display">\[
+SO(3) = \{R \in \mathbb{R}^{3\times 3}:R^{T}R=\mathbf{I},det(R)=1\}
+\]</span></p>
+<h4 id="特殊欧式群">特殊欧式群</h4>
+<p>特殊欧式群记为<span class="math inline">\(SE(n)\)</span>，对应<span class="math inline">\(n\)</span>维的欧式变换（旋转加平移）</p>
+<h4 id="李群">李群</h4>
+<p>李群是具有连续（光滑）性质的群</p>
+<p>例：旋转可以连续地进行，平移也可以连续地进行，所以<span class="math inline">\(SO(3)\)</span>、<span class="math inline">\(SE(3)\)</span>都是李群</p>
+<h3 id="李代数">李代数</h3>
+<h4 id="反对称矩阵符号">反对称矩阵符号</h4>
+<p>对于一个三维向量<span class="math inline">\(\boldsymbol{\phi}=[\phi_1,\phi_2,\phi_3]^T\)</span>，记其对应的反对称矩阵<span class="math inline">\(\boldsymbol{\phi}^{\wedge}\in \mathbb{R}^{3\times3}\)</span>，具有如下形式。符号<span class="math inline">\(\wedge\)</span>称作<em>hat</em></p>
+<p><span class="math display">\[
+\boldsymbol\phi^{\wedge} = 
+\begin{bmatrix}
+\phi_1\\
+\phi_2\\
+\phi_3
+\end{bmatrix}^{\wedge}
+=\
+\begin{bmatrix}
+0&amp;-\phi_3&amp;\phi_2\\
+\phi_3&amp;0&amp;-\phi_1\\
+-\phi_2&amp;\phi_1&amp;0
+\end{bmatrix}\tag{hat}
+\]</span></p>
+<p>同样的，任意一个反对称矩阵通过<em>vee</em>操作得到对应的三维向量</p>
+<p><span class="math display">\[
+(\boldsymbol\phi^{\wedge})^{\vee}
+=\
+\begin{bmatrix}
+0&amp;-\phi_3&amp;\phi_2\\
+\phi_3&amp;0&amp;-\phi_1\\
+-\phi_2&amp;\phi_1&amp;0
+\end{bmatrix}^{\vee}
+=\begin{bmatrix}
+\phi_1\\
+\phi_2\\
+\phi_3
+\end{bmatrix}\tag{vee}
+\]</span></p>
+<h4 id="李代数与李群的关系">李代数与李群的关系</h4>
+<ul>
+<li><p>每个李群都对应一个李代数。<span class="math inline">\(SO(3)\)</span>群的李代数是<span class="math inline">\(\mathfrak{so}(3)\)</span></p></li>
+<li><p>为了不造成理解困难，这里只用<span class="math inline">\(SO(3)\)</span>群作为讲解。（笔者发现，用<span class="math inline">\(SO(3)\)</span>群作为例子，不看<span class="math inline">\(SE(3)\)</span>群理解起来会更容易）</p></li>
+<li><p>为什么要引入李代数？ 一句话说明：在<span class="math inline">\(SO(3)\)</span>群上求导不太容易，因为旋转矩阵上的加法没有良好性质（两个旋转矩阵的加法不一定是一个旋转矩阵;回忆导数的定义，输入的微小变化造成的输出的改变量），而旋转矩阵的乘积在其中一者为微小量的时候，可以对应到李代数空间的线性关系。利用这一性质可以对旋转矩阵进行求导。旋转矩阵的更性也可以对应到李代数空间上的线性更新。后文会详细解说。</p></li>
+<li><p>李代数对应李群单位元处的切空间 旋转矩阵群的单位元就是单位矩阵。李代数对应李群单位元处的切空间这一点只是两者的性质，与后文的指数/对数映射没有太大关系。（笔者一开始总是误会指数/对数映射只能在李群单位元处进行）</p></li>
+</ul>
+<h4 id="对数映射log和指数映射exp">对数映射（log）和指数映射（exp）</h4>
+<p>《视觉SLAM十四讲》中这部分内容（第四讲）是通过旋转矩阵求导引出的，但其实这部分的推导只是建立一个感性的理解。李群李代数的指数/对数映射应该具有更严格的定义。所以这部分内容其实不要太过纠结。</p>
+<p><strong><em>再次强调</em></strong>：这部分推导只是为了建立感性认识</p>
+<p>由于旋转矩阵的性质：</p>
+<p><span class="math display">\[
+RR^T = \mathbf{I}
+\]</span></p>
+<p>上式对旋转矩阵求导（<span class="math inline">\(\dot{R}\)</span>表示<span class="math inline">\(R\)</span>的导数）：</p>
+<p><span class="math display">\[
+\dot{R}R^T + R\dot{R}^T=\mathbf{0}
+\]</span></p>
+<p>（这里对旋转矩阵求导，应该将其看作是一个变量，在时刻变化）</p>
+<p>即：</p>
+<p><span class="math display">\[
+\dot{R}R^T = -R\dot{R}^T=-(\dot{R}R^T)^T
+\]</span></p>
+<p>也就是<span class="math inline">\(\dot{R}R^T\)</span>是一个反对称矩阵，我们将其记为<span class="math inline">\(\boldsymbol{\phi}^{\wedge}\)</span>，则我们可以得到：</p>
+<p><span class="math display">\[
+\begin{split}
+\dot{R}R^T &amp;= \boldsymbol{\phi}^{\wedge}\\
+\dot{R} &amp;= \boldsymbol{\phi}^{\wedge}R
+\end{split}
+\]</span></p>
+<p>上式是关于<span class="math inline">\(R\)</span>的一个微分方程，我们可以看出，当</p>
+<p><span class="math display">\[
+R=\exp(\boldsymbol{\phi}^{\wedge})
+\]</span></p>
+<p>的时候，刚好满足上面的微分方程。同时，当<span class="math inline">\(R=\mathbf{I}\)</span>时，上面的微分方程刚好是<span class="math inline">\(\dot{R}=\boldsymbol{\phi}^{\wedge}\)</span>，所以说反对称矩阵空间是旋转矩阵单位元处的切平面（导数）。</p>
+<p>于是，我们直接地引入定义：指数映射将李代数空间映射到李群空间，指数映射将李群映射到李代数空间。</p>
+<p><span class="math display">\[
+\begin{split}
+\exp(\cdot):\mathfrak{so}(3)\rightarrow SO(3)\\
+\log(\cdot):SO(3) \rightarrow \mathfrak{so}(3)
+\end{split}
+\]</span></p>
+<h2 id="so3上的对数映射mathfrakso3的指数映射">SO(3)上的对数映射/<span class="math inline">\(\mathfrak{so}(3)\)</span>的指数映射</h2>
+<h3 id="mathfrakso3的指数映射"><span class="math inline">\(\mathfrak{so}(3)\)</span>的指数映射</h3>
+<p>令三维向量<span class="math inline">\(\boldsymbol{\phi}\)</span>的模为<span class="math inline">\(\theta\)</span>，方向向量为<span class="math inline">\(\boldsymbol{a}\)</span>，即</p>
+<p><span class="math display">\[
+\theta = ||\boldsymbol{\phi}||\\
+\boldsymbol{a} = \frac{\boldsymbol{\phi}}{||\boldsymbol{\phi}||}
+\]</span></p>
+<p>经过一系列的推导，可以得到指数映射的公式如下：</p>
+<p><span class="math display">\[
+\begin{split}
+\exp(\boldsymbol{\phi}^{\wedge}) &amp;= \exp(\theta\boldsymbol{a})\\
+&amp;= \cos{\theta}\mathbf{I} + (1 - \cos{\theta})\boldsymbol{a}\boldsymbol{a}^T+\sin{\theta}\boldsymbol{a}^{\wedge}
+\end{split}\tag{exp-1}
+\]</span></p>
+<p>上面公式的一种等价写法（不使用模和方向代替）为：</p>
+<p><span class="math display">\[
+\begin{split}
+\exp(\boldsymbol{\phi}^{\wedge}) = \mathbf{I} + \frac{\sin{||\boldsymbol{\phi}||}}{||\boldsymbol{\phi}||} + \frac{1 - \cos{||\boldsymbol{\phi}||}}{||\boldsymbol{\phi}||^2}(\boldsymbol{\phi}^{\wedge})^2
+\end{split}\tag{exp-2}
+\]</span></p>
+<p>上面这两个公式叫做罗德里格斯（Rodrigues' formula），也是将 <strong><em>旋转向量</em></strong> 变换为旋转矩阵的变换公式。从上面两个公式我们也可以看出，<span class="math inline">\(\mathfrak{so}(3)\)</span>李代数空间实际上也是 <strong><em>旋转向量</em></strong> 组成的空间。又因为旋转角的周期为<span class="math inline">\(2\pi\)</span>，所以一个旋转向量可以对应到一个旋转矩阵，但是一个旋转矩阵会对应到多个旋转向量（满射）。但是如果将旋转角限制在<span class="math inline">\([-\pi,\pi)\)</span>，则是单射。</p>
+<h3 id="so3上的对数映射">SO(3)上的对数映射</h3>
+<p>从上面的关系，我们可以知道要把李群<span class="math inline">\(SO(3)\)</span>映射到李代数，只需要用旋转矩阵计算旋转矢量即可。从旋转矩阵<span class="math inline">\(R\)</span>计算旋转角公式为：</p>
+<p><span class="math display">\[
+\theta = \arccos \frac{tr(R)-1}{2}\tag{ln-01}
+\]</span></p>
+<p>又由于旋转轴使用旋转矩阵旋转后方向不变，即：</p>
+<p><span class="math display">\[
+R\boldsymbol{a} = \boldsymbol{a}\tag{ln-02}
+\]</span></p>
+<p>所以<strong>旋转轴对应<span class="math inline">\(R\)</span>特征值为1的特征向量</strong></p>
+<p>轴向量也可以使用下面公式计算</p>
+<p><span class="math display">\[
+\log(R) = 
+\frac{\theta \cdot (R-R^T)}{2sin(\theta)}\quad \text{with} \quad R\neq\mathbf{I}\tag{ln-03}
+\]</span></p>
+<h3 id="指数映射的一阶近似">指数映射的一阶近似</h3>
+<p>指数映射的严格展开形式为:</p>
+<p><span class="math display">\[
+\exp(\boldsymbol{\phi}^{\wedge}) = \sum^{\infty}_{n=0}\frac{1}{n!}(\boldsymbol{\phi}^{\wedge})^n
+\]</span></p>
+<p>当<span class="math inline">\(\boldsymbol{\phi}\)</span>是微小量时，忽略二次项及以上，得到指数映射的一阶近似：</p>
+<p><span class="math display">\[
+\exp(\boldsymbol{\phi}^{\wedge})\approx \mathbf{I} + \boldsymbol{\phi}^{\wedge} \tag{exp-1st}
+\]</span></p>
+<p><strong><em>上面这个公式经常被使用到，要牢记</em></strong></p>
+<h2 id="李群李代数总结">李群李代数总结</h2>
+<ul>
+<li>引入李代数的原因是在SLAM中常用的群：<span class="math inline">\(SO(3),SE(3),Sim(3)\)</span>没有良好定义的加法，因此在优化的时候没法直接往上更新一个微小增量</li>
+<li>另一个原因是<span class="math inline">\(SO(3),SE(3),Sim(3)\)</span>这些群都有额外的限制，直接优化就变成了带约束的优化，而转到李代数空间则是一个无约束的优化问题</li>
+<li>在后面我们可以看到当旋转矩阵乘以一个微小扰动可以对应到李代数空间的近似线性相加，这为优化带来很大的好处</li>
+<li>李代数通过指数映射到李群，李群通过对数映射到李代数</li>
+<li>李代数是李群单位元处的切平面</li>
+<li>不要纠结上面的这句话！！！！对数映射/指数映射可以对整个李群/李代数空间进行映射！！！</li>
+</ul>
+<h2 id="bch近似">BCH近似</h2>
+<p>BCH(Baker-Campbell-Hausdorff)公式表达两个李代数指数映射乘积的完整形式（很复杂，不用记），但是但忽略高阶项后则会出现优美的线性表达。</p>
+<p>当旋转矩阵<span class="math inline">\(R\)</span>左乘或者右乘上一个微小量<span class="math inline">\(\Delta{R}\)</span>时，会近似（BCH近似）对应李代数空间线性相加，记<span class="math inline">\(R\)</span>的李代数为<span class="math inline">\(\boldsymbol{\phi}\)</span>，<span class="math inline">\(\Delta{R}\)</span>的李代数为<span class="math inline">\(\Delta \boldsymbol{\phi}\)</span></p>
+<p><strong>BCH近似有左乘右乘两种形式，笔者发现学习的时候以一种形式去推导即可，更容易理解，下面以右乘的形式进行讲解（十四讲中是以左乘作为讲解）</strong></p>
+<h3 id="bch近似右乘形式">BCH近似右乘形式</h3>
+<p><span class="math display">\[
+\exp(\boldsymbol{\phi}^{\wedge})\exp(\boldsymbol{\Delta{\phi}}^{\wedge})=\exp\big(J_r^{-1}(\boldsymbol{\phi})\Delta{\boldsymbol{\phi}}+\boldsymbol{\phi}\big)\tag{BCH}
+\]</span></p>
+<p>其中<span class="math inline">\(J_r(\boldsymbol{\phi})\)</span>乘为右乘雅各比：</p>
+<p><span class="math display">\[
+J_r(\boldsymbol{\phi}) = \mathbf{I}-\frac{1-\cos{||\boldsymbol{\phi}||}}{||\boldsymbol{\phi}||^2} + \frac{||\boldsymbol{\phi}||-\sin{||\boldsymbol{\phi}||}}{||\boldsymbol{\phi}||^3}(\boldsymbol{\phi}^{\wedge})^2\tag{BCH-Jr}
+\]</span></p>
+<p>也可以写成轴-角的形式</p>
+<p><span class="math display">\[
+J_r{(\boldsymbol{\phi})} = \frac{\sin{\theta}}{\theta}\mathbf{I}+(1-\frac{\sin{\theta}}{\theta})\boldsymbol{a}\boldsymbol{a}^T-\frac{1-\cos{\theta}}{\theta}\boldsymbol{a}^{\wedge}
+\]</span></p>
+<p>上面两种等价关系的变换中需要用到一个性质</p>
+<p><span class="math display">\[
+\boldsymbol{a}^{\wedge}\boldsymbol{a}^{\wedge} = \boldsymbol{a}\boldsymbol{a}^T - \mathbf{I}
+\]</span></p>
+<p>另外</p>
+<p><span class="math display">\[
+J_r^{-1}(\boldsymbol{\phi})=\mathbf{I}+\frac{1}{2}\boldsymbol{\phi}^{\wedge}+\big(\frac{1}{||\boldsymbol{\phi}||^2}-\frac{1+\cos{||\boldsymbol{\phi}||}}{2||\boldsymbol{\phi}||\sin{||\boldsymbol{\phi}||}}\big)(\boldsymbol{\phi}^{\wedge})^2
+\]</span></p>
+<h3 id="bch近似的其他表达形式">BCH近似的其他表达形式</h3>
+<p>BCH近似是为了能够将<span class="math inline">\(SO(3)\)</span>上的矩阵乘积变成李代数上的加法，下面几条公式只是公式（BCH）的其他表达形式，后面也会频繁用到</p>
+<p><span class="math display">\[
+\exp\big((\boldsymbol{\phi}+\Delta{\boldsymbol{\phi}})^{\wedge}\big) = \exp(\boldsymbol{\phi}^{\wedge})\exp(J_r\Delta{\boldsymbol{\phi}}^{\wedge})\tag{BCH-2}
+\]</span></p>
+<h2 id="so3上的李代数求导"><span class="math inline">\(SO(3)\)</span>上的李代数求导</h2>
+<p>加入我们对一个空间点<span class="math inline">\(\boldsymbol{p}\)</span>进行旋转，得到<span class="math inline">\(R\boldsymbol{p}\)</span>，要求相对于<span class="math inline">\(R\)</span>的导数。由于<span class="math inline">\(SO(3)\)</span>上没有加法，于是我们没法直接使用导数的定义进行计算。但是我们可以将<span class="math inline">\(R\)</span>映射到李代数空间<span class="math inline">\(\boldsymbol{\phi}{\wedge}\)</span>，并在李代数空间进行求导（SLAM十四讲公式4.41使用BCH左乘模型推导，这里使用右乘模型推导）</p>
+<h3 id="李代数空间求导">李代数空间求导</h3>
+<p><span class="math display">\[
+\begin{split}
+\frac{\partial(R\boldsymbol{p})}{\partial{R}} &amp;= \frac{\partial{\big(\exp(\boldsymbol{\phi}^{\wedge})\boldsymbol{p}\big)}}{\partial{\boldsymbol{\phi}}}\\
+&amp;\overset{1}{=}\lim_{\Delta{\boldsymbol{\phi}}\rightarrow0}\frac{\exp(\big(\boldsymbol{\phi}+\Delta{\boldsymbol{\phi}})^{\wedge}\big)\boldsymbol{p} - \exp(\boldsymbol{\phi}^{\wedge})\boldsymbol{p}}{\Delta{\boldsymbol{\phi}}}\\
+\\
+&amp;\overset{2}{=}\lim_{\Delta{\boldsymbol{\phi}}\rightarrow0}
+\frac
+{\exp(\boldsymbol{\phi}^{\wedge})\exp(J_r\Delta{\boldsymbol{\phi}^{\wedge}})\boldsymbol{p}-\exp(\boldsymbol{\phi}^{\wedge})\boldsymbol{p}}
+{\Delta{\boldsymbol{\phi}}}\\
+\\
+&amp;\overset{3}{=}\lim_{\Delta{\boldsymbol{\phi}}\rightarrow0}
+\frac
+{\exp(\boldsymbol{\phi}^{\wedge})(\mathbf{I}+J_r\Delta{\boldsymbol{\phi}^{\wedge}})\boldsymbol{p}-\exp(\boldsymbol{\phi}^{\wedge})\boldsymbol{p}}
+{\Delta{\boldsymbol{\phi}}}\\
+\\
+&amp;\overset{4}{=}\lim_{\Delta{\boldsymbol{\phi}}\rightarrow0}
+\frac
+{\exp(\boldsymbol{\phi}^{\wedge})J_r\Delta{\boldsymbol{\phi}^{\wedge}}\boldsymbol{p}}
+{\Delta{\boldsymbol{\phi}}}\\
+\\
+&amp;\overset{5}{=}\lim_{\Delta{\boldsymbol{\phi}}\rightarrow0}
+\frac
+{-\exp(\boldsymbol{\phi}^{\wedge})J_r\boldsymbol{p}^{\wedge}\Delta{\boldsymbol{\phi}}}
+{\Delta{\boldsymbol{\phi}}}\\
+\\
+&amp;=-RJ_r\boldsymbol{p}^{\wedge}
+\end{split}
+\]</span></p>
+<p>上式的推导中，等号1是导数的定义;等号2使用BCH右乘近似公式，也就是上文公式（BCH-2）;等号3是指数映射的一阶近似，也就是上文公式（exp-1st）;等号5利用了下面的性质</p>
+<p><span class="math display">\[
+\boldsymbol{a}^{\wedge}\boldsymbol{b} = -\boldsymbol{b}^{\wedge}\boldsymbol{a}\tag{skew-prop}
+\]</span></p>
+<p>将上面的结果记为 <span class="math display">\[
+\frac{\partial(R\boldsymbol{p})}{\partial{R}}=-RJ_r\boldsymbol{p}^{\wedge}\tag{dR-alg-R}
+\]</span></p>
+<p>如果在上面的推导中使用左乘模型进行推导，结果会稍微有点不同：</p>
+<p><span class="math display">\[
+\frac{\partial(R\boldsymbol{p})}{\partial{R}}=(-R\boldsymbol{p})^{\wedge}J_l\tag{dR-alg-L}
+\]</span></p>
+<h3 id="李群空间求导">李群空间求导</h3>
+<p>另一种更常见的做法是在李群上对<span class="math inline">\(R\)</span>进行一个扰动<span class="math inline">\(\exp(\Delta{\boldsymbol{\phi}^{\wedge}})\)</span>，计算结果相对于扰动的变化率。SLAM十四讲中使用左扰动推导，这里使用右扰动推导一下</p>
+<p><span class="math display">\[
+\begin{split}
+\frac{\partial(R\boldsymbol{p})}{\partial{R}}
+&amp;=\lim_{\Delta{\boldsymbol{\phi}\rightarrow0}}
+\frac
+{\exp(\boldsymbol{\phi}^{\wedge})\exp(\Delta{\boldsymbol{\phi}^{\wedge}})\boldsymbol{p}-\exp(\boldsymbol{\phi}^{\wedge})\boldsymbol{p}}
+{\Delta{\boldsymbol{\phi}}}\\
+\\
+&amp;\overset{1}{=}\lim_{\Delta{\boldsymbol{\phi}\rightarrow0}}
+\frac
+{\exp(\boldsymbol{\phi}^{\wedge})(\mathbf{I}+\Delta{\boldsymbol{\phi}^{\wedge}})\boldsymbol{p}-\exp(\boldsymbol{\phi}^{\wedge})\boldsymbol{p}}
+{\Delta{\boldsymbol{\phi}}}\\
+\\
+&amp;\overset{2}{=}\lim_{\Delta{\boldsymbol{\phi}\rightarrow0}}
+\frac
+{\exp(\boldsymbol{\phi}^{\wedge})\Delta{\boldsymbol{\phi}^{\wedge}}\boldsymbol{p}}
+{\Delta{\boldsymbol{\phi}}}\\
+\\
+&amp;\overset{3}{=}\lim_{\Delta{\boldsymbol{\phi}\rightarrow0}}
+\frac
+{-\exp(\boldsymbol{\phi}^{\wedge})\boldsymbol{p}^{\wedge}\Delta{\boldsymbol{\phi}}}
+{\Delta{\boldsymbol{\phi}}}\\
+\\
+&amp;=-R\boldsymbol{p}^{\wedge}
+\end{split}
+\]</span></p>
+<p>其中等号1使用指数映射的一阶近似，也就是公式（exp-1st）;等号3使用反对称矩阵的性质，也就是公式（skew-prop）。</p>
+<p>如果使用左扰动推导，结果会稍有不同，我们将两者记为如下</p>
+<p>右扰动模型：</p>
+<p><span class="math display">\[
+\frac{\partial(R\boldsymbol{p})}{\partial{R}}=-R\boldsymbol{p}^{\wedge}\tag{dR-group-R}
+\]</span></p>
+<p>左扰动模型：</p>
+<p><span class="math display">\[
+\frac{\partial(R\boldsymbol{p})}{\partial{R}}=-(R\boldsymbol{p})^{\wedge}\tag{dR-group-L}
+\]</span></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/05/31/slam-theory/lie-group-01/" title="SLAM基础——李代数基础概念及公式">https://zeal-up.github.io/2023/05/31/slam-theory/lie-group-01/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/slam/" rel="tag"># slam</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/05/30/slam-theory/MAP2LSP_02/" rel="prev" title="SLAM基础——如何从最大后验概率到最小二乘（应用篇）">
+                  <i class="fa fa-chevron-left"></i> SLAM基础——如何从最大后验概率到最小二乘（应用篇）
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/06/05/cv/camera-model/" rel="next" title="吐血整理：从相机模型（针孔、鱼眼、全景）到OpenCV源码实现">
+                  吐血整理：从相机模型（针孔、鱼眼、全景）到OpenCV源码实现 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="2cf0b705b902423269f4cebef74df287"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"covS4Q3Q0SaMRjqI2VomagVm-gzGzoHsz","app_key":"iK7kdlu4InjORoPr3oksi1IM","server_url":"https://covs4q3q.lc-cn-n1-shared.com","security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>

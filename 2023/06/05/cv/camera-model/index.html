@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  本文内容 本文旨在较为直观地介绍相机成像背后的数学模型，主要的章节组织如下：  第一章用最简单的针孔投影模型为例讲解一个三维点是如何映射到图像中的一个像素 第二章介绍除了针孔投影模型外其他一些经典投影模型，旨在让读者建立不同投影模型之间的建模过程 第三章介绍如何把不同的投影模型用一个统一的投影过程表达">
+<meta property="og:type" content="article">
+<meta property="og:title" content="吐血整理：从相机模型（针孔、鱼眼、全景）到OpenCV源码实现">
+<meta property="og:url" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  本文内容 本文旨在较为直观地介绍相机成像背后的数学模型，主要的章节组织如下：  第一章用最简单的针孔投影模型为例讲解一个三维点是如何映射到图像中的一个像素 第二章介绍除了针孔投影模型外其他一些经典投影模型，旨在让读者建立不同投影模型之间的建模过程 第三章介绍如何把不同的投影模型用一个统一的投影过程表达">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/01-pinhole.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/02-theta_projection.jpg">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/03-classic_projection.jpg">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/04-unit_sphere.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/05-mirror_camera.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/06-normalized_plane.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/07-unified_model.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/07-classic_proj_plot.jpg">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/08-image_affect.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/09-distortion_plane.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/10-distorted_to_undistorted.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/11-undistorted_model.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/12-omni_cam.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/13-cmei_model.png">
+<meta property="article:published_time" content="2023-06-05T09:35:04.000Z">
+<meta property="article:modified_time" content="2023-06-12T07:42:27.709Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="camera projection">
+<meta property="article:tag" content="视觉基础">
+<meta property="article:tag" content="相机模型">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/06/05/cv/camera-model/imgs/01-pinhole.png">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/06/05/cv/camera-model/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/06/05/cv/camera-model/","path":"2023/06/05/cv/camera-model/","title":"吐血整理：从相机模型（针孔、鱼眼、全景）到OpenCV源码实现"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>吐血整理：从相机模型（针孔、鱼眼、全景）到OpenCV源码实现 | Zeal's Blog</title>
+  
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+  <a target="_blank" rel="noopener" href="https://github.com/zeal-up" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E6%96%87%E5%86%85%E5%AE%B9"><span class="nav-number">1.</span> <span class="nav-text">本文内容</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E7%9B%B8%E6%9C%BA%E6%98%AF%E5%A6%82%E4%BD%95%E6%88%90%E5%83%8F%E7%9A%84"><span class="nav-number">2.</span> <span class="nav-text">一、相机是如何成像的？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E4%B8%89%E7%BB%B4%E7%A9%BA%E9%97%B4%E4%B8%AD%E7%9A%84%E7%82%B9%E6%80%8E%E6%A0%B7%E6%98%A0%E5%B0%84%E5%88%B0%E5%9B%BE%E7%89%87%E4%B8%8A%E7%9A%84%E4%B8%80%E4%B8%AA%E5%83%8F%E7%B4%A0"><span class="nav-number">2.1.</span> <span class="nav-text">一个三维空间中的点怎样映射到图片上的一个像素？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E6%9C%BA%E5%9D%90%E6%A0%87%E7%B3%BB"><span class="nav-number">2.2.</span> <span class="nav-text">相机坐标系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%A7%E7%99%BD%E8%AF%9D%E6%80%BB%E7%BB%93"><span class="nav-number">2.3.</span> <span class="nav-text">大白话总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E4%B8%8D%E5%90%8C%E7%9A%84%E7%9B%B8%E6%9C%BA%E6%8A%95%E5%BD%B1%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">二、不同的相机投影模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E7%9B%B8%E6%9C%BA%E6%8A%95%E5%BD%B1%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.1.</span> <span class="nav-text">什么是相机投影模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%8F%E5%85%B8%E7%9A%84%E7%9B%B8%E6%9C%BA%E6%8A%95%E5%BD%B1%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.2.</span> <span class="nav-text">经典的相机投影模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E7%9B%B8%E6%9C%BA%E6%8A%95%E5%BD%B1%E6%A8%A1%E5%9E%8B%E7%9A%84%E7%BB%9F%E4%B8%80%E8%A1%A8%E8%BE%BE%E5%BD%A2%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">三、相机投影模型的统一表达形式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E4%BD%8D%E7%90%83%E6%8A%95%E5%BD%B1"><span class="nav-number">4.1.</span> <span class="nav-text">单位球投影</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BD%92%E4%B8%80%E5%8C%96%E5%B9%B3%E9%9D%A2%E6%A8%A1%E5%9E%8B%E5%B9%B3%E9%9D%A2"><span class="nav-number">4.2.</span> <span class="nav-text">归一化平面&amp;&amp;模型平面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%8F%E8%A7%86%E5%8F%98%E6%8D%A2"><span class="nav-number">4.3.</span> <span class="nav-text">透视变换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%86%E9%92%88%E5%AD%94%E6%8A%95%E5%BD%B1%E5%B8%A6%E5%85%A5%E4%B8%8A%E8%BF%B0%E7%BB%9F%E4%B8%80%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.4.</span> <span class="nav-text">将针孔投影带入上述统一模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E6%8A%95%E5%BD%B1%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%87%BD%E6%95%B0%E5%9B%BE"><span class="nav-number">4.5.</span> <span class="nav-text">不同投影模型的函数图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E6%9C%BA%E6%8A%95%E5%BD%B1%E6%A8%A1%E5%9E%8B%E6%80%BB%E7%BB%93"><span class="nav-number">4.6.</span> <span class="nav-text">相机投影模型总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E7%9B%B8%E6%9C%BA%E7%9A%84%E7%95%B8%E5%8F%98"><span class="nav-number">5.</span> <span class="nav-text">四、相机的畸变</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%92%88%E5%AD%94%E6%A8%A1%E5%9E%8B%E7%9A%84%E4%BC%98%E8%B6%8A%E6%80%A7"><span class="nav-number">5.1.</span> <span class="nav-text">针孔模型的优越性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="nav-number">5.2.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E5%BD%92%E4%B8%80%E5%8C%96%E5%B9%B3%E9%9D%A2%E6%8F%92%E5%85%A5%E7%95%B8%E5%8F%98%E6%A8%A1%E5%9E%8B"><span class="nav-number">5.3.</span> <span class="nav-text">在归一化平面插入畸变模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%84%E5%90%91%E7%95%B8%E5%8F%98radial-distortion"><span class="nav-number">5.4.</span> <span class="nav-text">径向畸变（Radial Distortion）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%87%E5%90%91%E7%95%B8%E5%8F%98tangential-distortion"><span class="nav-number">5.5.</span> <span class="nav-text">切向畸变（Tangential Distortion）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%BB%E7%95%B8%E5%8F%98"><span class="nav-number">5.6.</span> <span class="nav-text">去畸变</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E5%85%A8%E6%99%AF%E7%9B%B8%E6%9C%BAomidirectional-camera"><span class="nav-number">6.</span> <span class="nav-text">五、全景相机（Omidirectional Camera）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#kannalabrandt%E6%A8%A1%E5%9E%8B"><span class="nav-number">6.1.</span> <span class="nav-text">KannalaBrandt模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cmei%E6%A8%A1%E5%9E%8B"><span class="nav-number">6.2.</span> <span class="nav-text">CMei模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E4%BB%A3%E7%A0%81%E5%AE%9E%E4%BE%8B"><span class="nav-number">7.</span> <span class="nav-text">六、代码实例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E4%B8%80%E9%92%88%E5%AD%94%E6%8A%95%E5%BD%B1%E6%A8%A1%E5%9E%8B%E5%8E%BB%E7%95%B8%E5%8F%98"><span class="nav-number">7.1.</span> <span class="nav-text">实例一：针孔投影模型去畸变</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E4%BA%8Ccmei%E6%A8%A1%E5%9E%8B%E5%8E%BB%E7%95%B8%E5%8F%98"><span class="nav-number">7.2.</span> <span class="nav-text">实例二：CMei模型去畸变</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E4%B8%89kannalabrandt%E6%A8%A1%E5%9E%8B%E5%8E%BB%E7%95%B8%E5%8F%98"><span class="nav-number">7.3.</span> <span class="nav-text">实例三：KannalaBrandt模型去畸变</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E6%9C%BA%E6%A0%87%E5%AE%9A%E6%96%B9%E6%B3%95"><span class="nav-number">8.</span> <span class="nav-text">相机标定方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">9.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/06/05/cv/camera-model/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="吐血整理：从相机模型（针孔、鱼眼、全景）到OpenCV源码实现 | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          吐血整理：从相机模型（针孔、鱼眼、全景）到OpenCV源码实现
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-06-05 17:35:04" itemprop="dateCreated datePublished" datetime="2023-06-05T17:35:04+08:00">2023-06-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-06-12 15:42:27" itemprop="dateModified" datetime="2023-06-12T15:42:27+08:00">2023-06-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/" itemprop="url" rel="index"><span itemprop="name">计算机视觉</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/06/05/cv/camera-model/" class="post-meta-item leancloud_visitors" data-flag-title="吐血整理：从相机模型（针孔、鱼眼、全景）到OpenCV源码实现" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="吐血整理：从相机模型（针孔、鱼眼、全景）到OpenCV源码实现" href="/2023/06/05/cv/camera-model/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::7f7d0e7ebf1819ceb3ada055941a8a17" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="本文内容">本文内容</h2>
+<p>本文旨在较为直观地介绍相机成像背后的数学模型，主要的章节组织如下：</p>
+<ol type="1">
+<li>第一章用最简单的针孔投影模型为例讲解一个三维点是如何映射到图像中的一个像素</li>
+<li>第二章介绍除了针孔投影模型外其他一些经典投影模型，旨在让读者建立不同投影模型之间的建模过程</li>
+<li>第三章介绍如何把不同的投影模型用一个统一的投影过程表达</li>
+<li>第四章进一步补充第三章的统一投影模型，并介绍畸变的定义和去畸变的原理</li>
+<li>第五章针对全景相机的基本概念和两种应用广泛的全景相机模型做出介绍</li>
+<li>第六章用代码示例介绍如何使用OpenCV的接口对图像去畸变</li>
+</ol>
+<h2 id="一相机是如何成像的">一、相机是如何成像的？</h2>
+<p>祭上一张经典图</p>
+<figure>
+<img src="./imgs/01-pinhole.png" alt="" /><figcaption>针孔相机模型</figcaption>
+</figure>
+<h3 id="一个三维空间中的点怎样映射到图片上的一个像素">一个三维空间中的点怎样映射到图片上的一个像素？</h3>
+<p>我们从一个最简单的问题开始：一个三维空间中的点<span class="math inline">\(P=[X,Y,Z]\)</span>是如何经过相机成像变为图像上的一个像素<span class="math inline">\(\boldsymbol{p}=[u,v]\)</span>的？</p>
+<p>我们最常见的投影模型<strong>Perspective Projection Model</strong> 描述的就是<strong>针孔相机</strong> 的成像原理。从上面的图根据相似三角形可以得出</p>
+<p><span class="math display">\[
+\frac{X_c}{Z_c} = \frac{u - c_x}{f}\tag{1-1}
+\]</span></p>
+<p>其中<span class="math inline">\(c_x\)</span>为光轴在图像中的<span class="math inline">\(x\)</span>坐标，如果相机的光轴与感光元器件完全对齐的话，<span class="math inline">\(c_x = \frac{1}{2}W\)</span>, <span class="math inline">\(W\)</span>是图像的宽度（单位是像素）</p>
+<p>从上面的关系可以得出，将一个三维点投影到像素坐标系的时候，可以直接使用下面的公式。对应的就是针孔相机模型。<strong>下标<span class="math inline">\((\cdot)_c\)</span></strong> 表示这个点是在相机坐标系下的点</p>
+<p><span class="math display">\[
+\begin{split}
+\lambda
+\begin{bmatrix}
+u\\
+v\\
+1
+\end{bmatrix}=
+\begin{bmatrix}
+f_x&amp;0&amp;c_x\\
+0&amp;f_y&amp;c_y\\
+0&amp;0&amp;1
+\end{bmatrix}
+\begin{bmatrix}
+X_c\\
+Y_c\\
+Z_c\\
+\end{bmatrix}
+\end{split}\tag{1-2}
+\]</span></p>
+<p>公式（1-2）在代码中也经常对<span class="math inline">\(u,v\)</span>分开进行计算</p>
+<p><span class="math display">\[
+\begin{split}
+u = f_x \frac{X_c}{Z_c} + c_x
+\\
+\\
+v = f_y \frac{Y_c}{Z_c} + c_y
+\end{split}\tag{1-3}
+\]</span></p>
+<p>当然，为了简化记号，公式（1-2）也通常记为矩阵相乘的形式</p>
+<p><span class="math display">\[
+\lambda\boldsymbol{p}=KP_c\tag{1-4}
+\]</span></p>
+<p>如果我们提前对<span class="math inline">\(P_c\)</span>做归一化处理，也就是除以<span class="math inline">\(Z_c\)</span>（假设点位于相机前，即<span class="math inline">\(Z_c&gt;0\)</span>），则可以去掉<span class="math inline">\(\lambda\)</span>系数，即如下形式：</p>
+<p><span class="math display">\[
+\begin{split}
+&amp;\boldsymbol{p}_n=\frac{P_c}{Z_c}=
+\begin{bmatrix}
+\frac{X_c}{Z_c}&amp;\frac{Y_c}{Z_c}&amp;1
+\end{bmatrix}^T
+\\
+&amp;\boldsymbol{p}=K\boldsymbol{p}_n
+\end{split}\tag{1-5}
+\]</span></p>
+<p>公式（1-4）中<span class="math inline">\(\boldsymbol{p}_n\)</span>位于<span class="math inline">\(Z=1\)</span>的平面，又叫归一化平面（nomalized plane），后文会再次讲到这个平面。</p>
+<p>公式（1-2）到公式（1-5）其实都是等价的</p>
+<p>如果给的三维点是在世界坐标系下，也就是<span class="math inline">\(P_w=[X_w,Y_w,Z_w]\)</span>，那么我们只需要先把该点用相机的外参转换到相机坐标系下（刚性变换）即可：</p>
+<p><span class="math display">\[
+\begin{split}
+\lambda\boldsymbol{p} = KT_{cw}P_w\\
+\\
+T_{cw} = [R|t]
+\end{split}\tag{1-6}
+\]</span></p>
+<p>由于刚性变换过程不影响对相机投影模型的讨论，因此后面都假设三维点是处于相机坐标系</p>
+<h3 id="相机坐标系">相机坐标系</h3>
+<p>在OpenCV中以及大部分视觉处理库中，相机坐标系的规定都与上述的图一致，就是相机光轴往前为<span class="math inline">\(Z\)</span>，图像水平往右为<span class="math inline">\(X\)</span>，图像垂直往下为<span class="math inline">\(Y\)</span>。不过要注意的是在一些仿真渲染器或者特定任务的数据集中可能会规定图像垂直往上为<span class="math inline">\(Z\)</span>，前为<span class="math inline">\(X\)</span>，朝左为<span class="math inline">\(Y\)</span>，但是这一点是无关紧要的，这一点差别可以反映在相机的外参里，也就是公式（1-6）中的<span class="math inline">\(T_{cw}\)</span>，只要按照OpenCV的方式规定相机坐标系，总是可以找到一个外参矩阵<span class="math inline">\(T_{cw}\)</span>将世界坐标系下的点变换到相机坐标系（前<span class="math inline">\(Z\)</span>右<span class="math inline">\(X\)</span>下<span class="math inline">\(Y\)</span>）</p>
+<h3 id="大白话总结">大白话总结</h3>
+<p>问：相机是如何成像的？ 答：光束从物体表面反射，经过相机镜头，到达感光原件，这一系列物理过程可以通过数学公式表达，最终变成一个简单的矩阵操作将三维空间中的点对应到图片的一个像素。</p>
+<h2 id="二不同的相机投影模型">二、不同的相机投影模型</h2>
+<p>第一节介绍的是针孔投影模型，但是事实上相机镜头都是多种多样的，不可能都是符合针孔投影模型。本节会介绍经典的相机投影模型，并从直观感受和形式化定义上介绍不同的投影模型是如何联系在一起的</p>
+<h3 id="什么是相机投影模型">什么是相机投影模型</h3>
+<p><strong>相机投影模型用数学的方式描述了一个真实世界中的三维点到图像上像素坐标的映射关系</strong></p>
+<p>相机投影模型实际上就是对相机成像过程（物理）的数学建模。建模的目的是为了能够尽量符合真实的成像过程。不同的建模方式就对应不同的相机投影模型</p>
+<h3 id="经典的相机投影模型">经典的相机投影模型</h3>
+<p>我们回头看看公式（1-3），并暂时<strong>只关注<span class="math inline">\(X\)</span>轴的映射关系</strong></p>
+<p><span class="math display">\[
+\begin{split}
+u = f_x \frac{X_c}{Z_c} + c_x
+\end{split}\tag{1-3}
+\]</span></p>
+<p>上式中<span class="math inline">\(f_x\)</span>称为相机焦距，反应了一个单位长度应该映射为几个像素，单位是<span class="math inline">\(pixels/m\)</span>，<span class="math inline">\(c_x\)</span>是相机坐标系（以光轴点为原点）到图像坐标系（以左上角为原点），这两个参数都是相机的固有参数。 而上式轴<span class="math inline">\(\frac{X_c}{Z_c}\)</span>刚好是点<span class="math inline">\(P_c\)</span>到相机光心连线与光轴角度的正切值，我们记光束与光轴的夹角为<span class="math inline">\(\theta\)</span>，并将图片原点移动到图片中心，则公式（1-3）可以写为</p>
+<p><span class="math display">\[
+u^{\prime}=f_x\tan(\theta)\tag{2-1}
+\]</span></p>
+<p>上式的示意图如下（图中的<span class="math inline">\(r\)</span>在只考虑<span class="math inline">\(X\)</span>轴的时候就是<span class="math inline">\(u^{\prime}\)</span>）：</p>
+<figure>
+<img src="./imgs/02-theta_projection.jpg" alt="" /><figcaption>光束与光轴夹角</figcaption>
+</figure>
+<p>在公式（2-1）中，<span class="math inline">\(X\)</span>轴的投影坐标是<span class="math inline">\(\theta\)</span>的函数，于是，我们是否可以用不同的函数表达这个过程？答案是肯定的！不同的函数就对应了不同的投影模型。下图就给出了在经典投影模型中对<span class="math inline">\(\theta\)</span>的不同映射方式</p>
+<figure>
+<img src="./imgs/03-classic_projection.jpg" alt="" /><figcaption>经典投影模型</figcaption>
+</figure>
+<p>事实上，<span class="math inline">\(f\)</span>作为相机的焦距，在上图中的不同投影模型都统一出现，于是我们可以舍弃焦距符号。于是，上图中不同的函数关系与投影模型的对应关系如下：</p>
+<ul>
+<li><span class="math inline">\(r(\theta)=\tan(\theta)\)</span>，perspective projection/针孔投影模型/rectilinear model</li>
+<li><span class="math inline">\(r(\theta)=2\tan{\big(\frac{\theta}{2}\big)}\)</span>, stereographic projection</li>
+<li><span class="math inline">\(r(\theta)=\theta\)</span>, equidistant projection</li>
+<li><span class="math inline">\(r(\theta)=\sin{(\theta)}\)</span>, sine-law projection</li>
+<li><span class="math inline">\(r(\theta)=2\sin{\big(\frac{\theta}{2}\big)}\)</span>, equi-solid angle projection</li>
+</ul>
+<p>上面两幅图出自:<a target="_blank" rel="noopener" href="http://michel.thoby.free.fr/Fisheye_history_short/Projections/Models_of_classical_projections.html">Models for the various classical lens projections</a>，这篇文章比较形象地介绍各种经典的相机投影模型，并给出他们的函数曲线分析。不过总体偏形象化，没有引入更形式化的描述。</p>
+<h2 id="三相机投影模型的统一表达形式">三、相机投影模型的统一表达形式</h2>
+<p>上一节我们将投影关系限制在<span class="math inline">\(X\)</span>轴，并且给出了较为直观的图示。目的在于两个：1）给读者建立更深刻的相机投影过程;2）让读者对几种经典的投影模型有初步的直观了解。在这一小节中，我们给出更为统一的相机投影表达方式，同时为后文讨论相机的<strong>畸变</strong> 建立必要的理论基础。</p>
+<p>我们将相机的投影过程拆分为三个过程：1）将空间中的点投影到单位球表面;2）将单位球上的点投影到归一化平面;3）将归一化平面上的点利用针孔模型投影到图像坐标系。下面详细介绍这几个过程</p>
+<h3 id="单位球投影">单位球投影</h3>
+<p>想象一下一束光束从相机光心射出，经过图像中的一个像素然后往外无限延伸，可以想象到，这个光束经过的任何点到图像的投影都是经过的那个像素。这个简单的事实告诉我们，我们可以对一个三维点进行任意的放缩，其在图像上的成像点都不会改变。于是，我们将三维点<span class="math inline">\(P_c\)</span>除以它自身的膜，将其投影到一个单位球，其投影坐标为<span class="math inline">\(P_s\)</span></p>
+<p><span class="math display">\[
+\begin{split}
+P_s = \frac{P_c}{||P_c||}=
+\begin{bmatrix}
+\frac{X_c}{||P_c||}&amp;\frac{Y_c}{||P_c||}&amp;\frac{Z_c}{||P_c||}
+\end{bmatrix}^T
+\end{split}\tag{3-1}
+\]</span></p>
+<p>示意图如下：</p>
+<figure>
+<img src="./imgs/04-unit_sphere.png" alt="" /><figcaption>单位球投影示意图</figcaption>
+</figure>
+<p>在上图中，<span class="math inline">\(\theta\)</span>是光束与光轴的夹角，<span class="math inline">\(\alpha\)</span>为光束与水平轴的夹角。</p>
+<p>两个角度有如下关系：</p>
+<p><span class="math display">\[
+\begin{split}
+&amp;\rho = \sqrt{(X_s^2+Y_s^2)}\\
+&amp;\theta=\operatorname{atan}(\frac{\rho}{Z_s})=\operatorname{asin}(\rho)\\
+&amp;\alpha=\operatorname{atan}(\frac{Y_s}{X_s})
+\end{split}\tag{3-2}
+\]</span></p>
+<p>之所以构建<span class="math inline">\(\theta\)</span>和<span class="math inline">\(\alpha\)</span>是因为，我们后续可以将投影过程建立为这两个角度的函数，也就是只与光束的角度有关，而与具体的点坐标无关，这也是符合直观的。</p>
+<p>另外，从前面的叙述以及常识，我们知道针孔成像结果是一个倒立的像，为了方便叙述，我们可以将相机做一个镜像，如下图所示：</p>
+<figure>
+<img src="./imgs/05-mirror_camera.png" alt="" /><figcaption>对相机做镜像</figcaption>
+</figure>
+<p>这个单位球有时候又叫视球（Viewing Sphere）</p>
+<h3 id="归一化平面模型平面">归一化平面&amp;&amp;模型平面</h3>
+<p>将世界坐标系的点投影到单位球后，我们进一步将其映射到<span class="math inline">\(Z=1\)</span>的平面上，这个平面又叫归一化平面（Normalized Plane）。 此时不同的投影模型会对在归一化平面上的点到原点的连线做放缩<span class="math inline">\(r(\theta)\)</span>，为了后文叙述的统一性，我们再拆分出一个模型平面。在归一化平面上的点只是<span class="math inline">\(P_c\)</span>与光心点的连线和平面的交点，即：</p>
+<p><span class="math display">\[
+p_n = \frac{P_c}{||Z_c||}\tag{3-3}
+\]</span></p>
+<p>在模型平面上（Model Plane），对归一化平面上的点做半径放缩，即</p>
+<p><span class="math display">\[
+\begin{split}
+\boldsymbol{p}_d=
+\begin{bmatrix}
+r(\theta)\cos(\alpha)\\
+r(\theta)\sin(\alpha)\\
+1
+\end{bmatrix}=
+\begin{bmatrix}
+u_d\\
+v_d\\
+1
+\end{bmatrix}
+\end{split}\tag{3-4}
+\]</span></p>
+<p>这两个平面的变换过程如下图所示</p>
+<figure>
+<img src="./imgs/06-normalized_plane.png" alt="" /><figcaption>归一化平面投影&amp;&amp;模型平面</figcaption>
+</figure>
+<p>从第二节中经典的投影模型我们发现，其实不同的投影模型都没有对<span class="math inline">\(\alpha\)</span>产生影响，而是对投影点到原点的距离<span class="math inline">\(r(\theta)\)</span>建立不同的函数形式</p>
+<p>稍后我们会看到，为了能够将所有模型都统一为针孔投影模型，会将模型平面变为畸变平面，用更具有一般性的多项式代替前面<span class="math inline">\(r(\theta)\)</span>的表达形式。（因此，现在模型平面上的点用下标<span class="math inline">\(d\)</span>标明，表示distortion）</p>
+<h3 id="透视变换">透视变换</h3>
+<p>得到模型平面上的坐标<span class="math inline">\(\boldsymbol{p}_d=[u_d,v_d,1]^T\)</span>后，我们可以用相机内参<span class="math inline">\(K\)</span>将其变换到图像平面，这个步骤实际上就只是坐标的变换了。</p>
+<p><span class="math display">\[
+\begin{split}
+u = f_xu_d+c_x\\
+v = f_yv_d+c_y
+\end{split}\tag{3-5}
+\]</span></p>
+<p>最后，我们可以得到一张完整地表达相机投影模型的示意图：</p>
+<figure>
+<img src="./imgs/07-unified_model.png" alt="" /><figcaption>相机投影模型统一表达形式</figcaption>
+</figure>
+<h3 id="将针孔投影带入上述统一模型">将针孔投影带入上述统一模型</h3>
+<p>我们可以将针孔模型，即<span class="math inline">\(r(\theta)=\tan(\theta)\)</span>代入上面的模型，联立公式（3-1）-（3-5）,最后可以发现，公式（3-5）的结果其实就是公式（1-3），也就是针孔投影模型的公式。这个过程比较简单，就不再展开公式。读者自己推导一下这个过程非常有利于理解上述的过程。</p>
+<h3 id="不同投影模型的函数图">不同投影模型的函数图</h3>
+<p>我们可以将不同的经典投影模型的函数画出来（横轴为<span class="math inline">\(\theta\)</span>，纵轴为<span class="math inline">\(r(\theta)\)</span>），结果如下</p>
+<figure>
+<img src="./imgs/07-classic_proj_plot.jpg" alt="" /><figcaption>经典投影模型的函数曲线</figcaption>
+</figure>
+<p>从上图我们应该至少要观察到一个重要的事实：针孔投影模型无法对<span class="math inline">\(&gt;=90\degree\)</span>的视野成像。因为<span class="math inline">\(\tan(\cdot)\)</span>在90度的时候会趋于无穷大。实际上，从上面的函数图可以看到，针孔投影模型只能在大约水平140度以内的视野成像</p>
+<h3 id="相机投影模型总结">相机投影模型总结</h3>
+<p>到目前位置，我们应该建立至少以下几个方面的认识：</p>
+<ol type="1">
+<li>统一化的投影模型经过：单位球投影-&gt;归一化平面-&gt;透视变换几个过程，将一个三维点投影到图像上的像素</li>
+<li>不同的经典投影模型在投影过程中不会改变光束与<span class="math inline">\(X\)</span>轴的夹角，只是对像素到图像原点的距离建立不同的方程</li>
+</ol>
+<h2 id="四相机的畸变">四、相机的畸变</h2>
+<h3 id="针孔模型的优越性">针孔模型的优越性</h3>
+<p>首先描述一下我们人类直观上对于“标准的图像”这个词的一个感性认识，是不是我们会觉得横平竖直，真实中是直线则图像中也是直线，这样的图片会比较“标准”？事实上，针孔投影模型就刚好具有这样的性质。这个性质也可以从其投影方程看出来。经过针孔成像的物体，好像就是把整个物体缩小放在图片上，因此圆是圆，直线是直线。而其他投影模型就可能会呈现膨胀、紧缩的成像效果。如下图</p>
+<figure>
+<img src="./imgs/08-image_affect.png" alt="" /><figcaption>标准的针孔成像与其他投影模型的图像</figcaption>
+</figure>
+<h3 id="定义">定义</h3>
+<p>“畸变”这个词从词语上应该理解成由于镜头加工等因素造成镜头与投影模型的差异。但实际上，<strong>相机畸变现在描述的是相机成像过程与针孔投影模型的差异（a deviation from the pinhole model）</strong> ，也就是：针孔投影+畸变模型=实际成像</p>
+<p>而“去畸变”则是使用畸变模型对图像进行逆操作，使得图像就像用针孔投影模型成像出来的一样。</p>
+<h3 id="在归一化平面插入畸变模型">在归一化平面插入畸变模型</h3>
+<p>为了能够利用针孔模型的性质，我们在前文给出的统一相机投影模型中将模型平面用畸变平面代替。这里的核心思想是，<strong>用一个更具一般性的多项式替代各个投影模型中的模型函数，以此达到用一个方程表达多个投影模型的目的。</strong></p>
+<p>替换后的示意图如图所示：</p>
+<figure>
+<img src="./imgs/09-distortion_plane.png" alt="" /><figcaption>加入畸变平面的投影模型</figcaption>
+</figure>
+<p>注意上图与上一节最后的统一投影模型其实是一样的，不过Model Plane名字换成Distortion Plane</p>
+<p>我们这一节采用<a href="#OpenCV2.4">OpenCV实现的畸变模型</a>来讲解畸变过程</p>
+<p>我们还是先将<span class="math inline">\(P_c\)</span>点投影到归一化平面得到<span class="math inline">\(\boldsymbol{p}_n=[u_n,v_n]\)</span>，并令其到原点的半径为<span class="math inline">\(r=\sqrt{(u_n^2+v_n^2)}\)</span></p>
+<h3 id="径向畸变radial-distortion">径向畸变（Radial Distortion）</h3>
+<p>所谓的径向畸变（Radial Distortion）就是指只对点<span class="math inline">\(p_n\)</span>做半径上的伸缩变化，这一点其实就跟经典投影模型一样用一个函数建立半径的变化，在OpenCV中，标准镜头的径向畸变可以用如下方程表达：</p>
+<p><span class="math display">\[
+\begin{split}
+&amp;u^{\prime}=u_n(1+k_1r^2+k_2r^4+k_3r^6)\\
+&amp;v^{\prime}=v_n(1+k_1r^2+k_2r^4+k_3r^6)
+\end{split}\tag{4-1}
+\]</span></p>
+<p>径向畸变对于环绕光轴一周的改变是一致的，因此也叫做半径对称畸变（Radial Symmetric Distortion）或者畸变的对称部分（Symmetric Part Of Distortion Model）</p>
+<h3 id="切向畸变tangential-distortion">切向畸变（Tangential Distortion）</h3>
+<p>真实的镜头由于加工误差和安装误差，会导致镜头与感光原件的中心不是完全对齐的，因此在平行的方向上会与标准的针孔成像模型有差异，这种差异对于光轴不是旋转对称的，也叫做切向畸变（Tangential Distortion）</p>
+<p>OpenCV中镜头的切向畸变方程如下：</p>
+<p><span class="math display">\[
+\begin{split}
+u_{d}=u^{\prime}+2p_1u_nv_n+p_2(r^2+2u_n)\\
+v_{d}=v^{\prime}+p_1(r^2+2{v_n}^2) + 2p_2u_nv_n
+\end{split}\tag{4-2}
+\]</span></p>
+<p>公式（4-1）和公式（4-2）中的<span class="math inline">\(k_1,k_2,k_3,p_1,p_2\)</span>叫做畸变参数（Distortion Coefficients）</p>
+<h3 id="去畸变">去畸变</h3>
+<p>有了畸变模型之后，我们就可以将一个三维点经过：单位球投影-&gt;归一化平面投影-&gt;畸变模型-&gt;透视变换，得到该点在图像中的像素位置。我们可以通过一些标定物，经过求解得到上述的畸变系数，进而得到畸变过程的反过程。我们将图像上的点先经过透视变换的反变换得到在畸变平面上的点，再经过畸变过程的反过程，再投回图像中，这样我们就得到一副没有畸变的图像，其看起来就像是用完全标准的针孔投影模型成像的照片。</p>
+<p>下面的图片展示了从畸变到去畸变的图像变化</p>
+<figure>
+<img src="./imgs/10-distorted_to_undistorted.png" alt="" /><figcaption>去畸变图像变化</figcaption>
+</figure>
+<p>做完去畸变后，整个的成像过程就像直接用针孔投影模型（公式1-3）成像一般，就像下图一样。</p>
+<figure>
+<img src="./imgs/11-undistorted_model.png" alt="" /><figcaption>去畸变的等效投影过程</figcaption>
+</figure>
+<p>提出畸变模型的文章需要给出如何标定出畸变参数，同时如何计算从畸变点到非畸变点，这里面主要是一些数学求解，这里就不展开讨论，有兴趣的可以看看<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Distortion_(optics)#Software_correction">wiki:Distortion</a></p>
+<h2 id="五全景相机omidirectional-camera">五、全景相机（Omidirectional Camera）</h2>
+<p>所谓的全景相机广泛概念上指成像角度能够大于等于180度的相机，他们看起来大概像是下面这样</p>
+<figure>
+<img src="./imgs/12-omni_cam.png" alt="" /><figcaption>全景相机类型</figcaption>
+</figure>
+<p>从第二节（不同的相机投影模型）我们可以知道，根据针孔投影模型设计出的镜头无法对大于等于90度（左右）的视野成像，通常由于进光量等问题，这类相机一般只有140度左右的成像视野。</p>
+<p>一般的畸变模型的设计以针孔相机模型为基础，通过参数模型修正真实的成像与针孔成像的差异，因为在很多的应用中我们希望能够通过“去畸变”的方式，将图片变成“直线还是直线（Straight lines are straight），在<a href="#KannalaBrandt">KannalaBrandt论文</a>中是这样描述的：</p>
+<blockquote>
+<p>It is impossible to project the hemispherical field of view on a finite image plane by a perspective projection so fish-eye lenses are designed to obey some other projection model.This is the reason why the inherent distortion of a fish-eye lens should not be considered only as a deviation from the pinhole model</p>
+</blockquote>
+<p>于是，就有很多专门针对全景相机（<strong>Omidirection Camera/Fisheye Camera/Wide-Angle camera</strong>）的建模研究出现。</p>
+<p>重新理清一下我们的目的：</p>
+<ol type="1">
+<li>拥有一种统一的表达方式能够尽量拟合真实的全景相机的成像过程</li>
+<li>这种表达方式应该简洁有效</li>
+<li>能够对模型的参数求解，并将图像通过“去畸变”变成像是由针孔相机拍摄出来的横平竖直的图像</li>
+</ol>
+<p>OpenCV中针对全景相机的标定和去畸变给出了两种实现</p>
+<ol type="1">
+<li><a target="_blank" rel="noopener" href="https://sci-hub.st/10.1109/TPAMI.2006.153">KannalaBrandt模型</a>.对应实现<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.7.0/db/d58/group__calib3d__fisheye.html">OpenCV::Fisheye</a></li>
+<li><a target="_blank" rel="noopener" href="https://sci-hub.st/10.1109/ROBOT.2007.364084">CMei模型</a>. 对应实现<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.7.0/dd/d12/tutorial_omnidir_calib_main.html">OpenCV::Omnidir</a></li>
+</ol>
+<p>下面简单介绍这两种模型</p>
+<h3 id="kannalabrandt模型">KannalaBrandt模型</h3>
+<p>第一步还是先将点投影到单位球模型，这样我们就得出了<span class="math inline">\(\theta,\alpha\)</span>两个角度，后续的畸变模型就是关于这两个角度的函数</p>
+<p>这里这里摘录OpenCV的描述方式<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.7.0/db/d58/group__calib3d__fisheye.html">OpenCV_Fisheye</a>，相比于论文，在模型参数上简化了很多</p>
+<p>KannalaBrandt模型使用一个多项式描述径向畸变（畸变的对称部分）</p>
+<p><span class="math display">\[
+\begin{split}
+&amp;\boldsymbol{p}_n=\frac{P_c}{P_z}=[u_n,v_n,1]^T\\
+\\
+&amp;r = \sqrt{u_n^2+v_n^2}\\
+\\
+&amp;\theta_d = k_1\theta + k_2\theta^3 + k_3\theta^5+k_4\theta^7+k_5\theta^9+....
+\end{split}\tag{5-1}
+\]</span></p>
+<p>径向畸变后坐标变为：</p>
+<p><span class="math display">\[
+\begin{split}
+u^{\prime} = \frac{\theta_d}{r}u_n\\
+v^{\prime} = \frac{\theta_d}{r}v_n
+\end{split}\tag{5-2}
+\]</span></p>
+<p>最后再进行非对称畸变</p>
+<p><span class="math display">\[
+\begin{split}
+&amp;u_d=u^{\prime}+\alpha v^{\prime}\\
+&amp;v_d=v^{\prime}
+\end{split}\tag{5-3}
+\]</span></p>
+<p>最后再经过公式（3-5）变换到图像坐标系</p>
+<h3 id="cmei模型">CMei模型</h3>
+<p>CMei模型相比于其他模型有一个较大不同之处在于在从单位球投影到归一化平面时将相机光心往后移动了距离<span class="math inline">\(\xi\)</span>，总体的投影过程如下图：</p>
+<figure>
+<img src="./imgs/13-cmei_model.png" alt="" /><figcaption>CMei投影模型</figcaption>
+</figure>
+<p>上图出自引用CMei的一篇论文：Design and Calibration of an Omni-RGB+D Camera</p>
+<h2 id="六代码实例">六、代码实例</h2>
+<h3 id="实例一针孔投影模型去畸变">实例一：针孔投影模型去畸变</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># undistort image</span></span><br><span class="line">h,  w = img.shape[:<span class="number">2</span>]</span><br><span class="line">newcameramtx, roi = cv2.getOptimalNewCameraMatrix(K, distortions, (w,h), alpha, (w,h))</span><br><span class="line">undistorted_img = cv2.undistort(img, K, distortions, <span class="literal">None</span>, newcameramtx)</span><br><span class="line">x, y, w, h = roi</span><br><span class="line">undistorted_img = undistorted_img[y:y+h, x:x+w]</span><br><span class="line"></span><br><span class="line"><span class="comment"># undistort image points</span></span><br><span class="line"><span class="keyword">if</span> points2d.ndim == <span class="number">2</span>:</span><br><span class="line">    points2d = points2d[:, <span class="literal">None</span>, :]</span><br><span class="line">undistorted_points = cv2.undistortPoints(points2d, K, distortions, P=K)</span><br><span class="line">undistorted_points = undistorted_points.reshape(-<span class="number">1</span>, <span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="实例二cmei模型去畸变">实例二：CMei模型去畸变</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># undistort image</span></span><br><span class="line"><span class="keyword">if</span> newK:</span><br><span class="line">        K_new = np.zeros((<span class="number">3</span>,<span class="number">3</span>), np.float64)</span><br><span class="line">        h,w = img.shape[:<span class="number">2</span>]</span><br><span class="line">        K_new[<span class="number">0</span>, <span class="number">0</span>] = w/<span class="number">4</span></span><br><span class="line">        K_new[<span class="number">0</span>, <span class="number">2</span>] = w/<span class="number">2</span></span><br><span class="line">        K_new[<span class="number">1</span>, <span class="number">1</span>] = h/<span class="number">4</span></span><br><span class="line">        K_new[<span class="number">1</span>, <span class="number">2</span>] = h/<span class="number">2</span></span><br><span class="line">        K_new[<span class="number">2</span>, <span class="number">2</span>] = <span class="number">1.0</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">        K_new = <span class="literal">None</span></span><br><span class="line">undistorted_img = cv2.omnidir.undistortImage(</span><br><span class="line">img, K, distortions, Xi, cv2.omnidir.RECTIFY_PERSPECTIVE, Knew=K_new)</span><br><span class="line"></span><br><span class="line"><span class="comment"># undistort image points</span></span><br><span class="line"><span class="keyword">if</span> points2d.ndim == <span class="number">2</span>:</span><br><span class="line">    points2d = points2d[:, <span class="literal">None</span>, :]</span><br><span class="line">undistorted_points = cv2.omnidir.undistortPoints(points2d, K, distortions, Xi, <span class="literal">None</span>)</span><br><span class="line">undistorted_points = undistorted_points.squeeze()</span><br><span class="line"></span><br><span class="line">f0 = K_new[<span class="number">0</span>,<span class="number">0</span>]</span><br><span class="line">f1 = K_new[<span class="number">1</span>,<span class="number">1</span>]</span><br><span class="line">c0 = K_new[<span class="number">0</span>,<span class="number">2</span>]</span><br><span class="line">c1 = K_new[<span class="number">1</span>,<span class="number">2</span>]</span><br><span class="line"></span><br><span class="line">undistorted_points[:, <span class="number">0</span>] = f0* undistorted_points[:, <span class="number">0</span>] + c0</span><br><span class="line">undistorted_points[:, <span class="number">1</span>] = f1 * undistorted_points[:, <span class="number">1</span>] + c1</span><br></pre></td></tr></table></figure>
+<p><strong>PS</strong>:cv2::omnidir::undisortPoints的旧版本有bug，参考这个<a target="_blank" rel="noopener" href="https://github.com/opencv/opencv_contrib/issues/1612">issue</a>。omnidir空间目前还没有成为opencv的正式稳定接口，因此维护在opencv-contrib-python包中，最新的包（4.6.x）已经修复了bug。一定要检查一下是不是有那个bug！！！！</p>
+<h3 id="实例三kannalabrandt模型去畸变">实例三：KannalaBrandt模型去畸变</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># You should replace these 3 lines with the output in calibration step</span></span><br><span class="line">DIM=XXX</span><br><span class="line">K=np.array(YYY)</span><br><span class="line">D=np.array(ZZZ)</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">undistort</span>(<span class="params">img_path</span>):</span><br><span class="line">    img = cv2.imread(img_path)</span><br><span class="line">    h,w = img.shape[:<span class="number">2</span>]</span><br><span class="line">    map1, map2 = cv2.fisheye.initUndistortRectifyMap(K, D, np.eye(<span class="number">3</span>), K, DIM, cv2.CV_16SC2)</span><br><span class="line">    undistorted_img = cv2.remap(img, map1, map2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)</span><br><span class="line">    cv2.imshow(<span class="string">&quot;undistorted&quot;</span>, undistorted_img)</span><br><span class="line">    cv2.waitKey(<span class="number">0</span>)</span><br><span class="line">    cv2.destroyAllWindows()</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> sys.argv[<span class="number">1</span>:]:</span><br><span class="line">        undistort(p)</span><br></pre></td></tr></table></figure>
+<h2 id="相机标定方法">相机标定方法</h2>
+<p>最经典的是使用张正友标定法。<a target="_blank" rel="noopener" href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tr98-71.pdf">原文</a>;<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/94244568">中文讲解</a></p>
+<h2 id="参考资料">参考资料</h2>
+<ol type="1">
+<li><p><a target="_blank" rel="noopener" href="https://docs.opencv.org/4.7.0/d9/d0c/group__calib3d.html#:~:text=Detailed%20Description">OpenCV:Camera Calibration</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.opencv.org/2.4/doc/tutorials/calib3d/camera_calibration/camera_calibration.html">OpenCV2.4:Camera Calibration</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="http://michel.thoby.free.fr/Fisheye_history_short/Projections/Models_of_classical_projections.html">Models for the various classical lens projections</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Distortion_(optics)#Software_correction">Wiki:Distortion</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://sci-hub.st/10.1109/TPAMI.2006.153">KannalaBrandt:A Generic Camera Model and Calibration Method for Conventional, Wide-Angle, and Fish-Eye Lenses</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://sci-hub.st/10.1109/ROBOT.2007.364084">CMei: Single View Point Omnidirectional Camera Calibration from Planar Grids</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.opencv.org/4.7.0/db/d58/group__calib3d__fisheye.html">OpenCV::Fisheye</a></p></li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.opencv.org/4.7.0/dd/d12/tutorial_omnidir_calib_main.html">OpenCV::Omnidir</a></p></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/06/05/cv/camera-model/" title="吐血整理：从相机模型（针孔、鱼眼、全景）到OpenCV源码实现">https://zeal-up.github.io/2023/06/05/cv/camera-model/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/camera-projection/" rel="tag"># camera projection</a>
+              <a href="/tags/%E8%A7%86%E8%A7%89%E5%9F%BA%E7%A1%80/" rel="tag"># 视觉基础</a>
+              <a href="/tags/%E7%9B%B8%E6%9C%BA%E6%A8%A1%E5%9E%8B/" rel="tag"># 相机模型</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/05/31/slam-theory/lie-group-01/" rel="prev" title="SLAM基础——李代数基础概念及公式">
+                  <i class="fa fa-chevron-left"></i> SLAM基础——李代数基础概念及公式
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/06/08/cv/surround-view-projection/" rel="next" title="超详细！从单应矩阵推导到自动驾驶环视投影应用">
+                  超详细！从单应矩阵推导到自动驾驶环视投影应用 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="7f7d0e7ebf1819ceb3ada055941a8a17"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"covS4Q3Q0SaMRjqI2VomagVm-gzGzoHsz","app_key":"iK7kdlu4InjORoPr3oksi1IM","server_url":"https://covs4q3q.lc-cn-n1-shared.com","security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>
