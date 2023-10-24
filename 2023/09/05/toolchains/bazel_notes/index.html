@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  一些链接 ubuntu安装Bazel直接参考：Bazel Install 官方教程：Bazel Tutorial BUILD文件中rule的路径 BUILD文件中，在加入source或者headers的时候，文件路径都是在BUILD文件所在目录下的文件，跟CMake文件一样 关于target的label">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BazelNotes">
+<meta property="og:url" content="https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  一些链接 ubuntu安装Bazel直接参考：Bazel Install 官方教程：Bazel Tutorial BUILD文件中rule的路径 BUILD文件中，在加入source或者headers的时候，文件路径都是在BUILD文件所在目录下的文件，跟CMake文件一样 关于target的label">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-09-05T06:06:49.000Z">
+<meta property="article:modified_time" content="2023-09-05T06:11:32.121Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="bazel">
+<meta property="article:tag" content="toolchains">
+<meta property="article:tag" content="gcc">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/","path":"2023/09/05/toolchains/bazel_notes/","title":"BazelNotes"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>BazelNotes | Zeal's Blog</title>
+  
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+  <a target="_blank" rel="noopener" href="https://github.com/zeal-up" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E9%93%BE%E6%8E%A5"><span class="nav-number">1.</span> <span class="nav-text">一些链接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#build%E6%96%87%E4%BB%B6%E4%B8%ADrule%E7%9A%84%E8%B7%AF%E5%BE%84"><span class="nav-number">2.</span> <span class="nav-text">BUILD文件中rule的路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8Etarget%E7%9A%84label%E8%A7%84%E5%88%99%E9%9C%80%E8%A6%81%E5%85%88%E7%9C%8B%E4%B8%80%E4%B8%8B"><span class="nav-number">3.</span> <span class="nav-text">关于target的label规则需要先看一下</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BE%9D%E8%B5%96%E5%9B%BE%E5%8F%AF%E8%A7%86%E5%8C%96dependency-graph"><span class="nav-number">4.</span> <span class="nav-text">依赖图可视化Dependency Graph</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#include%E7%9A%84%E4%B8%80%E4%BA%9B%E8%A7%84%E5%88%99"><span class="nav-number">5.</span> <span class="nav-text">Include的一些规则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E6%98%8Einclude%E7%9B%AE%E5%BD%95"><span class="nav-number">5.1.</span> <span class="nav-text">指明include目录</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#debug%E9%80%89%E9%A1%B9"><span class="nav-number">6.</span> <span class="nav-text">Debug选项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#gccg-%E9%80%89%E9%A1%B9"><span class="nav-number">6.1.</span> <span class="nav-text">gcc&#x2F;g++ 选项</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#o0o1o2o3og"><span class="nav-number">6.1.1.</span> <span class="nav-text">-O0&#x2F;O1&#x2F;O2&#x2F;O3&#x2F;Og</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#g-ggdb"><span class="nav-number">6.1.2.</span> <span class="nav-text">-g&#x2F;-ggdb</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#linker-%E9%80%89%E9%A1%B9"><span class="nav-number">6.2.</span> <span class="nav-text">linker 选项</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#strip"><span class="nav-number">6.2.1.</span> <span class="nav-text">strip</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#wl"><span class="nav-number">6.2.2.</span> <span class="nav-text">-Wl</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bazel%E9%80%89%E9%A1%B9"><span class="nav-number">6.3.</span> <span class="nav-text">bazel选项</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stripalways-never-sometimes"><span class="nav-number">6.3.1.</span> <span class="nav-text">--strip(always | never | sometimes)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#compilation_mode-c-fastbuild-opt-dbg"><span class="nav-number">6.3.2.</span> <span class="nav-text">--compilation_mode&#x2F;-c (fastbuild | opt | dbg)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bazel%E5%87%A0%E7%A7%8D%E7%BC%96%E8%AF%91%E6%A8%A1%E5%BC%8F%E5%AF%B9%E5%BA%94%E7%9A%84%E7%BC%96%E8%AF%91%E5%99%A8%E9%93%BE%E6%8E%A5%E5%99%A8%E9%80%89%E9%A1%B9"><span class="nav-number">6.4.</span> <span class="nav-text">bazel几种编译模式对应的编译器链接器选项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.5.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="BazelNotes | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          BazelNotes
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-09-05 14:06:49 / 修改时间：14:11:32" itemprop="dateCreated datePublished" datetime="2023-09-05T14:06:49+08:00">2023-09-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/Toolchains/" itemprop="url" rel="index"><span itemprop="name">Toolchains</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/09/05/toolchains/bazel_notes/" class="post-meta-item leancloud_visitors" data-flag-title="BazelNotes" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="BazelNotes" href="/2023/09/05/toolchains/bazel_notes/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::06f155b09959d28809461e0e2d48695c" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="一些链接">一些链接</h2>
+<p>ubuntu安装Bazel直接参考：<a target="_blank" rel="noopener" href="https://bazel.build/install/ubuntu?hl=zh-cn">Bazel Install</a></p>
+<p>官方教程：<a target="_blank" rel="noopener" href="https://bazel.build/start/cpp?hl=en">Bazel Tutorial</a></p>
+<h2 id="build文件中rule的路径">BUILD文件中rule的路径</h2>
+<p>BUILD文件中，在加入source或者headers的时候，文件路径都是在BUILD文件所在目录下的文件，跟CMake文件一样</p>
+<h2 id="关于target的label规则需要先看一下">关于target的label规则需要先看一下</h2>
+<p>很简单，但描述得很清晰</p>
+<p><a target="_blank" rel="noopener" href="https://bazel.build/tutorials/cpp-labels?hl=en">Use labels to reference targets</a></p>
+<h2 id="依赖图可视化dependency-graph">依赖图可视化Dependency Graph</h2>
+<p><a target="_blank" rel="noopener" href="https://bazel.build/tutorials/cpp-dependency?hl=en">Review the dependency graph</a></p>
+<p>之前不知道用指令输出的依赖图可以用在线工具<a target="_blank" rel="noopener" href="http://www.webgraphviz.com/">GraphViz</a>可视化</p>
+<h2 id="include的一些规则">Include的一些规则</h2>
+<h3 id="指明include目录">指明include目录</h3>
+<p>如果在source文件中include的文件不是相对于package的根目录，则需要使用<code>copts=[-Ipath/to/include/dir"]</code>来指明include的目录</p>
+<p>假设工作空间如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">└── my-project</span><br><span class="line">    ├── legacy</span><br><span class="line">    │   └── some_lib</span><br><span class="line">    │       ├── BUILD</span><br><span class="line">    │       ├── include</span><br><span class="line">    │       │   └── some_lib.h</span><br><span class="line">    │       └── some_lib.cc</span><br><span class="line">    └── WORKSPACE</span><br></pre></td></tr></table></figure>
+<ol type="1">
+<li>直接引用</li>
+</ol>
+<p>如果<code>some_lib.cc</code>在引用头文件的时候是<code>#include "legacy/some_lib/include/some_lib.h"</code>,则bazel rule可以直接这样写</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cc_library(</span><br><span class="line">    name = &quot;some_lib&quot;,</span><br><span class="line">    srcs = [&quot;some_lib.cc&quot;],</span><br><span class="line">    hdrs = [&quot;include/some_lib.h&quot;]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<ol start="2" type="1">
+<li>否则需要加入include的目录</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cc_library(</span><br><span class="line">    name = &quot;some_lib&quot;,</span><br><span class="line">    srcs = [&quot;some_lib.cc&quot;],</span><br><span class="line">    hdrs = [&quot;include/some_lib.h&quot;],</span><br><span class="line">    copts = [&quot;-Ilegacy/some_lib/include&quot;],</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<h2 id="debug选项">Debug选项</h2>
+<p>调试程序的时候需要在编译时关闭编译器优化选项，这样在gdb调试的时候才能有较丰富的调试信息。</p>
+<hr />
+<h3 id="gccg-选项">gcc/g++ 选项</h3>
+<p>说bazel的选项之前先说一下编译器的选项</p>
+<p><a target="_blank" rel="noopener" href="https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Invoking-GCC.html">gnc-gcc: Command Line Options</a></p>
+<h4 id="o0o1o2o3og">-O0/O1/O2/O3/Og</h4>
+<p>编译器的4个优化级别，-O0表示没有优化，默认为-O1,-O3优化级别最高</p>
+<p><a target="_blank" rel="noopener" href="https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Optimize-Options.html">gcc - 3.11 Options That Control Optimization</a></p>
+<ul>
+<li>-O0选项或者没有指定-O选项 - 完全不进行优化，可以提供准确的行号，程序打断点也是准确的，但是运行速度慢</li>
+<li>-O1/-O选项 - 由于进行优化，错误信息的行号可能不准确，但是相比O0速度会有显著提高</li>
+<li>-Og选项 - 进行适当的优化，但是为调试尽可能保存必要的信息。在官方文档中，建议调试时使用-Og选项而不是-O0选项</li>
+</ul>
+<h4 id="g-ggdb">-g/-ggdb</h4>
+<p><a target="_blank" rel="noopener" href="https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Debugging-Options.html">gcc - 3.10 Options for Debugging Your Program</a></p>
+<p>调试信息。可以和-O选项同时使用，更建议和-Og选项配合使用</p>
+<ul>
+<li>-g/-gdb选项 - 使得编译器在编译时会加入调试信息。并且调试信息可供gdb使用。这两者的具体区别不是很清楚</li>
+</ul>
+<hr />
+<h3 id="linker-选项">linker 选项</h3>
+<p><a target="_blank" rel="noopener" href="https://sourceware.org/binutils/docs/ld/Options.html">gnu-linker - Command Line Options</a></p>
+<p>除了编译器需要使用选项来指定是否保存调试信息之外，链接器也有选项来选择是否要保留调试符号</p>
+<h4 id="strip">strip</h4>
+<ul>
+<li>-s/--strip-all 选项 - 去除所有符号信息</li>
+<li>-S/--strip-debug 选项 - 只去除调试器的符号信息</li>
+</ul>
+<p><strong>不过有一点没有搞清楚的是，-S似乎不会去除gcc -g生成的所有调试符号。也就是说，编译是用<code>gcc -g -Wl,-S</code>并不是没有意义的，依旧会保留部分的调试符号。如果不加<code>-Wl,-S</code>，则生成的文件会非常大</strong></p>
+<p><em>PS：使用<code>strip --strip-debug bin</code>命令可以对二进制文件去除调试符号</em></p>
+<h4 id="wl">-Wl</h4>
+<p>如果链接器不是单独调用，而是通过编译器驱动（比如gcc/g++），则链接器的选项需要在前面加上<code>-Wl，</code>，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -Wl,--start-group foo.o bar.o -Wl, --end-group</span><br></pre></td></tr></table></figure>
+<p>如果不加<code>-Wl,</code>，则编译器驱动会直接忽略掉链接器选项，导致错误的链接 <a target="_blank" rel="noopener" href="https://sourceware.org/binutils/docs/ld/Options.html#:~:text=Note%E2%80%94if%20the,Map%3Da.map">原文说明</a></p>
+<hr />
+<h3 id="bazel选项">bazel选项</h3>
+<h4 id="stripalways-never-sometimes">--strip(always | never | sometimes)</h4>
+<p><a target="_blank" rel="noopener" href="https://bazel.build/docs/user-manual#strip">bazel-UserGuide-Options : strip</a></p>
+<p>这一个选项对应链接器的<code>-s/--strip-debug</code>选项。</p>
+<ul>
+<li><p>默认值<code>--strip=sometimes</code> - 表示当<code>--compilation_mode=fastbuild</code>的时候才会去除调试符号。也就是在不指定任何<code>--strip</code>选项的时候，除非<code>--compilation_mode=fastbuild</code>，否则不会去除调试信息</p></li>
+<li><p><code>--strip=always</code> - 相当于在编译时加上<code>-Wl,--strip-debug</code>选项（<code>-Wl</code>指明这个选项是链接器选项）</p></li>
+<li><p><code>--strip=never</code> - 指明不去除调试符号。<code>--strip=sometimes</code>选项使得当<code>--compilation_mode=fastbuild</code>的时候才会去除调试符号</p></li>
+</ul>
+<p>注意这个选项只对应链接器的<code>--strip-debug</code>选项，如果想要在链接时去掉所有符号，也就是链接器的<code>--strip-all</code>选项，需要单独指定<code>--linkopt=-Wl,--strip-all</code>。</p>
+<p><strong>--strip选项会覆盖--linkopt=-Wl,--strip-all`</strong></p>
+<p><code>--strip</code>只是指明链接阶段是否保留调试符号。但是编译阶段是否生成调试信息也需要单独指定。可以通过<code>-c dbg</code>或者<code>--copt -g</code>指定</p>
+<h4 id="compilation_mode-c-fastbuild-opt-dbg">--compilation_mode/-c (fastbuild | opt | dbg)</h4>
+<p>这个选项其实大概对应了编译器的几个优化等级，但又不完全一样</p>
+<ul>
+<li><code>fastbuild</code> - 表示最快编译，不进行优化（-O0），并在链接阶段去掉调试符号（-Wl,--strip-debug/-S）</li>
+<li><code>dbg</code> - 表示开启编译时的<code>-g</code>选项（看上文中编译器选项），生成调试信息</li>
+<li><code>opt</code> - 表示使用<code>-O2</code>等级的编译器优化。与是否打开调试信息无关，调试信息可以另外指定<code>--copt -g</code>开启（实际测试中好像会开启）。不仅如此，<code>opt</code>模式还会在加入<code>-DNDEBUG</code>选项定义一个<code>NDEBUG</code>的宏。</li>
+</ul>
+<hr />
+<h3 id="bazel几种编译模式对应的编译器链接器选项">bazel几种编译模式对应的编译器链接器选项</h3>
+<p><strong>上述的关于<code>--compilation_mode</code>的官方说明似乎跟实际中的不太一样</strong>。通过</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bazel aquery //target</span><br></pre></td></tr></table></figure>
+<p>指令可以查看bazel执行的过程执行和参数。下面整理一下三种编译模式对应的编译器和链接器部分选项</p>
+<ol type="1">
+<li>--compilation_mode=fastbuild - <strong>文件大小65.36M</strong></li>
+</ol>
+<p>此时相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-Wl,-S</span><br><span class="line"></span><br><span class="line"># gcc在没有指定优化级别的时候应该相当于-O0,因此也相当于</span><br><span class="line">-O0 -Wl,-S</span><br></pre></td></tr></table></figure>
+<ol start="2" type="1">
+<li>--compilation_mode=dbg - <strong>文件大小20.4M</strong></li>
+</ol>
+<p>此时相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-g -O2 -Wl,-S</span><br></pre></td></tr></table></figure>
+<p>可以看到，当使用<code>dbg</code>编译模式的时候，相当于编译器开启调试符号（-g），二级优化（-O2），链接器去除调试信息（-Wl,-S） <strong>但是要注意-S似乎不会去除gcc -g生成的所有调试符号。也就是说，编译是用<code>gcc -g -Wl,-S</code>并不是没有意义的，依旧会保留部分的调试符号。如果不加<code>-Wl,-S</code>，则生成的文件会非常大</strong></p>
+<ol start="3" type="1">
+<li>--compilation_mode=opt - <strong>文件大小3.56M</strong></li>
+</ol>
+<p>此时相当于（其实还有很多其他选项）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-g -O2 -DNDEBUG -Wl,-S -Wl,--gc-sections</span><br></pre></td></tr></table></figure>
+<p>虽然还是用<code>-S/--strip-debug</code>，但是加上其他选项后，实际上相当于去掉了所有调试符号（但还没有去掉所有符号）。使用<code>strip</code>工具再进行<code>--strip-debug</code>已经没有作用了。</p>
+<ol start="4" type="1">
+<li>--compilation_mode=dbg --strip=never - <strong>文件大小1.07</strong></li>
+</ol>
+<p>此时相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-g -O2 </span><br></pre></td></tr></table></figure>
+<p>此时由于保留了所有调试符号，所以文件非常大</p>
+<ol start="5" type="1">
+<li>--compilation_mode=opt --strip=never - <strong>文件大小1.05G</strong></li>
+</ol>
+<p>此时相当于<code>opt</code>模式下，但是保留所有调试符号。文件也很大</p>
+<hr />
+<h3 id="总结">总结</h3>
+<p>当需要进行调试的时候，可以选择几种模式</p>
+<ol type="1">
+<li>fastbuild + -g</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bazel build -c fastbuild --copt -g //target</span><br></pre></td></tr></table></figure>
+<p><strong>优点</strong>：编译快，没有进行优化所以出错位置的行号绝对准确;开始调试信息并保留部分调试信息 <strong>缺点</strong>：由于没有进行优化，程序运行可能会慢很多。文件大小会稍大一点</p>
+<ol start="2" type="1">
+<li>dbg</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bazel build -c dbg //target</span><br></pre></td></tr></table></figure>
+<p><strong>优点</strong>：开始二级优化，程序运行快，文件稍小。保留部分调试信息 <strong>缺点</strong>：二级优化（-O2）可能导致报错位置的行号会稍微不准确。</p>
+<ol start="3" type="1">
+<li>dbg + strip=never</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bazel build -c dbg --strip=never</span><br></pre></td></tr></table></figure>
+<p><strong>优点</strong>：二级优化。保留所有调试信息！ <strong>缺点</strong>：编译过程可能较慢。最终的文件大小会非常大。</p>
+<ol start="4" type="1">
+<li>其他注意要点</li>
+</ol>
+<p>在使用bazel的时候尽量还是用bazel推荐的方式，也就是上面的几个方式。bazel的几种编译模式除了指定上面的优化等级、是否开启调试信息、删除调试符号之外还加了很多其他的选项。这样也导致虽然默认都加了<code>-Wl,-S</code>选项，但是不会完全删除掉调试符号。但是如果是自己手工指定<code>--copt=-g</code>，则bazel会提示一下信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">WARNING: Stripping enabled, but &#x27;--copt=-g&#x27; (or --per_file_copt=...@-g) specified. Debug information will be generated and then stripped away. This is probably not what you want! Use &#x27;</span><br><span class="line">-c dbg&#x27; for debug mode, or use &#x27;--strip=never&#x27; to disable stripping</span><br></pre></td></tr></table></figure>
+<p>并且编译出的二进制文件完全删除了调试符号。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/" title="BazelNotes">https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/bazel/" rel="tag"># bazel</a>
+              <a href="/tags/toolchains/" rel="tag"># toolchains</a>
+              <a href="/tags/gcc/" rel="tag"># gcc</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/09/05/toolchains/vscode/" rel="prev" title="BazelNotes">
+                  <i class="fa fa-chevron-left"></i> BazelNotes
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/09/27/cv/otsu_method/" rel="next" title="Otsu算法（大津法）-动态阈值">
+                  Otsu算法（大津法）-动态阈值 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="06f155b09959d28809461e0e2d48695c"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"covS4Q3Q0SaMRjqI2VomagVm-gzGzoHsz","app_key":"iK7kdlu4InjORoPr3oksi1IM","server_url":"https://covs4q3q.lc-cn-n1-shared.com","security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>

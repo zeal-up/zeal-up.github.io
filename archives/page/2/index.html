@@ -239,12 +239,12 @@ mjx-container[display="true"] + br {
   <nav class="site-state">
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">15</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-count">39</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -268,6 +268,1326 @@ mjx-container[display="true"] + br {
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/" class="post-title-link" itemprop="url">Simple-LIO-SAM——（四）utility文件解读</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-22 11:18:09" itemprop="dateCreated datePublished" datetime="2023-03-22T11:18:09+08:00">2023-03-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-04-19 22:43:29" itemprop="dateModified" datetime="2023-04-19T22:43:29+08:00">2023-04-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——（四）utility文件解读" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——（四）utility文件解读" href="/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::6ed3eebc09d2237963daad43bab3bc96" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="utiliti.cpp文件">utiliti.cpp文件</h2>
+<p>这是<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>里一个最基础的文件，主要有几个重要功能：</p>
+<ol type="1">
+<li>作为所有其他节点的基类，放置所有从配置文件读取的配置字</li>
+<li>提供一些实用函数</li>
+<li>配置<a target="_blank" rel="noopener" href="https://docs.ros.org/en/humble/Concepts/About-Quality-of-Service-Settings.html">QoS</a></li>
+</ol>
+<p>本文对这个文件的详细内容和重点详细解读。</p>
+<h2 id="配置基类">配置基类</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>为了方便配置，把所有节点的配置项都写在同一个文件<code>Simple-LIO-SAM/config/params.yaml</code>，同时构建了一个基类<code>ParamServer</code>统一读取该配置文件，其余模块都从该基类继承。</p>
+<figure>
+<img src="./imgs/Design-Class.png" alt="" /><figcaption>源代码类图</figcaption>
+</figure>
+<p>这可能不是最优的方式，不过从实现上来说的确是最简单的。</p>
+<p>每个模块的具体配置项后面具体讲解到会逐一解释，目前只需要知道是在哪里配置就行。</p>
+<details class="note info no-icon"><summary><p>配置部分代码</p>
+</summary>
+<figure class="highlight plaintext">
+<table>
+<tr>
+<td class="gutter">
+<pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre>
+</td>
+<td class="code">
+<pre><span class="line">// Topics</span><br><span class="line">string pointCloudTopic;  // 原始点云数据话题（/points_raw）</span><br><span class="line">string imuTopic;         // 原始IMU数据话题（/imu_correct）</span><br><span class="line">string imuOdomTopic;     // IMU里程计，在imuPreintegration中对IMU做预积分得到（/lio_sam/imu/odometry）</span><br><span class="line">string lidarOdomTopic;   // 雷达里程计，在mapOptimization中得到（/lio_sam/mapping/odometry）</span><br><span class="line">string gpsTopic;         // 原始gps经过robot_localization包计算得到，暂未使用</span><br><span class="line"></span><br><span class="line">// Services</span><br><span class="line">string saveMapSrv;      // 保存地图service地址</span><br><span class="line"></span><br><span class="line">// Frames</span><br><span class="line">string imuFrame;        // IMU数据坐标系，如果IMU和激光雷达坐标系硬件对齐，可以认为IMU、Lidar、Chassis坐标系相同</span><br><span class="line">string lidarFrame;      // 激光雷达坐标系，点云数据坐标系，由激光雷达发布的数据指定。与lidarFrame相同，但是不同雷达有不同的名称</span><br><span class="line">string baseLinkFrame;   // 车辆底盘坐标系</span><br><span class="line">string odomFrame;       // 地图坐标系，在SLAM中一般也是世界坐标系，通常是车辆的起始坐标系</span><br><span class="line"></span><br><span class="line">// GPS Settings</span><br><span class="line">bool useImuHeadingInitialization;</span><br><span class="line">bool useGpsElevation;</span><br><span class="line">float gpsCovThreshold;</span><br><span class="line">float poseCovThreshold;</span><br><span class="line"></span><br><span class="line">// Save pcd</span><br><span class="line">bool savePCD;</span><br><span class="line">string savePCDDirectory;</span><br><span class="line"></span><br><span class="line">// Lidar Sensor Configuration</span><br><span class="line">SensorType sensor;</span><br><span class="line">int N_SCAN;</span><br><span class="line">int Horizon_SCAN;</span><br><span class="line">int downsampleRate;</span><br><span class="line">float lidarMinRange;</span><br><span class="line">float lidarMaxRange;</span><br><span class="line"></span><br><span class="line">// IMU</span><br><span class="line">float imuAccNoise;      // IMU加速度噪声协方差，可以用Allen方差标定；这里三个轴设为相同的方差</span><br><span class="line">float imuGyrNoise;      // IMU角速度噪声协方差，可以用Allen方差标定；这里三个轴设为相同的方差</span><br><span class="line">float imuAccBiasN;      // IMU加速度偏差，三轴统一</span><br><span class="line">float imuGyrBiasN;      // IMU角速度偏差，三轴统一</span><br><span class="line">float imuGravity;       // 重力加速度值</span><br><span class="line">float imuRPYWeight;     // 算法中使用IMU的roll、pitch角对激光里程计的结果加权融合</span><br><span class="line">vector&lt;double&gt; extRotV;         // IMU加速度向量到雷达坐标系的旋转</span><br><span class="line">vector&lt;double&gt; extRPYV;         // IMU角速度向量到雷达坐标系的旋转</span><br><span class="line">vector&lt;double&gt; extTransV;       // IMU向量到雷达坐标系的平移：P_&#123;lidar&#125; = T * P_&#123;imu&#125;</span><br><span class="line">Eigen::Matrix3d extRot;         // IMU加速度向量到雷达坐标系的旋转</span><br><span class="line">Eigen::Matrix3d extRPY;         // IMU角速度向量到雷达坐标系的旋转</span><br><span class="line">Eigen::Vector3d extTrans;       // IMU向量到雷达坐标系的平移：P_&#123;lidar&#125; = T * P_&#123;imu&#125;</span><br><span class="line">Eigen::Quaterniond extQRPY;     // IMU角速度向量到雷达坐标系的旋转（四元数形式）</span><br><span class="line"></span><br><span class="line">// LOAM</span><br><span class="line">float edgeThreshold;            // 边缘特征点提取阈值</span><br><span class="line">float surfThreshold;            // 平面特征点提取阈值</span><br><span class="line">int edgeFeatureMinValidNum;     // 边缘特征点数量阈值（default:10)</span><br><span class="line">int surfFeatureMinValidNum;     // 平面特征点数量阈值（default:100)</span><br><span class="line"></span><br><span class="line">// voxel filter paprams</span><br><span class="line">float odometrySurfLeafSize;</span><br><span class="line">float mappingCornerLeafSize;</span><br><span class="line">float mappingSurfLeafSize ;</span><br><span class="line"></span><br><span class="line">float z_tollerance;             // 限制z轴平移的大小</span><br><span class="line">float rotation_tollerance;      // 限制roll、pitch角的大小</span><br><span class="line"></span><br><span class="line">// CPU Params</span><br><span class="line">int numberOfCores;              // 在点云匹配中使用指令集并行加速（default:4）</span><br><span class="line">double mappingProcessInterval;  // 点云帧处理时间间隔（default:0.15s）</span><br><span class="line"></span><br><span class="line">// Surrounding map</span><br><span class="line">float surroundingkeyframeAddingDistThreshold;   // 当前帧需要与上一帧距离大于1米或者角度大于0.2度才有可能采纳为关键帧</span><br><span class="line">float surroundingkeyframeAddingAngleThreshold;  // 当前帧需要与上一帧距离大于1米或者角度大于0.2度才有可能采纳为关键帧</span><br><span class="line">float surroundingKeyframeDensity;               // 构建局部地图时对采用的关键帧数量做降采样</span><br><span class="line">float surroundingKeyframeSearchRadius;          // 构建局部地图时关键帧的检索半径</span><br><span class="line"></span><br><span class="line">// Loop closure</span><br><span class="line">bool  loopClosureEnableFlag;</span><br><span class="line">float loopClosureFrequency;                     // 回环检测独立线程的执行频率</span><br><span class="line">int   surroundingKeyframeSize;                  // 回环检测构建局部地图的最大关键帧数量</span><br><span class="line">float historyKeyframeSearchRadius;              // 执行回环检测时关键帧的检索半径</span><br><span class="line">float historyKeyframeSearchTimeDiff;            // 执行回环检测时关键帧的检索时间范围</span><br><span class="line">int   historyKeyframeSearchNum;                 // 执行回环检测时融合局部地图时对目标关键帧执行+-25帧的关键帧融合</span><br><span class="line">float historyKeyframeFitnessScore;              // 执行回环检测时使用ICP做点云匹配，阈值大于0.3认为匹配失败，不采纳当前回环检测</span><br><span class="line"></span><br><span class="line">// global map visualization radius</span><br><span class="line">float globalMapVisualizationSearchRadius;</span><br><span class="line">float globalMapVisualizationPoseDensity;</span><br><span class="line">float globalMapVisualizationLeafSize;</span><br></pre>
+</td>
+</tr>
+</table>
+</figure>
+
+</details>
+<h2 id="实用函数">实用函数</h2>
+<p>这里主要讲解其中一个<code>imuConverter</code>函数。该函数的功能主要是将<code>IMU</code>的原始数据<strong>旋转到</strong><code>Lidar</code>坐标系。这里要先知道，在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中， 默认将雷达坐标系和小车的坐标系等同为同一个坐标系，同时，这里只做了<strong>旋转</strong>操作，没有做平移操作。代码中有很多处位置都用到这个函数，因此需要理解这个函数到底做了什么。 简单来说这个函数就是做了一个<strong>向量坐标变换</strong>。旋转矩阵操作空间中一个点有两种意义：1）三维旋转；2）坐标变换。这两种不同的操作在做连续的操作时，对应旋转矩阵的左乘和右乘。 由于笔者以前的研究方向是六自由度姿态估计，用三维旋转操作比较多，一开始被这里的<code>矩阵右乘</code>搞蒙了。关于旋转矩阵的左乘和右乘，可以看这篇<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_45632220/article/details/117735223">博客</a></p>
+<p>这个函数的代码和解释如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">将原始IMU数据：三轴加速度、三轴角速度、三轴角度，与雷达坐标系进行旋转对齐</span></span><br><span class="line"><span class="comment">+ 对齐之后输出的加速度、角速度、角度的x，y，z就变成雷达坐标系的x，y，z</span></span><br><span class="line"><span class="comment">+ 这里的特殊之处在于允许IMU的加速度、角速度与角度的输出是两个不同的坐标系。但在算法中，角度的输出除了用来做第一帧的初始化和加权融合，似乎没有其他作用</span></span><br><span class="line"><span class="comment">+ 这里是将IMU的三个轴与雷达的三个轴在旋转上做对齐，不能加上平移</span></span><br><span class="line"><span class="comment">+ 对向量做坐标系变换，对多个变换的复合应该是右乘</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">sensor_msgs::<span class="function">msg::Imu <span class="title">imuConverter</span><span class="params">(<span class="type">const</span> sensor_msgs::msg::Imu&amp; imu_in)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    sensor_msgs::msg::Imu imu_out = imu_in;</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    对加速度向量做坐标系变换，注意这里要理解成坐标系变换，也就是同一个加速度在IMU坐标系和Lidar坐标系的不同表达。不能想象成对加速度做旋转</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="function">Eigen::Vector3d <span class="title">acc</span><span class="params">(imu_in.linear_acceleration.x, imu_in.linear_acceleration.y, imu_in.linear_acceleration.z)</span></span>;</span><br><span class="line">    acc = extRot * acc;</span><br><span class="line">    imu_out.linear_acceleration.x = acc.<span class="built_in">x</span>();</span><br><span class="line">    imu_out.linear_acceleration.y = acc.<span class="built_in">y</span>();</span><br><span class="line">    imu_out.linear_acceleration.z = acc.<span class="built_in">z</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    对角速度做坐标系变换。将IMU坐标系下的向量变换到雷达坐标系。</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="function">Eigen::Vector3d <span class="title">gyr</span><span class="params">(imu_in.angular_velocity.x, imu_in.angular_velocity.y, imu_in.angular_velocity.z)</span></span>;</span><br><span class="line">    gyr = extRot * gyr;</span><br><span class="line">    imu_out.angular_velocity.x = gyr.<span class="built_in">x</span>();</span><br><span class="line">    imu_out.angular_velocity.y = gyr.<span class="built_in">y</span>();</span><br><span class="line">    imu_out.angular_velocity.z = gyr.<span class="built_in">z</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    对角度做坐标系变换。</span></span><br><span class="line"><span class="comment">    + q_from是IMU在全局坐标系下的位姿，q_from: transformation_from_map_to_imu</span></span><br><span class="line"><span class="comment">    + extQRPY如果与extRot对应的话应该是lidar到imu的变换：transformation_from_lidar_to_imu</span></span><br><span class="line"><span class="comment">    + q_final是将雷达点云从雷达坐标系转换到map坐标系的变换，也是：transformation_from_map_to_lidar -&gt; pcd_in_map = q_final * pcd_in_lidar</span></span><br><span class="line"><span class="comment">    + 这里原代码是q_final = q_from * extQRPY；似乎有点问题，还是按照我的推导修改成q_final = q_from * extQRPT.inverse()；由于这里的extQRPY是</span></span><br><span class="line"><span class="comment">    + 直接从配置文件里面读取的，所以这里加不加逆只需要在配置文件里改就行。认为这里有问题的假设是认为extQRPY和extRot的坐标系关系的定义是一致的，也就是</span></span><br><span class="line"><span class="comment">    + 将imu坐标系下的向量转换到雷达坐标系下。如果作者对这两者的定义刚好是相反的，那这里就没有问题。</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="function">Eigen::Quaterniond <span class="title">q_from</span><span class="params">(imu_in.orientation.w, imu_in.orientation.x, imu_in.orientation.y, imu_in.orientation.z)</span></span>;</span><br><span class="line">    Eigen::Quaterniond q_final = q_from * extQRPY.<span class="built_in">inverse</span>();</span><br><span class="line">    imu_out.orientation.x = q_final.<span class="built_in">x</span>();</span><br><span class="line">    imu_out.orientation.y = q_final.<span class="built_in">y</span>();</span><br><span class="line">    imu_out.orientation.z = q_final.<span class="built_in">z</span>();</span><br><span class="line">    imu_out.orientation.w = q_final.<span class="built_in">w</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">sqrt</span>(q_final.<span class="built_in">x</span>()*q_final.<span class="built_in">x</span>() + q_final.<span class="built_in">y</span>()*q_final.<span class="built_in">y</span>() + q_final.<span class="built_in">z</span>()*q_final.<span class="built_in">z</span>() + q_final.<span class="built_in">w</span>()*q_final.<span class="built_in">w</span>()) &lt; <span class="number">0.1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">RCLCPP_ERROR</span>(<span class="built_in">get_logger</span>(), <span class="string">&quot;Invalid quaternion, please use a 9-axis IMU!&quot;</span>);</span><br><span class="line">        rclcpp::<span class="built_in">shutdown</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> imu_out;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="qosquality-of-service">QoS:Quality of Service</h2>
+<p>关于ROS2中<a target="_blank" rel="noopener" href="https://docs.ros.org/en/humble/Concepts/About-Quality-of-Service-Settings.html">QoS</a>的基本介绍，参考官方文档学习。<a target="_blank" rel="noopener" href="https://docs.ros.org/en/humble/Concepts/About-Quality-of-Service-Settings.html">QoS</a>的设置中，有两个参数是最重要的。一个是<code>depth</code>，一个是<code>RELIABILITY</code>。<code>depth</code>可以简要理解成中间件DDS为这个消息预留的缓存队列长度。 <code>RELIABILITY</code>主要有两种选项<code>best_effort</code>和<code>reliable</code>，它们的关系类似<code>TCP</code>,<code>UDP</code>。<code>best_effort</code>不能保证每一个消息到到达接收端，但可以保持最好的实时信。<code>reliable</code>保证每一帧消息 都到达接收端，但是无法保证实时性。ROS2中专门为传感器预设了一个<a target="_blank" rel="noopener" href="https://docs.ros2.org/foxy/api/rclcpp/classrclcpp_1_1SensorDataQoS.html">SensorDataQoS</a>，里面采用的就是<code>best_effort</code> 的设置。</p>
+<p>在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>设置了三种<code>QoS</code>，分别为：原始IMU数据、原始雷达数据、框架内部传输</p>
+<ol type="1">
+<li>原始IMU数据QoS</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// @brief 原始IMU数据的QOS，因为IMU数据较小，所以depth可以设成较大</span></span><br><span class="line"><span class="type">rmw_qos_profile_t</span> qos_profile_imu&#123;</span><br><span class="line">  RMW_QOS_POLICY_HISTORY_KEEP_LAST,</span><br><span class="line">  <span class="number">2000</span>,</span><br><span class="line">  RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,</span><br><span class="line">  RMW_QOS_POLICY_DURABILITY_VOLATILE,</span><br><span class="line">  RMW_QOS_DEADLINE_DEFAULT,</span><br><span class="line">  RMW_QOS_LIFESPAN_DEFAULT,</span><br><span class="line">  RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT,</span><br><span class="line">  RMW_QOS_LIVELINESS_LEASE_DURATION_DEFAULT,</span><br><span class="line">  <span class="literal">false</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">auto</span> qos_imu = rclcpp::<span class="built_in">QoS</span>(</span><br><span class="line">    rclcpp::<span class="built_in">QoSInitialization</span>(</span><br><span class="line">      qos_profile_imu.history,</span><br><span class="line">      qos_profile_imu.depth</span><br><span class="line">    ),</span><br><span class="line">    qos_profile_imu);</span><br></pre></td></tr></table></figure>
+<ol start="2" type="1">
+<li>原始雷达数据QoS</li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// @brief 原始雷达数据topic的QOS，主要是best_effort和depth起作用</span></span><br><span class="line"><span class="type">rmw_qos_profile_t</span> qos_profile_lidar&#123;</span><br><span class="line">  RMW_QOS_POLICY_HISTORY_KEEP_LAST,</span><br><span class="line">  <span class="number">5</span>,</span><br><span class="line">  RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,</span><br><span class="line">  RMW_QOS_POLICY_DURABILITY_VOLATILE,</span><br><span class="line">  RMW_QOS_DEADLINE_DEFAULT,</span><br><span class="line">  RMW_QOS_LIFESPAN_DEFAULT,</span><br><span class="line">  RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT,</span><br><span class="line">  RMW_QOS_LIVELINESS_LEASE_DURATION_DEFAULT,</span><br><span class="line">  <span class="literal">false</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">auto</span> qos_lidar = rclcpp::<span class="built_in">QoS</span>(</span><br><span class="line">    rclcpp::<span class="built_in">QoSInitialization</span>(</span><br><span class="line">      qos_profile_lidar.history,</span><br><span class="line">      qos_profile_lidar.depth</span><br><span class="line">    ),</span><br><span class="line">    qos_profile_lidar);</span><br></pre></td></tr></table></figure>
+<ol start="3" type="1">
+<li>算法框架内部传输QoS</li>
+</ol>
+<p>算法框架内部要求有最高的实时性，并且由于传输中有很多点云类型的数据（较大），因此作者把<code>depth</code>设置为1 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// @brief 算法框架中默认的QOS，主要是depth=1和reliability=best_effort起作用。对于传输实时性有要求，不要求每个数据可接收的消息，一般</span></span><br><span class="line"><span class="comment">/// 设成best_effort。在ROS2中对于传感器数据，有一个内置的QOS叫rclcpp::SensorDataQoS()</span></span><br><span class="line"><span class="type">rmw_qos_profile_t</span> qos_profile&#123;</span><br><span class="line">  RMW_QOS_POLICY_HISTORY_KEEP_LAST,</span><br><span class="line">  <span class="number">1</span>,</span><br><span class="line">  RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,</span><br><span class="line">  RMW_QOS_POLICY_DURABILITY_VOLATILE,</span><br><span class="line">  RMW_QOS_DEADLINE_DEFAULT,</span><br><span class="line">  RMW_QOS_LIFESPAN_DEFAULT,</span><br><span class="line">  RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT,</span><br><span class="line">  RMW_QOS_LIVELINESS_LEASE_DURATION_DEFAULT,</span><br><span class="line">  <span class="literal">false</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> qos = rclcpp::<span class="built_in">QoS</span>(</span><br><span class="line">    rclcpp::<span class="built_in">QoSInitialization</span>(</span><br><span class="line">      qos_profile.history,</span><br><span class="line">      qos_profile.depth</span><br><span class="line">    ),</span><br><span class="line">    qos_profile);</span><br></pre></td></tr></table></figure></p>
+<h2 id="本项目所有章节">本项目所有章节</h2>
+<ol type="1">
+<li><a href="https://zeal-up.github.io/2023/03/13/lio_sam/intro/">Simple-LIO-SAM——（一）项目简介</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/">Simple-LIO-SAM——（二）环境搭建与运行</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/">Simple-LIO-SAM——（三）总体流程认识</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/">Simple-LIO-SAM——（四）utility文件解读</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/">Simple-LIO-SAM——（五）点云去畸变模块</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/">Simple-LIO-SAM——（六）特征提取模块</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/">Simple-LIO-SAM——（七）GTSAM快速入门</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/">Simple-LIO-SAM——（八）IMU预积分模块</a></li>
+<li><a href="https://zeal-up.github.io/2023/04/06/lio_sam/pcdRegistration-doc/">Simple-LIO-SAM——（九）点云匹配算法详解</a></li>
+<li><a href="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/">Simple-LIO-SAM——（十）后端优化模块详解</a></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/" class="post-title-link" itemprop="url">Simple-LIO-SAM——（三）总体流程认识</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-16 19:38:59" itemprop="dateCreated datePublished" datetime="2023-03-16T19:38:59+08:00">2023-03-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-04-19 22:37:19" itemprop="dateModified" datetime="2023-04-19T22:37:19+08:00">2023-04-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——（三）总体流程认识" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——（三）总体流程认识" href="/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::152660a48ad07f280a45860dc663a523" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="总体流程">总体流程</h2>
+<p>话不多说，直接上干货。下图是整理出来的<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>整体运行流程</p>
+<figure>
+<img src="./imgs/Design-Pipelines.png" alt="" /><figcaption>Simple-LIO-SAM整体运行流程图</figcaption>
+</figure>
+<h2 id="整体认识">整体认识</h2>
+<p>所谓的紧耦合，笔者是这么理解的：IMU本身就可以积分出来一个位姿，连续帧的点云匹配也可以计算出一个位姿，如果两者分别进行，然后再做一个加权融合，那么就属于松耦合。而从上面的框架图也可以看出，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>的融合框架整体呈现一个<code>圈</code>，每个环节都为下一个环节提供信息，最后一个环节又为第一个环节提供信息。同时，耦合之处还在于以下几点：</p>
+<ol type="1">
+<li>高频的IMU信息对激光雷达点云做了畸变矫正，做了畸变矫正后的点云被用来做匹配计算激光里程计</li>
+<li>IMU的积分结果被用来当作该帧点云的初值，为点云匹配提供了较好的初始估计</li>
+<li>雷达里程计的结果被用来计算IMU的偏差，同时也被用来持续纠正IMU里程计</li>
+</ol>
+<p>虽然<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>框架中还可以融合<code>GPS</code>信息，但是主要还是对雷达点云和IMU信息做融合，因此，可以认为输入是点云和IMU数据，输出是小车当前时刻的位姿，以及对历史时刻位姿的平滑。</p>
+<ul>
+<li><p>框架的入口是点云去畸变模块，主要的功能就是对激光雷达运动畸变做矫正，然后输出去完畸变的点云。</p></li>
+<li><p>去完畸变的点云经过特征提取模块，提取出角特征点和平面特征点，被图优化模块中的点云匹配部分用来做点云匹配。</p></li>
+<li><p>图优化模块利用去完畸变后的点云与历史帧构建的局部地图做匹配，得出较准确的里程计结果。同时利用图优化，加入回环检测因子，使得整体估计更为准确顺滑</p></li>
+<li><p>IMU预积分模块从IMU和图优化模块接收数据，对IMU的原始数据做积分，得出每一帧点云的初始位姿，提供给图优化模块作为优化初始值。同时又从图优化模块拿出经过点云、图优化校正后的里程计结果校正本身的结果</p></li>
+<li><p>坐标系发布主要是为了<code>RIVZ</code>显示中用的，主要就是将各种里程计结果转换成<code>TF</code>坐标关系发布出去。在原始<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中是与<code>imuPreintegration</code>放置在同一个文件</p></li>
+</ul>
+<h2 id="运动畸变矫正">运动畸变矫正</h2>
+<p>对应博文：<a href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/">Simple-LIO-SAM——（五）点云去畸变模块</a></p>
+<ul>
+<li>为什么激光雷达有运动畸变？</li>
+</ul>
+<p>激光雷达通过发射高能量激光线束，计算激光线束往返时间，得到该激光线打到的物体的距离。以机械式激光雷达为例，雷达在统一时刻可以发送多条激光线（32、64、128），这多条激光线在垂直方向上可以扫到三维空间中垂直的一条线，激光雷达通过环绕一周的方式可以对360的空间做三维成像</p>
+<figure>
+<img src="./imgs/lidar.webp" alt="" /><figcaption>激光雷达成像原理图</figcaption>
+</figure>
+<p>由于激光雷达是通过激光线束环绕一周的方式成像一帧的点云，那么这一帧点云的点就是在不同的时间探测的。如果激光线束在环绕一周的过程中，激光雷达是在运动的，那么这一帧点云就由于激光雷达的运动而变得不准确，因此需要对其做运动畸变校正。</p>
+<figure>
+<img src="./imgs/livox_lidar_distortion.png" alt="" /><figcaption>livox_lidar_distortion_removal</figcaption>
+</figure>
+<p>（上面这幅图片引用自livox官网[Liovox_distortion_removal]）</p>
+<p>激光雷达输出的每一帧点云<span class="math inline">\(P\)</span>，里面的每一个点<span class="math inline">\(p_i\)</span>，都有一个属性<span class="math inline">\(t_i\)</span>，记录了该点距离该帧点云起始时刻的时间间隔，也就是下面代码段里的<code>time</code>字段。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// imageProjection.cpp 49-60</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">VelodynePointXYZIRT</span></span><br><span class="line">&#123;</span><br><span class="line">    PCL_ADD_POINT4D</span><br><span class="line">    PCL_ADD_INTENSITY;</span><br><span class="line">    <span class="type">uint16_t</span> ring;</span><br><span class="line">    <span class="type">float</span> time;</span><br><span class="line">    EIGEN_MAKE_ALIGNED_OPERATOR_NEW</span><br><span class="line">&#125; EIGEN_ALIGN16;</span><br><span class="line"><span class="built_in">POINT_CLOUD_REGISTER_POINT_STRUCT</span> (VelodynePointXYZIRT,</span><br><span class="line">    (<span class="type">float</span>, x, x) (<span class="type">float</span>, y, y) (<span class="type">float</span>, z, z) (<span class="type">float</span>, intensity, intensity)</span><br><span class="line">    (<span class="type">uint16_t</span>, ring, ring) (<span class="type">float</span>, time, time)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>由于IMU是非常高频的，因此我们可以得出该帧点云成像时间段内的激光雷达位移和旋转的变换，然后通过每一个点的时间<span class="math inline">\(t_i\)</span>，可以根据时间进行插值得出每一个点相对于起始点的转换关系<span class="math inline">\(T_i\)</span>。（注：LIOSAM里面是直接通过时间戳查找，而不是进行插值）。从而，我们就可以将每个点都转换到起始点的坐标系 <span class="math display">\[
+p_i^0 = T_ip_i
+\]</span></p>
+<h2 id="点云特征提取">点云特征提取</h2>
+<p>对应博文：<a href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/">Simple-LIO-SAM——（六）特征提取模块</a></p>
+<p>激光里程计中一般会涉及到点云匹配，如果用原始点云进行匹配由于点数过多的关系，会导致耗时太长，因此<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中用类似<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM">LeGO-LOAM</a>的方法进行<code>边缘点</code>,<code>平面点</code>两类特征点的提取，后面点云匹配部分使用这两种特征点进行<code>高斯-牛顿法</code>求解出匹配关系。</p>
+<p>这部分的代码相对简单，后面关于这个模块的详细内容会介绍，这里唯一要清楚的是，这里的点云特征点提取用的是每个点的曲率，选择曲率大的点作为边缘点，选择曲率小的点作为平面点。但是曲率的计算是用每个点周围的点到其平均距离作为近似。</p>
+<h2 id="imu预积分模块">IMU预积分模块</h2>
+<p>对应博文：<a href="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/">Simple-LIO-SAM——（八）IMU预积分模块</a></p>
+<p>这一个模块虽然从原理和实现上来说稍微有一点点复杂，但是从功能上简单来说只有一个功能，就是实时对<code>IMU原始数据</code>做处理（积分），得到每一个时刻的IMU里程计（也是6自由度位姿），然后该位姿被用来作为该帧点云的初始估计位姿，这个初始估计位姿会被用来作为点云匹配的初始估计。</p>
+<h2 id="点云匹配及图优化">点云匹配及图优化</h2>
+<p>对应博文：</p>
+<p><a href="https://zeal-up.github.io/2023/04/06/lio_sam/pcdRegistration-doc/">Simple-LIO-SAM——（九）点云匹配算法详解</a></p>
+<p><a href="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/">Simple-LIO-SAM——（十）后端优化模块详解</a></p>
+<p>这是整个框架最复杂的一个模块（也许是没有很好解耦？）。这个模块主要包含了以下几个功能：</p>
+<ol type="1">
+<li>点云匹配</li>
+<li>回环检测</li>
+<li>因子图构建及优化</li>
+<li>根据关键帧信息构建全局地图</li>
+</ol>
+<p>具体内容会在后面的章节展开，这里应该要有几个感性认识：</p>
+<ol type="1">
+<li>一般点云精细匹配（比如ICP算法）需要有一个良好的初始值，这里的初始值可以理解成采用IMU预积分模块的输出。</li>
+<li>点云匹配部分用的是沿用自LOAM-&gt;LeGO-LOAM的点云匹配算法，不是使用ICP。<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM">LeGO-LOAM</a>也是<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan">TixiaoShan</a>在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>之前的一篇相关论文</li>
+<li>回环检测根据里程计的x,y,z检索紧邻帧，然后通过ICP算法计算当前帧与近邻帧的转换关系</li>
+<li>经过点云匹配后的位姿会经过图优化得出更平滑的位姿</li>
+<li>地图和因子图的因子实际上是以关键帧的形态存在后端优化部分，关键帧的选取会比较稀疏，比如距离小与1米不会采用为关键帧。不采用为关键帧的点云会执行完点云匹配后就直接输出位姿。</li>
+<li>在有新的回环因子加入因子图后，会进行多次因子图优化器的更新步骤，然后将所有历史关键帧的位姿都更新一遍</li>
+<li>这个部分还支持<code>GPS里程计</code>的监听，并将<code>GPS里程计</code>也加入因子图进行优化</li>
+</ol>
+<h2 id="坐标系规定">坐标系规定</h2>
+<h3 id="坐标系规定-1">坐标系规定</h3>
+<p>原有的<code>urdf</code>文件加入了太多额外没必要的关节，导致<code>rviz</code>中<code>tf-tree</code>关系太过复杂。为了简化坐标系关系，但同时又维持坐标系关系标准化并且与<code>ROS</code>的规定相同（<code>ROS</code>中关于姿态估计的坐标系关系主要参考：<a target="_blank" rel="noopener" href="http://docs.ros.org/en/melodic/api/robot_localization/html/preparing_sensor_data.html">robot_localization_coordinate_system</a>，这里对项目中的坐标系关系做了一些简化修改。 根据robot_localization包的规定，所有姿态都要转到世界坐标系，通常是<code>map</code>或者<code>odom</code>坐标系。所有的twist数据，都要转到base_link坐标系下处理。</p>
+<h3 id="simple-lio-sam坐标系说明">Simple-LIO-SAM坐标系说明</h3>
+<ol type="1">
+<li>根据REP资料，一般有4个坐标系<code>earth</code>,<code>map</code>,<code>odom</code>,<code>base_link</code>。由于在SLAM中一般没有引入地球坐标系。所以在这里只有后三个坐标系。 同时，如果是以起始点作为地图原点，<code>map</code>,<code>odom</code>两个坐标系是重合的关系。</li>
+<li>另外，为了可以在Rivz显示原始点云信息，则也加入一个雷达坐标系。</li>
+<li>为了让坐标系定义自洽，虽然在算法中没有直接用到，但是IMU加速度速度和角速度应该定义在IMU坐标系，因此引入IMU坐标系</li>
+<li>为了让定义更为标准，这里保留<code>map</code>坐标系，虽然在SLAM中<code>map</code>,<code>odom</code>大部分情况是重叠的</li>
+<li>因此，整个spl_lio_sam框架可以简化成5个坐标系：<code>map</code>, <code>odom</code>,<code>base_link</code>,<code>lidar_link</code>,<code>imu_link</code>坐标系。其中， <code>map</code>是地图原点，在建图时是起始点，在重定位模式时，是地图原点。<code>odom</code>是里程计坐标系；<code>base_link</code>是车辆自身坐标系。<code>lidar_link</code>坐标系是雷达坐标系， 在lio_sam中是与<code>base_link</code>坐标系对齐的，但是<code>lidar_link</code>字段会根据雷达型号不同，被修改。<code>imu_link</code>坐标系是IMU坐标系，配置文件中 有指明IMU坐标系到Lidar坐标系的转换关系。</li>
+</ol>
+<h3 id="坐标系关系的其他说明">坐标系关系的其他说明</h3>
+<ol type="1">
+<li>ROS的Message Header只有一个frame_id字段，表明这个数据是在哪个坐标系下的。</li>
+<li>nav_msgs/Odometry中还有一个child_frame_id字段，nav_msgs/Odometry中的twist数据应该是在child_frame_id坐标系下的数据 &gt; The twist in this message should be specified in the coordinate frame given by the child_frame_id</li>
+</ol>
+<h2 id="本项目所有章节">本项目所有章节</h2>
+<ol type="1">
+<li><a href="https://zeal-up.github.io/2023/03/13/lio_sam/intro/">Simple-LIO-SAM——（一）项目简介</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/">Simple-LIO-SAM——（二）环境搭建与运行</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/">Simple-LIO-SAM——（三）总体流程认识</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/">Simple-LIO-SAM——（四）utility文件解读</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/">Simple-LIO-SAM——（五）点云去畸变模块</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/">Simple-LIO-SAM——（六）特征提取模块</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/">Simple-LIO-SAM——（七）GTSAM快速入门</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/">Simple-LIO-SAM——（八）IMU预积分模块</a></li>
+<li><a href="https://zeal-up.github.io/2023/04/06/lio_sam/pcdRegistration-doc/">Simple-LIO-SAM——（九）点云匹配算法详解</a></li>
+<li><a href="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/">Simple-LIO-SAM——（十）后端优化模块详解</a></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/" class="post-title-link" itemprop="url">记一次解决rosbag2内存错误问题过程</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-15 18:28:01" itemprop="dateCreated datePublished" datetime="2023-03-15T18:28:01+08:00">2023-03-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-05-14 16:36:35" itemprop="dateModified" datetime="2023-05-14T16:36:35+08:00">2023-05-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/ROS/" itemprop="url" rel="index"><span itemprop="name">ROS</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/" class="post-meta-item leancloud_visitors" data-flag-title="记一次解决rosbag2内存错误问题过程" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="记一次解决rosbag2内存错误问题过程" href="/2023/03/15/ros/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%A7%A3%E5%86%B3rosbag2%E5%86%85%E5%AD%98%E9%94%99%E8%AF%AF%E9%97%AE%E9%A2%98%E8%BF%87%E7%A8%8B/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::73e4783c1a71c1ae17cdb35318885253" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+</ul>
+<h2 id="问题背景">问题背景</h2>
+<p>由于工作需要，需要开发一个程序，根据记录的信息，从<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble" title="rosbag2 repo">rosbag2</a>保存的数据包根据打点的时间戳，提取出一段段单独的数据包。 为了存储空间考虑，保存时以及提取时都指定了使用<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble#recording-with-compression">压缩的方式</a>进行存储。压缩器和压缩模式如下： <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">compression_format:</span> <span class="string">zstd</span></span><br><span class="line"><span class="attr">compression_mode:</span> <span class="string">message</span></span><br></pre></td></tr></table></figure></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble" title="rosbag2 repo">rosbag2</a>不仅有命令行工具，同时还开放API给开发者使用。<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble" title="rosbag2 repo">rosbag2</a>还提供了<code>convert</code>功能，可以对录下来的bagfile进行<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble#converting-bags">二次提取</a>。因此开发这部分功能可以参考源码里面的<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/humble/rosbag2_transport/src/rosbag2_transport/bag_rewrite.cpp">bag_rewriter.cpp</a></p>
+<h2 id="开发环境">开发环境</h2>
+<blockquote>
+<p>ROS: ROS2-humble</p>
+</blockquote>
+<blockquote>
+<p>OS: ubuntu 22.04</p>
+</blockquote>
+<blockquote>
+<p>language: cpp17</p>
+</blockquote>
+<blockquote>
+<p>rosbag2: 0.15.4-2jammy.20230118.031755</p>
+</blockquote>
+<h2 id="问题描述">问题描述</h2>
+<p>完成上述数据提取功能后进行测试，发现提取的时候如果同时提取多个目标（构建多个writer，读取message后进行写操作，<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/14bf3dcc2170ebe5bd73ed0cf83bb4077b3e36b4/rosbag2_transport/src/rosbag2_transport/bag_rewrite.cpp#L135">rosbag2源码参考部分</a>，并且都进行压缩的时候，会有<code>core dump</code>，错误信息： <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">corrupted size vs. prev_size</span><br><span class="line">[ros2run]: Aborted</span><br></pre></td></tr></table></figure></p>
+<p>然而在其他情况：1.同时提取多个目标，但是不进行压缩；2.提取一个目标，进行压缩；的时候，程序都可以正常运行</p>
+<p>为了确保不是自己编写的程序导致的问题，又使用<code>rosbag2 cli</code>进行类似的尝试。根据<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble#converting-bags">converting-bags</a>的说明，我使用下面的<code>output_options.yaml</code>进行数据转换： <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">output_bags:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">uri:</span> <span class="string">out_bag01</span></span><br><span class="line">  <span class="attr">all:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">compression_format:</span> <span class="string">zstd</span></span><br><span class="line">  <span class="attr">compression_mode:</span> <span class="string">message</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">uri:</span> <span class="string">out_bag02</span></span><br><span class="line">  <span class="attr">all:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">compression_format:</span> <span class="string">zstd</span></span><br><span class="line">  <span class="attr">compression_mode:</span> <span class="string">message</span></span><br></pre></td></tr></table></figure></p>
+<p>然后使用如下命令进行提取 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ros2 bag convert -i ./path/to/bag/file -o output_options.yaml</span><br></pre></td></tr></table></figure></p>
+<p>果不其然，直接使用<code>rosbag2</code>的包也会有<code>core</code>问题，不过报的信息会有区别，不同次运行报的信息还不一样，主要是类似下面这样： <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">malloc(): unsorted double linked list corrupted</span><br><span class="line">free(): corrupted unsorted chunks</span><br><span class="line">corrupted double-linked list</span><br></pre></td></tr></table></figure></p>
+<h2 id="问题复现">问题复现</h2>
+<p>简单起见可以直接使用<code>rosbag2 cli</code>复现这个问题 1. 准备一个ros2的bag包 2. 新建一个配置文件命名为：<code>output_options.yaml</code>，并填入下面内容： <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">output_bags:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">uri:</span> <span class="string">out_bag01</span></span><br><span class="line">  <span class="attr">all:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">compression_format:</span> <span class="string">zstd</span></span><br><span class="line">  <span class="attr">compression_mode:</span> <span class="string">message</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">uri:</span> <span class="string">out_bag02</span></span><br><span class="line">  <span class="attr">all:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">compression_format:</span> <span class="string">zstd</span></span><br><span class="line">  <span class="attr">compression_mode:</span> <span class="string">message</span></span><br></pre></td></tr></table></figure> 3. 执行数据转换命令 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">source</span> /opt/ros/humble/setup.bash</span><br><span class="line">ros2 bag convert -i ./path/to/bag/file -o output_options.yaml</span><br></pre></td></tr></table></figure></p>
+<h2 id="问题定位">问题定位</h2>
+<h3 id="增加日志">增加日志</h3>
+<p>由于已经确认不是自己写的程序的问题，所以其实可以跳过这一步</p>
+<h3 id="gdb检查">gdb检查</h3>
+<p>cpp程序排查还是需要上gdb，不要自己瞎折腾瞎改代码。<a href="#appendA">文末记录</a>如何在<code>ubuntu</code>上生成<code>core文件</code>。 运行一次程序，生成<code>core文件</code>后使用gdb检查错误堆栈 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gdb ros_ws/install/package/lib/package/excutable /path/to/corefile</span><br><span class="line"></span><br><span class="line">bt  <span class="comment"># gdb命令，打印错误堆栈</span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到如下的报错信息</p>
+<figure>
+<img src="./imgs/backtraces.png" alt="" /><figcaption>backtraces</figcaption>
+</figure>
+<p>虽然是在子线程中出错，但是大概也能看到是在<code>rosbag2_compression::SequentialCompressonWriter::compression_thread_fn()</code>函数中出错。 这也符合了现象，只在进行压缩的时候会出错。</p>
+<p>同时，从错误堆栈里可以看出应该是<code>rosbag2_compression_zstd::ZstdCompressor</code>在进行压缩处理的时候调用<code>rcutils_uint8_array_resize</code>函数出错。</p>
+<h3 id="对比不同的writer">对比不同的writer</h3>
+<p>由于在进行多个<code>writers</code>写数据，但是不执行压缩的时候并没有相关问题发生，所以可以对比一下普通的<code>writer</code>和<code>SequentialCompressonWriter</code>在写函数中的区别</p>
+<h4 id="普通的writer即rosbag2_cppsequentialwriter">普通的writer，即rosbag2_cpp::SequentialWriter</h4>
+<p>普通的<code>writer</code>，即<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/humble/rosbag2_cpp/src/rosbag2_cpp/writers/sequential_writer.cpp">rosbag2_cpp::SequentialWriter</a>中，<code>void SequentialWriter::write(std::shared_ptr&lt;rosbag2_storage::SerializedBagMessage&gt; message)</code>函数比较简单，<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/14bf3dcc2170ebe5bd73ed0cf83bb4077b3e36b4/rosbag2_cpp/src/rosbag2_cpp/writers/sequential_writer.cpp#L328-L337">核心代码</a>是这几行 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (storage_options_.max_cache_size == <span class="number">0u</span>) &#123;</span><br><span class="line"><span class="comment">// If cache size is set to zero, we write to storage directly</span></span><br><span class="line">storage_-&gt;<span class="built_in">write</span>(converted_msg);</span><br><span class="line">++topic_information-&gt;message_count;</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line"><span class="comment">// Otherwise, use cache buffer</span></span><br><span class="line">message_cache_-&gt;<span class="built_in">push</span>(converted_msg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>由于<code>bag_rewrite</code>在调用<code>writer</code>的时候，<code>max_cache_size</code>始终<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/14bf3dcc2170ebe5bd73ed0cf83bb4077b3e36b4/rosbag2_transport/src/rosbag2_transport/bag_rewrite.cpp#L191">设置为0</a>，因此执行的是<code>if</code>分支，也就是直接调用底层的数据库封装类直接写入硬盘。</p>
+<h4 id="带压缩的writer即rosbag2_compressionsequentialcompressionwriter">带压缩的writer即rosbag2_compression::SequentialCompressionWriter</h4>
+<p>带压缩功能的writer这部分的逻辑增加了一个单独线程做压缩处理，函数<code>void SequentialCompressionWriter::write(   std::shared_ptr&lt;rosbag2_storage::SerializedBagMessage&gt; message)</code>的核心部分主要是<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/14bf3dcc2170ebe5bd73ed0cf83bb4077b3e36b4/rosbag2_compression/src/rosbag2_compression/sequential_compression_writer.cpp#L317-L321">这几行</a> <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">std::lock_guard&lt;std::mutex&gt; <span class="title">lock</span><span class="params">(compressor_queue_mutex_)</span></span>;</span><br><span class="line"><span class="keyword">while</span> (compressor_message_queue_.<span class="built_in">size</span>() &gt; compression_options_.compression_queue_size) &#123;</span><br><span class="line">    compressor_message_queue_.<span class="built_in">pop</span>();</span><br><span class="line">&#125;</span><br><span class="line">compressor_message_queue_.<span class="built_in">push</span>(message);</span><br><span class="line">compressor_condition_.<span class="built_in">notify_one</span>();</span><br></pre></td></tr></table></figure></p>
+<p>其中的<code>compressor_message_queue_</code>在另一个线程，即函数<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/14bf3dcc2170ebe5bd73ed0cf83bb4077b3e36b4/rosbag2_compression/src/rosbag2_compression/sequential_compression_writer.cpp#L63">void SequentialCompressionWriter::compression_thread_fn()</a>被处理。 这里面有一个对传入的<code>SerializedMessageSharedPtr</code>对象中的<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/blob/14bf3dcc2170ebe5bd73ed0cf83bb4077b3e36b4/rosbag2_compression/src/rosbag2_compression/sequential_compression_writer.cpp#L96">内存直接进行处理</a></p>
+<h4 id="重新查看调用api的代码">重新查看调用API的代码</h4>
+<p>调用<code>rosbag2 API</code>进行数据写操作的主要过程如下： <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// create rosbag2_storage::StorageOptions</span></span><br><span class="line">rosbag2_storage::StorageOptions storageOptions;</span><br><span class="line"><span class="comment">// create reader</span></span><br><span class="line"><span class="keyword">auto</span> inputReader = rosbag2_transport::ReaderWriterFactory::<span class="built_in">make_reader</span>(storageOptions);</span><br><span class="line"><span class="comment">// open file</span></span><br><span class="line">inputReader-&gt;<span class="built_in">open</span>(storageOptions);</span><br><span class="line"></span><br><span class="line"><span class="comment">// create multiplt writers</span></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment">// perform write</span></span><br><span class="line"><span class="keyword">while</span> (inputReader-&gt;<span class="built_in">has_next</span>())</span><br><span class="line">&#123;</span><br><span class="line">    std::shared_ptr&lt;rosbag2_storage::SerializedBagMessage&gt; nextMsg = <span class="literal">nullptr</span>;</span><br><span class="line">    nextMsg = inputReader-&gt;<span class="built_in">read_next</span>();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> &amp; writer : outputWriters):</span><br><span class="line">    &#123;</span><br><span class="line">        writer-&gt;<span class="built_in">write</span>(nextMsg);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">    </span><br></pre></td></tr></table></figure></p>
+<p><strong>可以看到，我们从<code>reader</code>中拿到的<code>SerializedBagMessage</code>是以共享指针的形式使用，当我们把共享指针传给不同的<code>writer</code>时，不同的<code>writer</code>内部同时对同一块内存进行数据压缩处理，因此也就导致了不同线程操作同一块地址空间的错误。</strong></p>
+<h2 id="修复">修复</h2>
+<p>由于不想更改<code>rosbag2</code>的代码，因此想办法在调用层解决。既然问题共享指针指向的内存被不同线程同时处理，那么我们就在每一次调用<code>writer-&gt;write(nextMsg)</code>的时候对<code>nextMsg</code>执行一次深拷贝，让不同的<code>writer</code>操作不同内存即可。 这里比较复杂的是<code>SerializedBagMessage</code>中使用一个指向<code>rcutils_uint8_array_t</code>的指针对内存进行管理。而<code>rcutils_uint8_array_t</code>里面又使用一个裸<code>uint8_t*</code>指针指向管理的内存。同时<code>rcutils</code>的文档不够详细，也没有提供函数对<code>rcutils_uint8_array_t</code>执行深拷贝操作。不过只要能够明白上面的内存管理关系，修复起来不太困难，关于<code>rcutils_uint8_array_t</code>的操作可以参考<code>rosbag2</code>里面的代码，最终修复的代码如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">...create reader &amp;&amp; writer</span><br><span class="line"><span class="comment">// perform write</span></span><br><span class="line"><span class="keyword">while</span> (inputReader-&gt;<span class="built_in">has_next</span>())</span><br><span class="line">&#123;</span><br><span class="line">    std::shared_ptr&lt;rosbag2_storage::SerializedBagMessage&gt; nextMsg = <span class="literal">nullptr</span>;</span><br><span class="line">    nextMsg = inputReader-&gt;<span class="built_in">read_next</span>();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> &amp; writer : outputWriters):</span><br><span class="line">    &#123;</span><br><span class="line">        std::shared_ptr&lt;rosbag2_storage::SerializedBagMessage&gt; nextMsg_copy = std::<span class="built_in">make_shared</span>&lt;rosbag2_storage::SerializedBagMessage&gt;();</span><br><span class="line">        <span class="comment">// 新建rcutils_uint8_array_t需要按照下面这样的操作</span></span><br><span class="line">        nextMsg_copy-&gt;serialized_data = std::<span class="built_in">shared_ptr</span>&lt;<span class="type">rcutils_uint8_array_t</span>&gt;(</span><br><span class="line">        <span class="keyword">new</span> <span class="type">rcutils_uint8_array_t</span>,</span><br><span class="line">        [](<span class="type">rcutils_uint8_array_t</span> * msg) &#123;</span><br><span class="line">        <span class="keyword">auto</span> fini_return = <span class="built_in">rcutils_uint8_array_fini</span>(msg);</span><br><span class="line">        <span class="keyword">delete</span> msg;</span><br><span class="line">        <span class="keyword">if</span> (fini_return != RCUTILS_RET_OK) &#123;</span><br><span class="line">            <span class="built_in">RCLCPP_ERROR_STREAM</span>(</span><br><span class="line">            rclcpp::<span class="built_in">get_logger</span>(<span class="string">&quot;rosbag2_cpp&quot;</span>),</span><br><span class="line">            <span class="string">&quot;Failed to destroy serialized message: &quot;</span> &lt;&lt; <span class="built_in">rcutils_get_error_string</span>().str);</span><br><span class="line">        &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 新建后需要执行内存初始化</span></span><br><span class="line">        <span class="type">rcutils_allocator_t</span> allocator = <span class="built_in">rcutils_get_default_allocator</span>();</span><br><span class="line">        <span class="keyword">auto</span> ret = <span class="built_in">rcutils_uint8_array_init</span>(</span><br><span class="line">            nextMsg_copy-&gt;serialized_data.<span class="built_in">get</span>(),</span><br><span class="line">            nextMsg-&gt;serialized_data-&gt;buffer_capacity,</span><br><span class="line">            &amp;allocator);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 检查是否初始化成功</span></span><br><span class="line">        <span class="keyword">if</span> (ret != RCUTILS_RET_OK)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">RCLCPP_ERROR</span>(<span class="built_in">get_logger</span>(), <span class="string">&quot;Init arrry failed with ret code = %d&quot;</span>, ret);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 复制内容</span></span><br><span class="line">        nextMsg_copy-&gt;topic_name = nextMsg-&gt;topic_name;</span><br><span class="line">        nextMsg_copy-&gt;time_stamp = nextMsg-&gt;time_stamp;</span><br><span class="line">        nextMsg_copy-&gt;serialized_data-&gt;buffer_capacity = nextMsg-&gt;serialized_data-&gt;buffer_capacity;</span><br><span class="line">        nextMsg_copy-&gt;serialized_data-&gt;buffer_length = nextMsg-&gt;serialized_data-&gt;buffer_length;</span><br><span class="line">        <span class="comment">// 复制内存</span></span><br><span class="line">        <span class="built_in">memcpy</span>((<span class="type">void</span>*)nextMsg_copy-&gt;serialized_data-&gt;buffer,</span><br><span class="line">                (<span class="type">void</span>*)nextMsg-&gt;serialized_data-&gt;buffer, nextMsg-&gt;serialized_data-&gt;buffer_length);</span><br><span class="line">        writer-&gt;<span class="built_in">write</span>(nextMsg_copy);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="issue-提交及-pr">Issue 提交及 PR</h2>
+<p>这个bug同时提交到<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/tree/humble" title="rosbag2 repo">rosbag2</a>仓库<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/issues/1262">issues1262中</a>。根据issue的反馈，这个bug在最新的rolling分支已经被修复。不过rolling分支的API与humble 的API差别较大，因此没法直接合并到humble分支中，因此在humble分支这个bug还没有被修复。</p>
+<h3 id="pr过程">PR过程</h3>
+<ol type="1">
+<li>fork仓库</li>
+<li>克隆fork后的仓库到本地</li>
+<li>从humble分支切出bug_fix分支</li>
+<li>先用原始代码编译并执行test</li>
+<li>先新增一个单元测试用例，并执行编译测试，原始代码无法在新的单元测试下通过</li>
+<li>修复代码</li>
+<li>编译并测试，通过所有测试用例</li>
+</ol>
+<p>PS:在修复过程中一开始总是无法通过测试用例，提示无法生成测试结果文件。后面查看发现运行过程中会<code>core dump</code>。经过<code>gdb</code>调试（为了调试能够输出最多的<code>core dump</code>信息，需要<code>colcon build --cmake-args -DCMAKE_BUILD_TYPE=Debug</code>）后发现，是因为声明了共享指针之后没有对齐进行初始化，后面又调用了该指针的成员变量。哎，还是太菜呀～</p>
+<p>具体的<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2/pull/1331#issue-1708860338">PR</a></p>
+<h2 id="附录aubuntu-core文件生成">附录A：ubuntu core文件生成</h2>
+<div id="appendA">
+
+</div>
+<ol type="1">
+<li>ubuntu有一个默认的错误搜集系统apport，必须要关掉之后才能生成core文件</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo service apport status</span><br><span class="line">sudo service apport stop</span><br><span class="line">sudo systemctl apport disble  <span class="comment"># 似乎无法关闭开机启动，每次需要的时候需要手工确认是否关闭</span></span><br></pre></td></tr></table></figure>
+<ol start="2" type="1">
+<li>设置core文件大小，默认是0，所以不会生成core文件</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ulimit</span> -c  <span class="comment"># 若结果是0，则不会生成core文件</span></span><br><span class="line"><span class="built_in">ulimit</span> -c unlimited  <span class="comment"># 不限制core文件大小</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;ulimit -c unlimited&quot;</span> &gt;&gt; ~/.bashrc  <span class="comment"># 选择当前使用的终端</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;ulimit -c unlimited&quot;</span> &gt;&gt; ~/.zshrc</span><br></pre></td></tr></table></figure>
+<ol start="3" type="1">
+<li>设置corefile路径（注意，路径必须普通用户可读！）</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo <span class="built_in">mkdir</span> /corefile</span><br><span class="line">sudo <span class="built_in">chmod</span> 777 /corefile</span><br><span class="line">sysctl -w kernel.core_pattern=/corefile/core-%e-%p-%t</span><br></pre></td></tr></table></figure>
+<ol start="4" type="1">
+<li><code>CMakeLists.txt加上``Debug模式</code>下不进行编译器优化</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># In CMakeLists.txt</span></span><br><span class="line">SET(CMAKE_CXX_FLAGS_DEBUG <span class="string">&quot;<span class="variable">$ENV</span>&#123;CXXFLAGS&#125; -O0 -Wall -g -ggdb -Wno-unused-parameter&quot;</span>)  </span><br></pre></td></tr></table></figure>
+<p>注意在编译<code>ROS2</code>包的时候要指明<code>Debug</code> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">colcon build --packages-select package_name --cmake-args -DCMAKE_BUILD_TYPE=Debug</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/" class="post-title-link" itemprop="url">Simple-LIO-SAM——（二）环境搭建与运行</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-14 19:49:06" itemprop="dateCreated datePublished" datetime="2023-03-14T19:49:06+08:00">2023-03-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-04-19 22:23:01" itemprop="dateModified" datetime="2023-04-19T22:23:01+08:00">2023-04-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——（二）环境搭建与运行" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——（二）环境搭建与运行" href="/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::b824fa070f036b85c958cacd75daa48f" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="运行环境搭建">运行环境搭建</h2>
+<p>本项目提供基于<code>ROS2-humble</code>的镜像，并提供脚本可直接在镜像中启动可视化程序。 docker镜像部署见下文。</p>
+<h3 id="数据">数据</h3>
+<p>本项目同时提供转为<code>rosbag2</code>格式的数据包，<a href="">下载地址:暂时未上传</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> DATA_DIR=/path/to/download/ros2bag/dir</span><br></pre></td></tr></table></figure>
+<p>本项目中默认的配置文件<code>params_default.yaml</code>可以直接运行下面的数据： - park_dataset - walking_dataset - garden_dataset</p>
+<h3 id="环境部署">环境部署</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> git@github.com:zeal-up/Simple-LIO-SAM.git</span><br><span class="line"><span class="built_in">cd</span> Simple-LIO-SAM</span><br><span class="line">./docker_run.sh -h  <span class="comment"># show help message</span></span><br><span class="line">./docker_run.sh -c /path/to/code/repo -d <span class="variable">$DATA_DIR</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ./docker_into.sh  # enter the container next time</span></span><br></pre></td></tr></table></figure>
+<h3 id="编译">编译</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> Simple-LIO-SAM</span><br><span class="line">./docker_into.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下面命令在镜像中执行</span></span><br><span class="line"><span class="built_in">cd</span> ~/ros_ws/</span><br><span class="line"><span class="built_in">mkdir</span> src &amp;&amp; <span class="built_in">cd</span> src &amp;&amp;<span class="built_in">ln</span> -s /home/splsam/codes ./</span><br><span class="line"><span class="built_in">cd</span> ..</span><br><span class="line"><span class="built_in">source</span> /opt/ros/humble/setup.bash</span><br><span class="line">colcon build --packages-select spl_lio_sam</span><br></pre></td></tr></table></figure>
+<h3 id="运行">运行</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker镜像下运行</span></span><br><span class="line"><span class="built_in">cd</span> ~/ros_ws</span><br><span class="line"><span class="built_in">source</span> ./install/setup.bash</span><br><span class="line">ros2 launch spl_lio_sam run.launch.py </span><br><span class="line"></span><br><span class="line"><span class="comment"># 新开终端</span></span><br><span class="line"><span class="built_in">cd</span> Simple-LIO-SAM</span><br><span class="line">./docker_into.sh</span><br><span class="line"><span class="built_in">cd</span> data/ros2/</span><br><span class="line">ros2 bag play ./park_dataset/ --topics /points_raw /imu_raw</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>运行时画面：</p>
+<img src="./imgs/runtime.gif" title="fig:" alt="Simple-LIO-SAM运行时画面" />
+<center>
+Simple-LIO-SAM运行时画面
+</center>
+<h2 id="开发环境搭建">开发环境搭建</h2>
+<p>由于本项目作者在使用<code>vscode</code>开发<code>c++</code>时经常会遇到无法快捷跳转问题（其实笔者发现有很多人在使用vscode开发时都会有这个问题）， 因此一并把解决方案写入项目中。</p>
+<h3 id="vscode-cpp函数快捷跳转">vscode Cpp函数快捷跳转</h3>
+<ol type="1">
+<li>安装cpp扩展 vscode侧边栏进入扩展选项（ctrl+shift+x)，搜索<code>c++</code>，安装<code>C/C++ Extension Pack</code></li>
+<li>打开项目 &gt; File-&gt;Open Folder</li>
+<li>保存为工作区 &gt; File-&gt;Save Workspace as 选择目标目录及文件（默认以<code>.code-workspace</code>结尾）</li>
+<li>打开刚才保存的工作区文件 &gt; File-&gt;Open File 选择刚才打开的工作区文件</li>
+<li>对工作区添加<code>c++</code>库检索路径 在刚才打开的工作区文件中，参考以下格式编辑</li>
+</ol>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">&quot;folders&quot;:</span> [</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="attr">&quot;path&quot;:</span> <span class="string">&quot;../Simple-LIO-SAM&quot;</span></span><br><span class="line">		&#125;,</span><br><span class="line">	],</span><br><span class="line">	<span class="attr">&quot;settings&quot;:</span> &#123;</span><br><span class="line">		<span class="attr">&quot;C_Cpp.default.includePath&quot;:</span> [</span><br><span class="line">			<span class="string">&quot;$&#123;default&#125;&quot;</span>,</span><br><span class="line">			<span class="string">&quot;/usr/include/**&quot;</span>,</span><br><span class="line">			<span class="string">&quot;/usr/include/c++/9/&quot;</span>,</span><br><span class="line">			<span class="string">&quot;/usr/lib/gcc/x86_64-linux-gnu/8/include/&quot;</span>,</span><br><span class="line">			<span class="string">&quot;/opt/ros/humble/include/**&quot;</span>,</span><br><span class="line"></span><br><span class="line">			<span class="string">&quot;$&#123;workspaceFolder&#125;/include&quot;</span>,</span><br><span class="line"></span><br><span class="line">            <span class="string">//</span> <span class="string">重点！！这里的路径要设置为ros2工作空间下spl_lio_sam编译出来的头文件</span></span><br><span class="line">			<span class="string">&quot;/path/to/ros2_ws/install/spl_lio_sam/include/spl_lio_sam&quot;</span></span><br><span class="line"></span><br><span class="line">		],</span><br><span class="line">		<span class="attr">&quot;C_Cpp.files.exclude&quot;:</span> &#123;</span><br><span class="line">			<span class="string">&quot;**/.vscode&quot;</span><span class="string">:</span> <span class="literal">true</span>,</span><br><span class="line">			<span class="string">&quot;**/.vs&quot;</span><span class="string">:</span> <span class="literal">true</span></span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="attr">&quot;C_Cpp.default.cStandard&quot;:</span> <span class="string">&quot;c17&quot;</span>,</span><br><span class="line">		<span class="attr">&quot;C_Cpp.default.cppStandard&quot;:</span> <span class="string">&quot;c++17&quot;</span>,</span><br><span class="line">		<span class="attr">&quot;python.analysis.include&quot;:</span> [</span><br><span class="line">			<span class="string">&quot;/opt/ros/humble/lib/python3.10/site-packages&quot;</span>,</span><br><span class="line">		],</span><br><span class="line">		<span class="attr">&quot;python.autoComplete.extraPaths&quot;:</span> [</span><br><span class="line">			<span class="string">&quot;/opt/ros/humble/lib/python3.10/site-packages&quot;</span>,</span><br><span class="line">		],</span><br><span class="line">		<span class="attr">&quot;python.analysis.extraPaths&quot;:</span> [</span><br><span class="line">			<span class="string">&quot;/opt/ros/humble/lib/python3.10/site-packages&quot;</span>,</span><br><span class="line">		],</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="对工作区文件的解释">对工作区文件的解释</h3>
+<p>其实主要起作用的是工作区文件中<code>settings-&gt;C_Cpp.default.includePath</code>字段内容，vscode的cpp扩展会读取该工作空间文件下 的这个字段，并将里面的路径进行解析加到头文件解析路径中。</p>
+<p>这里有两个路径要注意的</p>
+<ol type="1">
+<li><code>"$&#123;workspaceFolder&#125;/include"</code>，也就是Simple-LIO-SAM仓库下的include路径</li>
+<li><code>"/path/to/ros2_ws/install/spl_lio_sam/include/spl_lio_sam"</code>，这个要设置成你的ros工作空间对应的路径</li>
+</ol>
+<p>另外，如果发现自己路径设置完成，但是有些函数还提示下划线，要看看是不是那些函数是<code>c++17</code>或者更高的标准才支持的特性，在上面的配置文件中 设置c++/c标准为17</p>
+<h3 id="其余注意">其余注意</h3>
+<ol type="1">
+<li>尽量不要用<code>/path/**</code>的格式添加include路径，虽然看起来很省事，但会影响检索效率</li>
+<li>刚设置完路径需要等待vscode检索构建数据库，在vscode右下方状态条会提示正在进行检索</li>
+<li>上面配置文件中<code>"python.analysis.extraPaths","python.autoComplete.extraPaths","python.analysis.include"</code>是设置python语法提示器的 库检索路径，不同的python提示器插件会使用不同的路径。</li>
+</ol>
+<h2 id="reference">Reference</h2>
+<ol type="1">
+<li><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIO-SAM</a></li>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258">LIO-SAM paper</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">This Project</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/chennuo0125-HIT/LIO-SAM-note">LIO-SAM-note</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/smilefacehh/LIO-SAM-DetailedNote">LIO-SAM-DetailedNote</a></li>
+</ol>
+<h2 id="本项目所有章节">本项目所有章节</h2>
+<ol type="1">
+<li><a href="https://zeal-up.github.io/2023/03/13/lio_sam/intro/">Simple-LIO-SAM——（一）项目简介</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/">Simple-LIO-SAM——（二）环境搭建与运行</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/">Simple-LIO-SAM——（三）总体流程认识</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/">Simple-LIO-SAM——（四）utility文件解读</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/">Simple-LIO-SAM——（五）点云去畸变模块</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/">Simple-LIO-SAM——（六）特征提取模块</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/">Simple-LIO-SAM——（七）GTSAM快速入门</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/">Simple-LIO-SAM——（八）IMU预积分模块</a></li>
+<li><a href="https://zeal-up.github.io/2023/04/06/lio_sam/pcdRegistration-doc/">Simple-LIO-SAM——（九）点云匹配算法详解</a></li>
+<li><a href="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/">Simple-LIO-SAM——（十）后端优化模块详解</a></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/lio_sam/intro/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/13/lio_sam/intro/" class="post-title-link" itemprop="url">Simple-LIO-SAM——（一）项目简介</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-13 19:45:58" itemprop="dateCreated datePublished" datetime="2023-03-13T19:45:58+08:00">2023-03-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-04-18 22:29:16" itemprop="dateModified" datetime="2023-04-18T22:29:16+08:00">2023-04-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/03/13/lio_sam/intro/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——（一）项目简介" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Simple-LIO-SAM——（一）项目简介" href="/2023/03/13/lio_sam/intro/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::d227db67a0df8ebb129db6bbfad2da40" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
+</ul>
+<h2 id="liosam介绍">LIOSAM介绍</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光惯性里程计方法。 作者<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan">TixiaoShan</a>是SLAM届大神，在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>之前发表过<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM">LeGO-LOAM</a>，在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>之后发布了<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2104.10831">LVI-SAM</a>——在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>基础上又加入了语义定位因子。 网上关于<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>的解读已经有很多，这里不会进行太过详细的复述，具体的内容解析会放在后面系列文章慢慢仔细阐述。</p>
+<p>简单来说，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>整体的框架与其他方法区别在与：</p>
+<ol type="1">
+<li>使用因子图作为后端优化框架，将IMU预积分与雷达点云匹配及回环检测等紧耦合</li>
+<li>使用当前帧-局部地图匹配而不是对全局地图匹配来加速点云匹配速度</li>
+<li>基于位置关系选择回环帧，并使用点云匹配计算回环因子</li>
+<li>使用高频IMU并进行简单积分对点云做运动畸变校正</li>
+</ol>
+<p>另外，LIOSAM作者的工程功底很好，LIOSAM代码库被github上很多SLAM开源项目作为code base</p>
+<h2 id="本项目目的">本项目目的</h2>
+<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>源代码虽然不能说庞大，甚至可以说简单，因为整个代码库主要只要5个文件。 <img src="./imgs/org_files.png" alt="LIOSAM原代码src目录" />
+<center>
+LIOSAM原代码src目录
+</center>
+<p>但是原代码里面每个模块都通过ROS的topic与其他模块有紧密的联系，且非常多的冗余代码和topic，这导致了 整个的流程对新手十分不友好，下图是LIOSAM原本运行时的<code>rqt_graph</code></p>
+<img src="./imgs/org_rqtgraph.png" title="fig:" alt="原始LIOSAM运行时rqt_graph" />
+<center>
+原始LIOSAM运行时rqt_graph
+</center>
+<p>第二个复杂之处在于<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>框架涉及到的知识点和工具较多，至少要熟悉<code>ROS,gtsam,pcl</code>几个库，算法层面需要熟悉<code>点云匹配、IMU积分、因子图、三维转换</code>等。 对于熟悉SLAM的人来说可能较为简单上手，但是对于新入门的人来说则一开始会一头雾水。</p>
+<p>基于上述这些原因，笔者基于<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>改进，完成了<a href="Simple-LIO-SAM">SPL-LIO-SAM</a>项目，希望能够以最大幅度帮助初学者理解<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>框架及里面的算法细节。</p>
+<h2 id="适用人群">适用人群</h2>
+<p>如果你是SLAM大牛，那本项目可能对你没有用处。如果你是以下人群之一，笔者相信本项目可以让你受益匪浅。</p>
+<ol type="1">
+<li>SLAM初学者。本项目对代码注释和讲解可以说细致到令人发指，因此十分适合初学者学习。</li>
+<li>接触过SLAM，希望将SLAM算法工程化，并加以实现。</li>
+<li>SLAM学习者或工程师，但是希望对<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>,<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM">LeGO-LOAM</a>,<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2104.10831">LVI-SAM</a>,<a target="_blank" rel="noopener" href="https://github.com/laboshinl/loam_velodyne">loam_velodyne</a>其中任何一种算法进行精细学习</li>
+</ol>
+<h2 id="simple-lio-sam项目特点与liosam区别">Simple-LIO-SAM项目特点/与LIOSAM区别</h2>
+<h3 id="基于最新的ros2发行版humble实现">基于最新的ROS2发行版humble实现</h3>
+<p>虽然<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>源码中有一个ros2分支，但该分支的维护者并不是原作者，而且已经长时间没有人维护，且该分支存在一些bug没有被修复。为了能够在进行本项目的学习过程中 熟悉最新的ROS2框架，笔者在LIOSAM的ros2分支基础上，修复了存在的bug，同时将功能较为独立的<code>Transformfusion</code>类抽取成独立的类。</p>
+<h3 id="开箱即用docker开发环境">开箱即用docker开发环境</h3>
+<p>为了便于上手及部署，笔者同时准备了适配的docker镜像供学习者使用。</p>
+<h3 id="简化">简化</h3>
+<h4 id="话题发布的简化">话题发布的简化</h4>
+<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>原始代码中有很多中间结果的发布，这些中间结果可以用来可视化及调试程序，但是对于学习者和开发者而言不仅意义不大，而且会在初始学习源码阶段误导学习者。 本项目在话题发布上进行<code>大幅度简化</code>，简化后的设计如下： <img src="./imgs/Design-Node%26%26Topics.png" alt="Simple-LIO-SAM节点及话题设计" />
+<center>
+Simple-LIO-SAM节点及话题设计
+</center>
+简化后运行时的<code>rqt_graph</code>: <img src="./imgs/spl_liosam_rosgraph.png" alt="Simple-LIO-SAM的rqt_grpah" />
+<center>
+Simple-LIO-SAM的rqt_grpah
+</center>
+<h4 id="坐标系简化">坐标系简化</h4>
+<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中实用的坐标系并不复杂，但是作者提供的<code>urdf</code>包含了太多为了兼容性考虑的坐标系，这些坐标系对于实际运行和理解并没有用。因此，本项目基于ROS对坐标系的约束，将 坐标系关系树简化为如下： <img src="./imgs/Design-CoordinateSystem.png" alt="Simple-LIO-SAM的坐标系关系" />
+<center>
+Simple-LIO-SAM的坐标系关系
+</center>
+<h3 id="保留算法及定义完整性">保留算法及定义完整性</h3>
+<p>虽然本项目去除了很多非必要topic，同时对于一些非必要代码也进行了简化，但对一些学习算法有帮助的细节依旧保留。比如激光里程计在发布的时候有<code>mapping/odometry</code>和<code>mapping/odometry_incremental</code>两个话题，这两个话题虽然类似但是背后却有很不同的含义，但同时两者合一又不影响算法的运行。因此采取的做法时在代码中保留这部分代码，同时加以解释，但发布时只发布其中一个话题。</p>
+<h3 id="完善的注释及流程图">完善的注释及流程图</h3>
+网上对<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>源码的注释其实并不少，比如<a target="_blank" rel="noopener" href="https://github.com/chennuo0125-HIT/LIO-SAM-note">LIO-SAM-note</a>和<a target="_blank" rel="noopener" href="https://github.com/smilefacehh/LIO-SAM-DetailedNote">LIO-SAM-DetailedNote</a>，还有一些blog也对源码做了解释，但是都不太完美，同时缺少项目性的组织。本项目借鉴了一些开源项目的注释，并加以完善，可以说，本项目是目前对<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>注释最完善的开源项目。<a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">Simple-LIO-SAM代码</a> <img src="./imgs/comments.png" alt="Simple-LIO-SAM部分注释图" />
+<center>
+Simple-LIO-SAM部分注释图
+</center>
+为了最为清晰的展示<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>算法不同模块的流程，该项目还对各个模块流程进行梳理，建立了完善的流程图设计 <img src="./imgs/Design-Pipelines.png" alt="算法Pipeline梳理" />
+<center>
+算法Pipeline梳理
+</center>
+<img src="./imgs/Design-imageProjection_top0.png" title="fig:" alt="点云去畸变流程图-top" />
+<center>
+点云去畸变流程图-top
+</center>
+<img src="./imgs/Design-imageProjection_top1.png" title="fig:" alt="点云去畸变流程图-细节示例1" />
+<center>
+点云去畸变流程图-细节示例
+</center>
+<h2 id="本项目所有章节">本项目所有章节</h2>
+<ol type="1">
+<li><a href="https://zeal-up.github.io/2023/03/13/lio_sam/intro/">Simple-LIO-SAM——（一）项目简介</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/">Simple-LIO-SAM——（二）环境搭建与运行</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/">Simple-LIO-SAM——（三）总体流程认识</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/">Simple-LIO-SAM——（四）utility文件解读</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/">Simple-LIO-SAM——（五）点云去畸变模块</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/">Simple-LIO-SAM——（六）特征提取模块</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/">Simple-LIO-SAM——（七）GTSAM快速入门</a></li>
+<li><a href="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/">Simple-LIO-SAM——（八）IMU预积分模块</a></li>
+<li><a href="https://zeal-up.github.io/2023/04/06/lio_sam/pcdRegistration-doc/">Simple-LIO-SAM——（九）点云匹配算法详解</a></li>
+<li><a href="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/">Simple-LIO-SAM——（十）后端优化模块详解</a></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/" class="post-title-link" itemprop="url">FastDDS关键概念</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-13 18:02:43" itemprop="dateCreated datePublished" datetime="2023-03-13T18:02:43+08:00">2023-03-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-16 18:07:59" itemprop="dateModified" datetime="2023-03-16T18:07:59+08:00">2023-03-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/DDS/" itemprop="url" rel="index"><span itemprop="name">DDS</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/" class="post-meta-item leancloud_visitors" data-flag-title="FastDDS关键概念" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="FastDDS关键概念" href="/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::73f7a0f706535d55ad531611b3af6c03" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="架构">架构</h1>
+<p>架构图 <img src="./imgs/fast-dds-architecture.svg" alt="架构图" /></p>
+<p>域（Domain）的概念 <img src="imgs/domain_concept.jpg" alt="Domain" /> <img src="imgs/dds_domain.svg" alt="Domain" /></p>
+<p>数据中心收发模型（DCPS:Data Centric Publisher and Subscriber) <img src="imgs/DataCentricModel.png" alt="DCPS" /></p>
+<h1 id="why-need-a-publisher-and-subscriber">Why need a publisher and subscriber</h1>
+<blockquote>
+<p>These publishers and subscribers don’t need to know about each other ahead of time; they discover each other dynamically at runtime. The data they share is described by a “topic,” and publishers and subscribers send and receive data only for the topics they are interested in. In this pattern, many publishers may publish the same topic, and many subscribers may subscribe to the same topic. Subscribers receive data from all of the publishers that they share a topic with. Publishers send data directly to subscribers, with no need for a broker or centralized application to mediate communications. (https://community.rti.com/static/documentation/connext-dds/6.0.1/doc/manuals/connext_dds/getting_started/cpp11/intro_pubsub_cpp.html)</p>
+</blockquote>
+<h1 id="notes">Notes</h1>
+<p>Publisher 和 Subscriber 负责生成DataWriter&amp;&amp;DataReader，一个Publisher[Subscriber]可以绑定多个DataWriter[DataReader]。每一个DataWriter[DataReader]都会绑定到一个topic，同时可以指定对应的回调函数DataWriterListener[DataReaderListener]</p>
+<h1 id="数据监控fastdds-monitor">数据监控——FastDDS Monitor</h1>
+<p><a target="_blank" rel="noopener" href="https://fast-dds-monitor.readthedocs.io/en/latest/rst/getting_started/tutorial.html">FastDDS Monitor Tutorial</a> ## 原理 FastDDS库有一个内嵌的Participant，叫做Statistic Participant，包含在FastDDS的Statistic Module中。该模块不是默认编译的，因此需要在编译FastDDS的时候指明CMake选项。 实际上是用户开发应用时，在构建<strong>DomainParticipants</strong>阶段，如果通过某种方式指明了要将数据统计信息往外发送，则Statistic Module模块就会自动收集信息，然后往固定的topic发送监控数据。FastDDS Monitor通过这些内嵌的topic，可以监控数据的收发情况。</p>
+<p><a target="_blank" rel="noopener" href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/statistics/statistics.html">如何打开Statistics DataWriters</a> <a target="_blank" rel="noopener" href="https://fast-dds-monitor.readthedocs.io/en/latest/rst/getting_started/tutorial.html">如何使用FastDDS Monitor</a></p>
+<p><strong>注意，如果编译FastDDS的时候打开Statistics Module模块，由于会发送额外的信息，所以会损失性能</strong> &gt; Consequently, by default, Fast DDS does not compile this module because it may entail affecting the application’s performance.(https://fast-dds.docs.eprosima.com/en/latest/fastdds/statistics/statistics.html)</p>
+<figure>
+<img src="imgs/monitor.jpg" alt="" /><figcaption>数据监控窗口</figcaption>
+</figure>
+<h1 id="record-replay">Record &amp;&amp; Replay</h1>
+<blockquote>
+<p>rosbag2 is a ROS 2 application that can be used to capture DDS messages and store them on an SQLite database which allows inspecting and replaying said messages at a later time.</p>
+</blockquote>
+<ol type="1">
+<li>rosbag2可以将在Topic中传送的数据以SQLite的形式保存</li>
+<li>FastDDS没有自己的数据保存和回放工具，官方说明用的是ROS2的<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2">rosbag2</a>包。要使用该包来记录和回放FastDDS的数据需要安装ROS2环境和rosbag2</li>
+<li>由于rosbag2是用来保存ros2的message的，并不是FastDDS的官方工具，因此如果要用rosbag2回放，需要做较多的配置</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/use_cases/rosbag_capture/rosbag_capture.html#rosbag-capture">使用rosbag-capture</a></p>
+<h1 id="limitations">Limitations</h1>
+<ol type="1">
+<li>没有进程管理和启动工具。ROS/Apollo/XPilot都有属于自己的进程调度系统，可以直接按指定顺序启动多个进程并执行相关调度。</li>
+<li>似乎无法实现像ROS的Service这种类似RPC的功能</li>
+</ol>
+<h1 id="reference-resources-link">Reference &amp;&amp; Resources link</h1>
+<ol type="1">
+<li><a target="_blank" rel="noopener" href="https://github.com/eProsima/Fast-DDS">FastDDS Github</a></li>
+<li><a target="_blank" rel="noopener" href="https://fast-dds-monitor.readthedocs.io/en/latest/rst/installation/linux.html">FastDDS Monitor Documentation</a></li>
+<li><a target="_blank" rel="noopener" href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/use_cases/rosbag_capture/rosbag_capture.html#rosbag-capture">使用rosbag-capture</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/eProsima/Fast-DDS-python.git">Fast-DDS-Python</a></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/" class="post-title-link" itemprop="url">经久不衰的卡尔曼滤波器-基础知识及公式推导</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-13 17:59:59" itemprop="dateCreated datePublished" datetime="2023-03-13T17:59:59+08:00">2023-03-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-16 18:07:59" itemprop="dateModified" datetime="2023-03-16T18:07:59+08:00">2023-03-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/%E6%BB%A4%E6%B3%A2/" itemprop="url" rel="index"><span itemprop="name">滤波</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%8A%80%E8%83%BD/%E6%BB%A4%E6%B3%A2/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2/" itemprop="url" rel="index"><span itemprop="name">卡尔曼滤波</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/" class="post-meta-item leancloud_visitors" data-flag-title="经久不衰的卡尔曼滤波器-基础知识及公式推导" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="经久不衰的卡尔曼滤波器-基础知识及公式推导" href="/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::485da1f1f8066e1c77d786731c1e5117" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="一卡尔曼滤波器的应用场景">一、卡尔曼滤波器的应用场景</h1>
+<p>卡尔曼滤波器之前被广泛用来做动态系统的状态估计、预测。主要的目的就是用来从带噪声的观测量，比如各种传感器的观测（IMU、GPS、里程计等）估计出最优的系统状态（state）。不过要明确强调的是，由于测量都带有噪声，也就是随机性，所以真正准确的状态是无法获知的。</p>
+<p>最小二乘法可以从一长串的测量值回归出一个最为匹配的模型。卡尔曼滤波相比于最小二乘法，采用了一种递归的计算方式，也就是每一时刻只需要保存上一时刻的状态。因此可以被用来处理实时任务。</p>
+<p>虽然卡尔曼滤波器从美国阿波罗登月计划到如今已有几十年，且目前有更先进的因子图（Factor Graph）算法，但是在很多领域依旧可以看到卡尔曼滤波器的身影，特别是在自动驾驶的各个模块，比如：从IMU的数据（三轴加速度，三轴角速度）计算出运动物体的当前位置。</p>
+<h1 id="二卡尔曼滤波器的两个步骤宏观认识">二、卡尔曼滤波器的两个步骤——宏观认识</h1>
+<p>卡尔曼滤波包含两个步骤</p>
+<ol type="1">
+<li>预测（prediction）—— Dynamic model</li>
+<li>更新（correction/measurment update）—— Observation model</li>
+</ol>
+<p>所谓<strong>预测</strong>，就是用一个数学模型，根据当前的传感器输入，直接计算此时系统的状态。可以理解为一个方程的计算就行。</p>
+<p>所谓的<strong>更新</strong>，就是在某些时刻或者每一时刻，获取一些系统的状态输入（可以同样是传感器的值），甚至是<strong>预测</strong>阶段中同样的传感器的值，将其当作真值，我们将这个值叫做<strong>测量值</strong>。比较此刻<strong>预测</strong>的系统状态和<strong>测量</strong>的系统状态，对<strong>预测</strong>出的系统状态进行修正，因此也叫<strong>测量更新</strong>（measurment update）。</p>
+<figure>
+<img src="./imgs/framework.png" alt="" /><figcaption>framework</figcaption>
+</figure>
+<h1 id="三卡尔曼滤波的几大概念">三、卡尔曼滤波的几大概念</h1>
+<h2 id="状态向量state-vector">1、状态向量State Vector</h2>
+<p>系统的状态向量包含了系统中我们关心的状态变量，比如速度<span class="math inline">\(\textbf{v}=[v_x, v_y,v_z]\)</span>，距离<span class="math inline">\(\textbf{d}=[d_x, d_y,d_z]\)</span>，加速度<span class="math inline">\(\textbf{a}=[a_x,a_y,a_z]\)</span>等。我们用<span class="math inline">\(\textbf{x}\)</span>表示系统向量 <span class="math display">\[ \textbf{x} = \begin{bmatrix} \textbf{d}\\ \textbf{v}\\ \textbf{a} \end{bmatrix}\\\]</span></p>
+<p>因为卡尔曼滤波有两个步骤，我们先以每个时刻都进行测量和修正这两个步骤作为讲解。那么，每一时刻的两个步骤的输出对应两个系统向量，一个是预测的系统向量<span class="math inline">\(\textbf{x}^-\)</span>，一个是修正后的系统向量<span class="math inline">\(\textbf{x}^+\)</span>。</p>
+<p><strong><em><strong>ps</strong>:大写字母表示矩阵；小写加粗字母表示向量；小写字母表示变量</em></strong></p>
+<h2 id="状态方程预测方程">2、状态方程&amp;&amp;预测方程</h2>
+<h3 id="状态方程">状态方程</h3>
+<p><strong>状态方程</strong>描述了将上一时刻的状态向量<span class="math inline">\(\textbf{x}_{t-1}\)</span>映射到当前的系统状态<span class="math inline">\(\textbf{x}_t\)</span> <span class="math display">\[ \textbf{x}_t = A_t\textbf{x}_{t-1}+ B_t\textbf{u}_t+\textbf{w}_t \tag{1}\]</span></p>
+<p>其中，矩阵<span class="math inline">\(A\)</span>称为转换矩阵（Transition Matrix），<span class="math inline">\(\textbf{u}_t\)</span>是当前时刻的系统输入，矩阵<span class="math inline">\(B\)</span>称为控制矩阵（Control Matrix）反映了系统输入到系统状态的映射关系，<span class="math inline">\(\textbf{w}_t\)</span>是过程噪声，我们假定其符合均值为0，协方差矩阵为<span class="math inline">\(Q_t\)</span>的高斯噪声。这里要注意的有几点：</p>
+<ol type="1">
+<li>矩阵<span class="math inline">\(A、B\)</span>都随着时间演进进行更新</li>
+<li>从公式1的形式可以看出，卡尔曼滤波的数学建模形式是线性方程，这也是卡尔曼滤波的限制之一。扩展卡尔曼滤波器（Extended Kalman Filter）支持非线性模型。</li>
+<li>这里的状态方程是一个“准确”的表达，因为不准确的部分已经放在噪声项中，要跟下面的预测方程区分开来。这个“准确”的表达由于有噪声（随机向量），所以我们没办法使用它作为输出，只能用它来分析、推导。</li>
+</ol>
+<h3 id="预测方程">预测方程</h3>
+<p><strong>预测方程</strong>跟状态方程基本一样，要强调的一点是，噪声<span class="math inline">\(\textbf{w}_t\)</span>是均值为0的高斯噪声，因此最大概率对应的值为0，因此我们在预测状态向量的时候其实不用管最后一项 <span class="math display">\[ \hat{\textbf{x}}^-_t = \textbf{A}_t\hat{\textbf{x}}^+_{t-1} + \textbf{B}_t\textbf{u}_t\tag{2}\]</span></p>
+<p>这里对系统状态向量上面加上一个帽子表示这是一个估计量，也就是我们实际输出的量。其中<span class="math inline">\(\hat{\textbf{x}}^+ _{t-1}\)</span>表示上一时刻执行完步骤二<strong>更新</strong>后的状态向量，<span class="math inline">\(\hat{\textbf{x}}^- _{t}\)</span>表示当前时候只执行了步骤1<strong>预测</strong>的状态向量。</p>
+<h3 id="理解预测方程">理解预测方程</h3>
+<p>预测方程（公式2）从形式上看只是把状态方程（公式1）去掉了噪声项，但其中包含了很多含义。其中，要时刻记得的是我们把系统状态当作一个随机向量处理，严格的表述需要引入随机过程的相关知识，但其实没太大必要。由于公式（1）中状态向量是一个随机向量，且噪声项是均值为0的高斯噪声，那么状态向量<span class="math inline">\(\textbf{x}_t\)</span>也满足高斯分布，其最大概率的地方就对应这噪声为0的地方，因此我们有理由将这个概率最大处对应的值当作我们的<strong>预测</strong>。</p>
+<figure>
+<img src="./imgs/gaussian.png" alt="" /><figcaption>gaussian</figcaption>
+</figure>
+<h2 id="测量方程测量估计方程">3、测量方程&amp;&amp;测量估计方程</h2>
+<h3 id="测量方程">测量方程</h3>
+<p><strong>测量方程</strong>反映了系统的测量值和系统状态向量之间的关系 <span class="math display">\[ \textbf{z}_t=H_t\textbf{x}_t+v_t\tag{3}\]</span></p>
+<p>其中，<span class="math inline">\(\textbf{z}_t\)</span>是当前时刻的测量值，<span class="math inline">\(H_t\)</span>称为测量矩阵（Measurement Matrix），描述了从系统状态到测量值的转换关系（举一个最简单的关系，系统状态是物体的直线距离，测量值是使用激光笔测出来的光从原点到物体的时间，那么<span class="math inline">\(H\)</span>就是光速的倒数）, <span class="math inline">\(\textbf{v}_t\)</span>是测量噪声，我们假定其符合均值为0，协方差为<span class="math inline">\(R_t\)</span>的高斯噪声。注意这里无论是状态向量还是测量向量都没有加帽子（<span class="math inline">\(\hat{.}\)</span>），表示这是个"准确"的表达式。</p>
+<h3 id="测量估计方程">测量估计方程</h3>
+<p>同样，我们如果忽略噪声项，就变成了对此时测量量的估计（注意状态向量的上标和角标）：</p>
+<p><span class="math display">\[ \hat{\textbf{z}}_t=H_t\hat{\textbf{x}}^-_t\tag{4}\]</span></p>
+<h2 id="测量更新方程">4、测量更新方程</h2>
+<p>上面给出了对测量量的估计，但是现在的情况是，我们有了一个测量值（通过某些测量方式或者传感器数据），这是一个不需要计算得到的量，我们如何用这个测量得出的量来更新我们对状态向量的估计？这就涉及到测量更新方程，这也是卡尔曼滤波里最难的部分，这里先给出更新方程的形式。</p>
+<p><span class="math display">\[ \hat{\textbf{x}}^+_t=\hat{\textbf{x}}^-_t+K_t(z_t-H_t\hat{\textbf{x}}^-_t)\tag{5}\]</span> <span class="math display">\[ K_t=\frac{P^-_tH_t^T}{H_tP^-_tH_t^T+R_t}\tag{6}\]</span></p>
+<p>其中，<span class="math inline">\(K_t\)</span>叫做卡尔曼增益；<span class="math inline">\(P^-_t\)</span>是系统测量值<span class="math inline">\(\hat{\textbf{x}}^-_t\)</span>的误差协方差矩阵。</p>
+<h1 id="四误差和协方差矩阵">四、误差和协方差矩阵</h1>
+<p>根据公式（1）减去公式（2），我们可以得出误差的协方差矩阵的表达形式</p>
+<p><span class="math display">\[ e^-_t \triangleq \textbf{x}_t - \hat{\textbf{x}}^-_t\\\]</span> <span class="math display">\[ P^-_t = \mathbb{E}[\textbf{e}^-_t {\textbf{e}^{-}_{t}}^T]\\\]</span></p>
+<p>把公式（1）和（2）带入误差表达式，可以推导出系统状态的协方差矩阵的递归表达形式</p>
+<p><span class="math display">\[
+\begin{split}
+P^-_t&amp;=\mathbb{E}[\big((A_tx_{t-1}+w_t)-A_tx_{t-1}^+\big)\big((A_tx_{t-1}+w_t)-A_tx_{t-1}^+\big)^T]\\&amp;=\mathbb{E}[\big(A_t(x_{t-1}-x_{t-1}^+)+w_t\big)\big(A_t(x_{t-1}-x_{t-1}^+)+w_t\big)^T]\\ &amp;=\mathbb{E}[A_t(x_{t-1}-x_{t-1}^+)(x_{t-1}-x_{t-1}^+)^TA_t^T]+\mathbb{E}[w_tw_t^T]\\ &amp;=A_tP_{t-1}^+A_t^T+Q_t
+\end{split}\\\]</span></p>
+<p>其中，从第二个等号到第三个等号利用了状态向量和随机噪声 的无关性（协方差为0）。因此我们可以得到下面的公式（7）</p>
+<p><span class="math display">\[P^-_t=A_tP^+_{t-1}A^T_t+Q_t\tag{7}\]</span></p>
+<h1 id="五更新方程的推导">五、更新方程的推导</h1>
+<p>现在我们进行到了这样的情况，我们使用预测方程公式（2）得到了<span class="math inline">\(t\)</span>时刻的系统状态预测量<span class="math inline">\(\textbf{x}_t^-\)</span>；同时，我们在这个时刻得到了一个测量值，且根据测量方程，我们认为它与此时的状态向量满足公式（3）：<span class="math inline">\(\textbf{z}_t=H_t\textbf{x}_t+v_t\)</span> 。那么其实我们可以从公式（3）也得到此时系统状态的另一个估计，由公式（3）将 移动到等式左侧，可以得到：</p>
+<p><span class="math display">\[\textbf{x}^2_t = \textbf{H}_t^{-1}\textbf{z}_t\\\]</span></p>
+<p>这里之所以没有把噪声<span class="math inline">\(\textbf{v}_t\)</span>表示出来，是因为这里将 当作一个随机向量处理，其均值为<span class="math inline">\(\bar{z}_t\)</span>，也就是当前时刻测量得出的量；其方差为<span class="math inline">\(R_t\)</span>（在公式3中给出）</p>
+<p>我们的状态方程也给出了状态向量的一个等式 <span class="math display">\[ \textbf{x}^1_t = \textbf{A}_t\textbf{x}_{t-1}+ \textbf{B}_t\textbf{u}_t+w_t\]</span></p>
+<p>这里用<strong>上标1和2</strong>表示状态向量的两个来源。要强调的是，这两个等式里面都包含了一个随机噪声，因此$^1_t 、^2_t $都是随机向量。同时，他们的分布都符合高斯分布。它们的均值和方差分别是：</p>
+<p><span class="math display">\[
+\begin{split} &amp;\mu_1=x_t^-\\ &amp;\sigma_1^2=P_t^-\\ &amp;\mu_2=H_t^{-1}\bar{z}_t\\ &amp;\sigma_2^2=H_t^{-1}R_t(H_t^{-1})^T\\  \end{split}\\\]</span></p>
+<p>现在有了两个关于状态向量的概率分布，那接下来的事情就简单了。因为这两个状态向量的来源我们可以认为是独立的，因此他们的联合概率分布是各自概率分布的乘积。重点是，高斯分布的乘积依旧是高斯分布！！！！新的高斯分布的均值和方差有如下表达形式：</p>
+<figure>
+<img src="./imgs/joint_gaussian.png" alt="" /><figcaption>joint gaussian</figcaption>
+</figure>
+<p>用上面的式子代入，可以得到联合概率分布的均值和方差： <strong>均值</strong> <span class="math display">\[ \begin{split} \mu_{fused}&amp;=\frac{\mu_1\sigma_2^2+\mu_2\sigma_1^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=\mu_1+\frac{(\mu_2-\mu_1)\sigma_1^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=x_t^-+\frac{(H_t^{-1}\bar{z}_t-x_t^-)P_t^-}{P_t^-+H_t^{-1}R_t(H_t^{-1})^T}\\ &amp;=x_t^-+\frac{P_t^-H_t^T}{H_tP_t^-H_t^T+R_t}(\bar{z}_t-H_tx_t^-)\\ &amp;=x_t^-+K_t(\bar{z}_t-H_tx_t^-) \end{split}\\\]</span></p>
+<p><strong>方差</strong></p>
+<p><span class="math display">\[
+\begin{split} \sigma_{fused}^2 &amp;=\frac{\sigma_1^2\sigma_2^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=\sigma_1^2-\frac{\sigma_1^4}{\sigma_1^2+\sigma_2^2}\\ &amp;=P_t^--\frac{P_t^-H_t^TH_tP_t^-}{H_tP_t^-H_t^T+R_t}\\ &amp;=P_t^--K_tH_tP_t^- \end{split}\\\]</span></p>
+<p>这个<span class="math inline">\(\sigma_{fused}^2\)</span>就是更新后的系统状态误差的协方差矩阵，也就是得到下面的式子</p>
+<p><span class="math display">\[ P^+_{t}=P^-_t-K_tH_tP^-_t\tag{8}\]</span></p>
+<h1 id="六总结">六、总结</h1>
+<p><strong>预测方程</strong> <span class="math display">\[ \hat{\textbf{x}}^-_t = \textbf{A}_t\hat{\textbf{x}}^+_{t-1} + \textbf{B}_t\textbf{u}(t)\tag{2}\]</span> <span class="math display">\[P^-_t=A_tP^+_{t-1}A^T_t+Q_t\tag{7}\]</span></p>
+<p><strong>更新方程</strong> <span class="math display">\[ \hat{\textbf{x}}^+_t=\hat{\textbf{x}}^-_t+K_t(z_t-H_t\hat{\textbf{x}}^-_t)\tag{5}\]</span> <span class="math display">\[ K_t=\frac{P^-_tH_t^T}{H_tP^-_tH_t^T+R_t}\tag{6} \]</span> <span class="math display">\[ P^+_{t}=P^-_t-K_tH_tP^-_t\tag{8} \]</span></p>
+<hr />
+<h1 id="转载须知">转载须知</h1>
+<ol type="1">
+<li>请于文章标题注明转载</li>
+<li>请于文章起始位置注明原始链接</li>
+<li>请在推文文末的【阅读原文】链接上原始链接</li>
+<li>感谢~</li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 

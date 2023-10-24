@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-deskewInfo.png">
 <meta property="og:image" content="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/imgs/Design-imageProjection-projectPointCloud.png">
 <meta property="article:published_time" content="2023-03-22T07:55:36.000Z">
-<meta property="article:modified_time" content="2023-04-19T14:54:00.098Z">
+<meta property="article:modified_time" content="2023-07-05T07:19:27.332Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="liosam">
 <meta property="article:tag" content="slam">
@@ -126,7 +126,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">总述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E8%AE%A2%E9%98%85%E5%8F%8A%E5%8F%91%E5%B8%83"><span class="nav-number">2.</span> <span class="nav-text">消息订阅及发布</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cloudinfo%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">CloudInfo数据类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E8%A7%A3%E8%AF%BB"><span class="nav-number">4.</span> <span class="nav-text">功能解读</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#imu%E5%8F%8Aimu%E9%87%8C%E7%A8%8B%E8%AE%A1%E5%A4%84%E7%90%86"><span class="nav-number">4.1.</span> <span class="nav-text">IMU及IMU里程计处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%BB%E7%95%B8%E5%8F%98%E6%B5%81%E7%A8%8B"><span class="nav-number">4.2.</span> <span class="nav-text">去畸变流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E9%A1%B9%E7%9B%AE%E6%89%80%E6%9C%89%E7%AB%A0%E8%8A%82"><span class="nav-number">5.</span> <span class="nav-text">本项目所有章节</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">总述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E8%AE%A2%E9%98%85%E5%8F%8A%E5%8F%91%E5%B8%83"><span class="nav-number">2.</span> <span class="nav-text">消息订阅及发布</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cloudinfo%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">CloudInfo数据类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E8%A7%A3%E8%AF%BB"><span class="nav-number">4.</span> <span class="nav-text">功能解读</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#imu%E5%8F%8Aimu%E9%87%8C%E7%A8%8B%E8%AE%A1%E5%A4%84%E7%90%86"><span class="nav-number">4.1.</span> <span class="nav-text">IMU及IMU里程计处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%92%E5%BA%A6%E6%8F%92%E5%80%BC"><span class="nav-number">4.2.</span> <span class="nav-text">角度插值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%BB%E7%95%B8%E5%8F%98%E6%B5%81%E7%A8%8B"><span class="nav-number">4.3.</span> <span class="nav-text">去畸变流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E9%A1%B9%E7%9B%AE%E6%89%80%E6%9C%89%E7%AB%A0%E8%8A%82"><span class="nav-number">5.</span> <span class="nav-text">本项目所有章节</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -139,12 +139,12 @@
   <nav class="site-state">
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">15</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-count">39</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -214,7 +214,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-04-19 22:54:00" itemprop="dateModified" datetime="2023-04-19T22:54:00+08:00">2023-04-19</time>
+      <time title="修改时间：2023-07-05 15:19:27" itemprop="dateModified" datetime="2023-07-05T15:19:27+08:00">2023-07-05</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -297,6 +297,10 @@
 <h2 id="功能解读">功能解读</h2>
 <h3 id="imu及imu里程计处理">IMU及IMU里程计处理</h3>
 <p>ImageProjection监听IMU原始数据与从<code>ImuPreintegration</code>（后面会详细讲解这个模块）发布出来的IMU里程计数据，分别由两个回调函数处理，对于IMU原始数据，只是简单地将其旋转到雷达坐标系后塞入缓存队列。 对于IMU历程计，则是直接塞入缓存队列。</p>
+<h3 id="角度插值">角度插值</h3>
+<p>由于雷达点的时间戳与IMU的时间戳不可能是一一对齐，因此在使用雷达点的时间戳检索IMU的积分结果的时候，还需要进行一下插值，获取该雷达点对应的位姿</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM/blob/89dafd75519a5c8c1e88187f40f3378352e0c7c5/src/imageProjection.cpp#L683-L699">代码位置</a></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// imuPointerFront为找到的IMU去畸变信息的索引</span></span><br><span class="line"><span class="comment">// 引起if条件主要是因为可能最后一个IMU的时间戳依然是小于雷达点的时间戳，</span></span><br><span class="line"><span class="comment">// 这个时候就直接使用最后一个IMU对应的角度</span></span><br><span class="line"><span class="keyword">if</span> (pointTime &gt; imuTime[imuPointerFront] || imuPointerFront == <span class="number">0</span>)</span><br><span class="line">&#123;</span><br><span class="line">    *rotXCur = imuRotX[imuPointerFront];</span><br><span class="line">    *rotYCur = imuRotY[imuPointerFront];</span><br><span class="line">    *rotZCur = imuRotZ[imuPointerFront];</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// else 部分根据时间戳比例进行角度插值，计算出更准确的旋转</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> imuPointerBack = imuPointerFront - <span class="number">1</span>;</span><br><span class="line">    <span class="type">double</span> ratioFront = (pointTime - imuTime[imuPointerBack]) / (imuTime[imuPointerFront] - imuTime[imuPointerBack]);</span><br><span class="line">    <span class="type">double</span> ratioBack = (imuTime[imuPointerFront] - pointTime) / (imuTime[imuPointerFront] - imuTime[imuPointerBack]);</span><br><span class="line">    *rotXCur = imuRotX[imuPointerFront] * ratioFront + imuRotX[imuPointerBack] * ratioBack;</span><br><span class="line">    *rotYCur = imuRotY[imuPointerFront] * ratioFront + imuRotY[imuPointerBack] * ratioBack;</span><br><span class="line">    *rotZCur = imuRotZ[imuPointerFront] * ratioFront + imuRotZ[imuPointerBack] * ratioBack;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="去畸变流程">去畸变流程</h3>
 <p>一句话说明点云运动畸变校正：根据每一帧点云中每一个点的时间戳，计算该点到该帧点云起始点的旋转平移变换，将每一个点变换到起始点的坐标系。</p>
 <p>要注意的是，算法中对运动畸变校正只做了旋转校正，没有做平移校正。</p>
