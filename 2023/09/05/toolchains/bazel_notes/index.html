@@ -21,13 +21,13 @@
 
     <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  一些链接 ubuntu安装Bazel直接参考：Bazel Install 官方教程：Bazel Tutorial BUILD文件中rule的路径 BUILD文件中，在加入source或者headers的时候，文件路径都是在BUILD文件所在目录下的文件，跟CMake文件一样 关于target的label">
 <meta property="og:type" content="article">
-<meta property="og:title" content="BazelNotes">
+<meta property="og:title" content="Bazel笔记及调试时编译选项">
 <meta property="og:url" content="https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
 <meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  一些链接 ubuntu安装Bazel直接参考：Bazel Install 官方教程：Bazel Tutorial BUILD文件中rule的路径 BUILD文件中，在加入source或者headers的时候，文件路径都是在BUILD文件所在目录下的文件，跟CMake文件一样 关于target的label">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-09-05T06:06:49.000Z">
-<meta property="article:modified_time" content="2023-09-05T06:11:32.121Z">
+<meta property="article:modified_time" content="2023-10-24T12:06:07.973Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="bazel">
 <meta property="article:tag" content="toolchains">
@@ -39,10 +39,10 @@
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/","path":"2023/09/05/toolchains/bazel_notes/","title":"BazelNotes"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/","path":"2023/09/05/toolchains/bazel_notes/","title":"Bazel笔记及调试时编译选项"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>BazelNotes | Zeal's Blog</title>
+<title>Bazel笔记及调试时编译选项 | Zeal's Blog</title>
   
   <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
   <script src="/js/third-party/analytics/google-analytics.js"></script>
@@ -185,12 +185,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="BazelNotes | Zeal's Blog">
+      <meta itemprop="name" content="Bazel笔记及调试时编译选项 | Zeal's Blog">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          BazelNotes
+          Bazel笔记及调试时编译选项
         </h1>
 
         <div class="post-meta-container">
@@ -200,9 +200,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2023-09-05 14:06:49 / 修改时间：14:11:32" itemprop="dateCreated datePublished" datetime="2023-09-05T14:06:49+08:00">2023-09-05</time>
+      <time title="创建时间：2023-09-05 14:06:49" itemprop="dateCreated datePublished" datetime="2023-09-05T14:06:49+08:00">2023-09-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-10-24 20:06:07" itemprop="dateModified" datetime="2023-10-24T20:06:07+08:00">2023-10-24</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -219,7 +225,7 @@
     </span>
 
   
-    <span id="/2023/09/05/toolchains/bazel_notes/" class="post-meta-item leancloud_visitors" data-flag-title="BazelNotes" title="阅读次数">
+    <span id="/2023/09/05/toolchains/bazel_notes/" class="post-meta-item leancloud_visitors" data-flag-title="Bazel笔记及调试时编译选项" title="阅读次数">
       <span class="post-meta-item-icon">
         <i class="far fa-eye"></i>
       </span>
@@ -234,7 +240,7 @@
       </span>
       <span class="post-meta-item-text">Changyan：</span>
     
-    <a title="BazelNotes" href="/2023/09/05/toolchains/bazel_notes/#SOHUCS" itemprop="discussionUrl">
+    <a title="Bazel笔记及调试时编译选项" href="/2023/09/05/toolchains/bazel_notes/#SOHUCS" itemprop="discussionUrl">
       <span id="sourceId::06f155b09959d28809461e0e2d48695c" class="cy_cmt_count" itemprop="commentCount"></span>
     </a>
   </span>
@@ -407,7 +413,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/" title="BazelNotes">https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/</a>
+      <a href="https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/" title="Bazel笔记及调试时编译选项">https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -425,8 +431,8 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2023/09/05/toolchains/vscode/" rel="prev" title="BazelNotes">
-                  <i class="fa fa-chevron-left"></i> BazelNotes
+                <a href="/2023/09/05/toolchains/vscode/" rel="prev" title="Vscode配置">
+                  <i class="fa fa-chevron-left"></i> Vscode配置
                 </a>
             </div>
             <div class="post-nav-item">
