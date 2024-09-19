@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  !!!!还是没有找到问题所在！！！！ 一个非常奇怪的问题 这几天在调试自己“抄写”ORB_SLAM代码时遇到的非常奇怪的问题。主要发生在各种对象的析构时，比如cv::Mat,std::vector&lt;cv::Keypoint&gt;等等。这些对象的析构时机不同，但不外乎有下面这几种：  离开函数作用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenCV对象析构时错误">
+<meta property="og:url" content="https://zeal-up.github.io/2024/02/08/thirdparty/opencv_deallocate/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  !!!!还是没有找到问题所在！！！！ 一个非常奇怪的问题 这几天在调试自己“抄写”ORB_SLAM代码时遇到的非常奇怪的问题。主要发生在各种对象的析构时，比如cv::Mat,std::vector&lt;cv::Keypoint&gt;等等。这些对象的析构时机不同，但不外乎有下面这几种：  离开函数作用">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-02-08T06:06:49.000Z">
+<meta property="article:modified_time" content="2024-09-19T08:38:22.449Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="Thirdparty">
+<meta property="article:tag" content="opencv">
+<meta property="article:tag" content="g++">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2024/02/08/thirdparty/opencv_deallocate/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2024/02/08/thirdparty/opencv_deallocate/","path":"2024/02/08/thirdparty/opencv_deallocate/","title":"OpenCV对象析构时错误"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>OpenCV对象析构时错误 | Zeal's Blog</title>
+  
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+  <a target="_blank" rel="noopener" href="https://github.com/zeal-up" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%B8%AA%E9%9D%9E%E5%B8%B8%E5%A5%87%E6%80%AA%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">一个非常奇怪的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8F%91"><span class="nav-number">2.</span> <span class="nav-text">启发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="nav-number">3.</span> <span class="nav-text">解决方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%8B%E5%AD%901"><span class="nav-number">3.1.</span> <span class="nav-text">例子1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%8B%E5%AD%902"><span class="nav-number">3.2.</span> <span class="nav-text">例子2</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2024/02/08/thirdparty/opencv_deallocate/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="OpenCV对象析构时错误 | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OpenCV对象析构时错误
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-02-08 14:06:49" itemprop="dateCreated datePublished" datetime="2024-02-08T14:06:49+08:00">2024-02-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-09-19 16:38:22" itemprop="dateModified" datetime="2024-09-19T16:38:22+08:00">2024-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Thirdparty/" itemprop="url" rel="index"><span itemprop="name">Thirdparty</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Thirdparty/OpenCV/" itemprop="url" rel="index"><span itemprop="name">OpenCV</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2024/02/08/thirdparty/opencv_deallocate/" class="post-meta-item leancloud_visitors" data-flag-title="OpenCV对象析构时错误" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="OpenCV对象析构时错误" href="/2024/02/08/thirdparty/opencv_deallocate/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::df837af98869957ec8823469fb86cc94" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<p>!!!!还是没有找到问题所在！！！！</p>
+<h2 id="一个非常奇怪的问题">一个非常奇怪的问题</h2>
+<p>这几天在调试自己“抄写”ORB_SLAM代码时遇到的非常奇怪的问题。主要发生在各种对象的析构时，比如<code>cv::Mat</code>,<code>std::vector&lt;cv::Keypoint&gt;</code>等等。这些对象的析构时机不同，但不外乎有下面这几种：</p>
+<ol type="1">
+<li>离开函数作用域时</li>
+<li>对象被销毁时（类对象内有成员是<code>cv::Mat</code>或者容器内的元素是opencv对象时）</li>
+<li>手动调用容器的<code>clear</code>方法时</li>
+</ol>
+<p>当这些时刻发生，程序经常会漰溃，用gdb查看core文件查找漰溃的代码时，基本都发生在下面的时刻：</p>
+<ol type="1">
+<li><code>cv::Mat</code>析构时，调用了<code>cv::Mat::release()</code>方法</li>
+<li><code>std::vector&lt;cv::Keypoint&gt;</code>析构时或者其他stl容器析构时，会调用容器内元素的析构函数<code>std::vector&lt;xxx,stl::alloc&lt;xxx&gt;&gt;::deallocate</code>的时候</li>
+</ol>
+<p>一开始以为是各种对象没有被初始化，所以导致析构时错误。但是后面各种对象都补上了初始化，依旧会存在析构时错误。几经折腾，终于摸清了问题所在。</p>
+<h2 id="启发">启发</h2>
+<p>能够搞清楚这个问题主要受到下面这篇文章的启发<a target="_blank" rel="noopener" href="https://blog.csdn.net/asdf02000/article/details/102398173">opencv+vs2015 堆内存析构异常</a></p>
+<p>首先，要知道，opencv的默认的编译都是动态库编译，opencv要编译成静态库十分困难，特别是里面的视频部分，由于要避免开源协议，在编译成静态库时会去掉视频模块。所以，opencv的默认编译方式是动态库。</p>
+<p>然后opencv会链接一些静态库，这样就导致了opencv内部拥有一个所谓的<strong><em>local heap</em></strong>，如果我们在程序中声明一些对象，但是没有在程序中进行初始化，然后直接调用opencv的一些接口，让这些对象在opencv内部进行初始化，就会导致这些对象是存放在opencv的<strong><em>local heap</em></strong>中，而不是我们程序的堆中。这样就导致了我们在程序中调用析构函数时，会出现错误。</p>
+<h2 id="解决方法">解决方法</h2>
+<p>知道上面的原因其实解决方法就比较简单，只需要在声明opencv对象的时候同时进行初始化或者更准确地说，是分配内存。注意，这里不单普通对象要进行初始化，比如容器内包含opencv类型的对象也要进行内存分配，即先调用reserve方法分配好容器的内存。</p>
+<h3 id="例子1">例子1</h3>
+<p>对于<code>cv::Mat</code>对象，我们可以这样声明：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cv::Mat img = cv::<span class="built_in">Mat</span>();</span><br><span class="line">img = cv::<span class="built_in">imread</span>(<span class="string">&quot;xxx.jpg&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p>出错用例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cv::Mat img = cv::<span class="built_in">imread</span>(<span class="string">&quot;xxx.jpg&quot;</span>);    <span class="comment">// 此时img的内存是在opencv内部申请的</span></span><br><span class="line">cv::Mat img2 = cv::Mat::<span class="built_in">zeros</span>(<span class="number">100</span>,<span class="number">100</span>,CV_8UC3);    <span class="comment">// 此时img2的内存是在opencv内部申请的</span></span><br></pre></td></tr></table></figure>
+<h3 id="例子2">例子2</h3>
+<p>对于<code>std::vector&lt;cv::Keypoint&gt;</code>对象，我们可以这样声明：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">std::vector&lt;cv::Keypoint&gt; kps;</span><br><span class="line">kps.<span class="built_in">reserve</span>(<span class="number">100</span>);</span><br><span class="line"><span class="built_in">opencvFUNC</span>(kps);</span><br></pre></td></tr></table></figure>
+<p>出错用例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">std::vector&lt;cv::Keypoint&gt; kps;</span><br><span class="line"><span class="built_in">opencvFUNC</span>(kps);    <span class="comment">// 此时kps的内存是在opencv内部申请的</span></span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2024/02/08/thirdparty/opencv_deallocate/" title="OpenCV对象析构时错误">https://zeal-up.github.io/2024/02/08/thirdparty/opencv_deallocate/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Thirdparty/" rel="tag"># Thirdparty</a>
+              <a href="/tags/opencv/" rel="tag"># opencv</a>
+              <a href="/tags/g/" rel="tag"># g++</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/12/05/orbslam/orbslam3-MapInitialization/" rel="prev" title="ORB-SLAM3保姆级教程——详解地图初始化（基础矩阵/单应矩阵/三角化的实际应用）">
+                  <i class="fa fa-chevron-left"></i> ORB-SLAM3保姆级教程——详解地图初始化（基础矩阵/单应矩阵/三角化的实际应用）
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/09/19/g2o/parameters/" rel="next" title="G2O - g2o中parameter的使用">
+                  G2O - g2o中parameter的使用 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="df837af98869957ec8823469fb86cc94"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"covS4Q3Q0SaMRjqI2VomagVm-gzGzoHsz","app_key":"iK7kdlu4InjORoPr3oksi1IM","server_url":"https://covs4q3q.lc-cn-n1-shared.com","security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>

@@ -19,15 +19,15 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  配置项 使用代码格式化（formating）时修改column length 谷歌的代码格式化标准是80列，但是对于现在的电脑屏幕太窄了。这个选项的修改有点隐秘，似乎必须通过settings.json来修改。 在settings.json中添加如下内容： 123&amp;#123;    &quot;C_Cpp">
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  配置项 使用代码格式化（formating）时修改column length 谷歌的代码格式化标准是80列，但是对于现在的电脑屏幕太窄了。这个选项的修改有点隐秘，似乎必须通过settings.json来修改。 在settings.json或者xxx.code-workspace中添加如下内容： 1234">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Vscode配置">
 <meta property="og:url" content="https://zeal-up.github.io/2023/09/05/toolchains/vscode/index.html">
 <meta property="og:site_name" content="Zeal&#39;s Blog">
-<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  配置项 使用代码格式化（formating）时修改column length 谷歌的代码格式化标准是80列，但是对于现在的电脑屏幕太窄了。这个选项的修改有点隐秘，似乎必须通过settings.json来修改。 在settings.json中添加如下内容： 123&amp;#123;    &quot;C_Cpp">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  配置项 使用代码格式化（formating）时修改column length 谷歌的代码格式化标准是80列，但是对于现在的电脑屏幕太窄了。这个选项的修改有点隐秘，似乎必须通过settings.json来修改。 在settings.json或者xxx.code-workspace中添加如下内容： 1234">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-09-05T06:06:49.000Z">
-<meta property="article:modified_time" content="2023-10-24T12:06:19.469Z">
+<meta property="article:modified_time" content="2024-09-19T08:38:22.449Z">
 <meta property="article:author" content="Zeal">
 <meta property="article:tag" content="toolchains">
 <meta property="article:tag" content="gcc">
@@ -120,7 +120,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E9%A1%B9"><span class="nav-number">1.</span> <span class="nav-text">配置项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E4%BB%A3%E7%A0%81%E6%A0%BC%E5%BC%8F%E5%8C%96formating%E6%97%B6%E4%BF%AE%E6%94%B9column-length"><span class="nav-number">1.1.</span> <span class="nav-text">使用代码格式化（formating）时修改column length</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E9%A1%B9"><span class="nav-number">1.</span> <span class="nav-text">配置项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E4%BB%A3%E7%A0%81%E6%A0%BC%E5%BC%8F%E5%8C%96formating%E6%97%B6%E4%BF%AE%E6%94%B9column-length"><span class="nav-number">1.1.</span> <span class="nav-text">使用代码格式化（formating）时修改column length</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#intellisense%E5%AE%9A%E4%B9%89%E5%AE%8Fifdef"><span class="nav-number">1.2.</span> <span class="nav-text">intellisense定义宏（#ifdef）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E9%BB%98%E8%AE%A4%E7%BC%A9%E8%BF%9B%E6%95%B0%E9%87%8F"><span class="nav-number">1.3.</span> <span class="nav-text">设置默认缩进数量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#python-debug%E8%AE%BE%E7%BD%AE%E8%BF%9B%E5%85%A5%E6%96%87%E4%BB%B6%E7%9B%AE%E5%BD%95"><span class="nav-number">1.4.</span> <span class="nav-text">python debug设置进入文件目录</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -133,12 +133,12 @@
   <nav class="site-state">
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-count">20</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">39</span>
+        <span class="site-state-item-count">58</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -208,7 +208,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-24 20:06:19" itemprop="dateModified" datetime="2023-10-24T20:06:19+08:00">2023-10-24</time>
+      <time title="修改时间：2024-09-19 16:38:22" itemprop="dateModified" datetime="2024-09-19T16:38:22+08:00">2024-09-19</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -216,11 +216,11 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E8%83%BD/" itemprop="url" rel="index"><span itemprop="name">技能</span></a>
+          <a href="/categories/Toolchains/" itemprop="url" rel="index"><span itemprop="name">Toolchains</span></a>
         </span>
           ，
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/%E6%8A%80%E8%83%BD/Toolchains/" itemprop="url" rel="index"><span itemprop="name">Toolchains</span></a>
+          <a href="/categories/Toolchains/vscode/" itemprop="url" rel="index"><span itemprop="name">vscode</span></a>
         </span>
     </span>
 
@@ -262,8 +262,17 @@
 </ul>
 <h2 id="配置项">配置项</h2>
 <h3 id="使用代码格式化formating时修改column-length">使用代码格式化（formating）时修改column length</h3>
-<p>谷歌的代码格式化标准是80列，但是对于现在的电脑屏幕太窄了。这个选项的修改有点隐秘，似乎必须通过<code>settings.json</code>来修改。 在<code>settings.json</code>中添加如下内容：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;C_Cpp.clang_format_fallbackStyle&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&#123; BasedOnStyle: Google, ColumnLimit: 120 &#125;&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>谷歌的代码格式化标准是80列，但是对于现在的电脑屏幕太窄了。这个选项的修改有点隐秘，似乎必须通过<code>settings.json</code>来修改。 在<code>settings.json</code>或者<code>xxx.code-workspace</code>中添加如下内容：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;C_Cpp.clang_format_fallbackStyle&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&#123; BasedOnStyle: Google, ColumnLimit: 120 &#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;black-formatter.args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="string">&quot;--line-length=100&quot;</span></span><br><span class="line">	<span class="punctuation">]</span>	<span class="comment">// for python</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="intellisense定义宏ifdef">intellisense定义宏（#ifdef）</h3>
+<p>如果一些宏定义是通过编译时指定，比如<code>gcc/cmake -DDEBUG</code>，那么在vscode中就无法识别这些宏定义，从而导致一些代码提示无法正常工作。需要在<code>vscode_workspace</code>中加入如下配置</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">	<span class="attr">&quot;folders&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">		<span class="punctuation">&#123;</span></span><br><span class="line">			<span class="attr">&quot;path&quot;</span><span class="punctuation">:</span> <span class="string">&quot;../project&quot;</span></span><br><span class="line">		<span class="punctuation">&#125;</span></span><br><span class="line">	<span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;settings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;C_Cpp.default.includePath&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">		<span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;C_Cpp.files.exclude&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">			<span class="attr">&quot;**/.vscode&quot;</span> <span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">		<span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;C_Cpp.default.defines&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">			<span class="string">&quot;DEBUG=True&quot;</span></span><br><span class="line">		<span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">	<span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="设置默认缩进数量">设置默认缩进数量</h3>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">	<span class="attr">&quot;settings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;editor.tabSize&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;editor.detectIndentation&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;editor.insertSpaces&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">	<span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="python-debug设置进入文件目录">python debug设置进入文件目录</h3>
+<p>在<code>.code-workspace</code>中加入如下配置</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;launch&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.2.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;configurations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Python: Current File (Integrated Terminal)&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;debugpy&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;file&#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;console&quot;</span><span class="punctuation">:</span> <span class="string">&quot;integratedTerminal&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;cwd&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;fileDirname&#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;purpose&quot;</span><span class="punctuation">:</span><span class="punctuation">[</span><span class="string">&quot;debug-in-terminal&quot;</span><span class="punctuation">]</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>如果是在<code>.launch</code>文件，则去掉<code>"launch"</code>层级即可</p>
 
     </div>
 
@@ -328,7 +337,7 @@
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2023</span>
+  <span itemprop="copyrightYear">2024</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  前言 最近在学习DBoW2的论文和代码。 在DBoW2中使用的是二值特征，二值特征在计算距离的时候直接使用Hamming Distance，这样的话，计算距离的时候简单的异或操作，然后统计1的个数就可以了。 但是在计算Hamming Distance的时候，有这样一段代码： 12345678910111">
+<meta property="og:type" content="article">
+<meta property="og:title" content="算法系列——统计二进制数中1的个数">
+<meta property="og:url" content="https://zeal-up.github.io/2023/11/10/algos/CountBitsSet/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  前言 最近在学习DBoW2的论文和代码。 在DBoW2中使用的是二值特征，二值特征在计算距离的时候直接使用Hamming Distance，这样的话，计算距离的时候简单的异或操作，然后统计1的个数就可以了。 但是在计算Hamming Distance的时候，有这样一段代码： 12345678910111">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/11/10/algos/CountBitsSet/imgs/01-brian_kernighan.webp">
+<meta property="og:image" content="https://zeal-up.github.io/2023/11/10/algos/CountBitsSet/imgs/02-parallel_algo.jpg">
+<meta property="og:image" content="https://zeal-up.github.io/2023/11/10/algos/CountBitsSet/imgs/03-parallel_step1.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/11/10/algos/CountBitsSet/imgs/04-parallel_step2.png">
+<meta property="article:published_time" content="2023-11-10T02:07:32.000Z">
+<meta property="article:modified_time" content="2024-09-19T08:27:36.493Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="二进制">
+<meta property="article:tag" content="位操作">
+<meta property="article:tag" content="计算二进制数中1的个数">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/11/10/algos/CountBitsSet/imgs/01-brian_kernighan.webp">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/11/10/algos/CountBitsSet/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/11/10/algos/CountBitsSet/","path":"2023/11/10/algos/CountBitsSet/","title":"算法系列——统计二进制数中1的个数"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>算法系列——统计二进制数中1的个数 | Zeal's Blog</title>
+  
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+  <a target="_blank" rel="noopener" href="https://github.com/zeal-up" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%9F%E8%AE%A1%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%95%B0%E4%B8%AD1%E7%9A%84%E4%B8%AA%E6%95%B0"><span class="nav-number">2.</span> <span class="nav-text">统计二进制数中1的个数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%AE%80%E5%8D%95%E4%B8%94%E6%9C%80%E7%9B%B4%E6%8E%A5%E7%9A%84%E6%96%B9%E6%B3%95-%E5%BE%AA%E7%8E%AF%E7%A7%BB%E4%BD%8D"><span class="nav-number">2.1.</span> <span class="nav-text">最简单且最直接的方法 —— 循环移位</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#brian-kernighan%E7%AE%97%E6%B3%95"><span class="nav-number">2.2.</span> <span class="nav-text">Brian Kernighan算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E8%A1%8C%E6%B3%95"><span class="nav-number">2.3.</span> <span class="nav-text">平行法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A41"><span class="nav-number">2.3.1.</span> <span class="nav-text">步骤1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A42"><span class="nav-number">2.3.2.</span> <span class="nav-text">步骤2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A43"><span class="nav-number">2.3.3.</span> <span class="nav-text">步骤3</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%84%E7%90%868%E4%BD%8D%E5%8F%8A%E4%BB%A5%E4%B8%8A%E7%9A%84%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%95%B0"><span class="nav-number">2.3.4.</span> <span class="nav-text">处理8位及以上的二进制数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9E%E5%88%B0%E6%9C%80%E5%88%9D%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">3.</span> <span class="nav-text">回到最初的例子</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A6%96%E5%85%88%E7%9C%8B%E6%AD%A5%E9%AA%A41"><span class="nav-number">3.1.</span> <span class="nav-text">首先看步骤1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A42-1"><span class="nav-number">3.2.</span> <span class="nav-text">步骤2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A43-1"><span class="nav-number">3.3.</span> <span class="nav-text">步骤3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A44"><span class="nav-number">3.4.</span> <span class="nav-text">步骤4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E8%A1%8C%E6%B3%95%E7%9A%84%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="nav-number">3.5.</span> <span class="nav-text">平行法的时间复杂度</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/11/10/algos/CountBitsSet/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="算法系列——统计二进制数中1的个数 | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          算法系列——统计二进制数中1的个数
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-11-10 10:07:32" itemprop="dateCreated datePublished" datetime="2023-11-10T10:07:32+08:00">2023-11-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-09-19 16:27:36" itemprop="dateModified" datetime="2024-09-19T16:27:36+08:00">2024-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Algorithms/" itemprop="url" rel="index"><span itemprop="name">Algorithms</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/11/10/algos/CountBitsSet/" class="post-meta-item leancloud_visitors" data-flag-title="算法系列——统计二进制数中1的个数" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="算法系列——统计二进制数中1的个数" href="/2023/11/10/algos/CountBitsSet/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::a9e28da38edcf791134fb9cfce177288" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="前言">前言</h2>
+<p>最近在学习<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2">DBoW2</a>的论文和代码。</p>
+<p>在<code>DBoW2</code>中使用的是<strong>二值特征</strong>，二值特征在计算距离的时候直接使用<code>Hamming Distance</code>，这样的话，计算距离的时候简单的<strong><em>异或</em></strong>操作，然后统计<code>1</code>的个数就可以了。</p>
+<p>但是在计算<code>Hamming Distance</code>的时候，有这样一段代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">uint64_t</span> *pa, *pb;</span><br><span class="line">pa = a.<span class="built_in">ptr</span>&lt;<span class="type">uint64_t</span>&gt;(); <span class="comment">// a &amp; b are actually CV_8U</span></span><br><span class="line">pb = b.<span class="built_in">ptr</span>&lt;<span class="type">uint64_t</span>&gt;(); </span><br><span class="line"></span><br><span class="line"><span class="type">uint64_t</span> v, ret = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span>(<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; a.cols / <span class="built_in">sizeof</span>(<span class="type">uint64_t</span>); ++i, ++pa, ++pb)</span><br><span class="line">&#123;</span><br><span class="line">  v = *pa ^ *pb;</span><br><span class="line">  v = v - ((v &gt;&gt; <span class="number">1</span>) &amp; (<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">3</span>);</span><br><span class="line">  v = (v &amp; (<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">15</span>*<span class="number">3</span>) + ((v &gt;&gt; <span class="number">2</span>) &amp; </span><br><span class="line">    (<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">15</span>*<span class="number">3</span>);</span><br><span class="line">  v = (v + (v &gt;&gt; <span class="number">4</span>)) &amp; (<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">255</span>*<span class="number">15</span>;</span><br><span class="line">  ret += (<span class="type">uint64_t</span>)(v * ((<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">255</span>)) &gt;&gt; </span><br><span class="line">    (<span class="built_in">sizeof</span>(<span class="type">uint64_t</span>) - <span class="number">1</span>) * CHAR_BIT;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面这段代码大概的意思是这样：</p>
+<ol type="1">
+<li>将特征向量（如果使用<code>ORB</code>特征并且采用默认参数的话，长度是256bit）按照64bit进行分组，然后进行异或操作</li>
+<li>统计异或操作后每个64bit中<code>1</code>的个数，然后将每个64bit中<code>1</code>的个数相加，得到最终的<code>Hamming Distance</code></li>
+</ol>
+<p>代码中的注释虽然说明这段代码的来源：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Bit count function got from:</span></span><br><span class="line"><span class="comment">// http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetKernighan</span></span><br><span class="line"><span class="comment">// This implementation assumes that a.cols (CV_8U) % sizeof(uint64_t) == 0</span></span><br><span class="line">  </span><br></pre></td></tr></table></figure>
+<p>但是注释中所提到的<code>Brian Kernighan</code>算法似乎是另外一种算法（后文会单独作为一个算法解释），与代码中的算法不一样。</p>
+<p>上面的这段代码到底是怎么统计<code>1</code>的个数的呢？这就是本文要讨论的问题。</p>
+<p><strong><em>PS:说实话，这几行代码如果没有类似算法经验的话，会让人一头雾水。查询之后才发现，即使是简单的统计二进制数中<code>1</code>的个数，也有很多种方法，其中有些方法会让人惊呼巧妙！</em></strong></p>
+<h2 id="统计二进制数中1的个数">统计二进制数中1的个数</h2>
+<h3 id="最简单且最直接的方法-循环移位">最简单且最直接的方法 —— 循环移位</h3>
+<p>最简单的方法就是循环移位，然后统计<code>1</code>的个数。这种方法的思路很简单，就是将二进制数中的每一位都移动到最低位，然后判断最低位是否为<code>1</code>，如果是的话，计数器加一，然后再将二进制数右移一位，直到二进制数为<code>0</code>。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">countBits</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> n)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> count = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (n)</span><br><span class="line">    &#123;</span><br><span class="line">        count += n &amp; <span class="number">1</span>;</span><br><span class="line">        n &gt;&gt;= <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> count;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>时间复杂度</strong>：<span class="math inline">\(O(N)\)</span>，<span class="math inline">\(N\)</span>是二进制数的位数</p>
+<h3 id="brian-kernighan算法">Brian Kernighan算法</h3>
+<p>这个算法就有点巧妙了，它的思路是这样的：</p>
+<ol type="1">
+<li><p>一个数<code>n</code>减去<code>1</code>，得到的结果是<code>n</code>的二进制数中最右边的<code>1</code>变成<code>0</code>，而在这个<code>1</code>右边的所有<code>0</code>都变成<code>1</code>。<br />
+<br />
+<strong>举个例子：</strong> <span class="math inline">\(n=22_{10}=10110_{2}\)</span>，最右边的<code>1</code>是第二位的<code>1</code>，其右边有一个0。那么这个数减去<code>1</code>之后，第二位的<code>1</code>就会变成<code>0</code>，而第一位的<code>0</code>会变成<code>1</code>，其余位不变，得到的结果是<span class="math inline">\(n-1=21_{10}=10101_{2}\)</span></p></li>
+<li><p>上面这样做的原因是，将<code>n</code>和<code>n-1</code>进行与操作，会将<code>n</code>的二进制数中最右边的<code>1</code>即其右边的所有为都变成<code>0</code>。</p></li>
+<li><p>重复上面的操作，直到<code>n</code>变成<code>0</code>，那么就可以统计出<code>n</code>的二进制数中<code>1</code>的个数了。</p></li>
+</ol>
+<p>上面的操作可以用一张图描述：</p>
+<p><img src="./imgs/01-brian_kernighan.webp" alt="Brian Kernighan算法" /> 上图引用自：<a target="_blank" rel="noopener" href="https://yuminlee2.medium.com/brian-kernighans-algorithm-count-set-bits-in-a-number-18ab05edca93">Brian Kernighan's Algorithm</a></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">countBits</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> n)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> count = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (n)</span><br><span class="line">    &#123;</span><br><span class="line">        n = n &amp; (n - <span class="number">1</span>)</span><br><span class="line">        count++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> count;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>时间复杂度</strong>：<span class="math inline">\(O(M)\)</span>，<span class="math inline">\(M\)</span>是二进制数中<code>1</code>的个数</p>
+<h3 id="平行法">平行法</h3>
+<p>这是一个更加巧妙的方法，总体的思路可以用下面这张图片：</p>
+<p><img src="./imgs/02-parallel_algo.jpg" alt="平行法" /> 上图引用自：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/graphics/archive/2010/06/21/1752421.html">算法-求二进制数中1的个数</a></p>
+<p>主要的思路可以拆解成如下几个步骤：</p>
+<ol type="1">
+<li>将二进制数中的每两位当作一组相加，得到的结果是每两位中<code>1</code>的个数。</li>
+<li>将上面得到的结果中的每两组当作一组相加，得到的结果是每四位中<code>1</code>的个数。</li>
+<li>将上面得到的结果中的每两组当作一组相加，得到的结果是每八位中<code>1</code>的个数。</li>
+</ol>
+<p>虽然用图描述起来很容易，但是在代码中的实验就显得很巧妙了。这里以一个<code>8</code>位的二进制数为例，来说明这个算法的实现过程。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">unsigned</span> <span class="type">int</span> <span class="title">countBits</span><span class="params">(<span class="type">uint8_t</span> n)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="comment">// count bits of each 2-bit chunk</span></span><br><span class="line">n  = n - ((n &gt;&gt; <span class="number">1</span>) &amp; <span class="number">0x55</span>);</span><br><span class="line"><span class="comment">// count bits of each 4-bit chunk</span></span><br><span class="line">n  = (n &amp; <span class="number">0x33</span>) + ((n &gt;&gt; <span class="number">2</span>) &amp; <span class="number">0x33</span>);</span><br><span class="line"><span class="comment">// count bits of each 8-bit chunk</span></span><br><span class="line">n  = n + (n &gt;&gt; <span class="number">4</span>);</span><br><span class="line"><span class="comment">// mask out junk</span></span><br><span class="line">n &amp;= <span class="number">0x0F</span>;</span><br><span class="line"><span class="keyword">return</span> n;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="步骤1">步骤1</h4>
+<p>我们假设<span class="math inline">\(n=10101101_{2}\)</span>，那么步骤1是先将每两位分为一组，每一组中高位往后移动一位，并用一个掩码（<span class="math inline">\(0\text{x}55\)</span>）将移位后的数每两位的高位置位0。这样实际上对于一个2位的二进制数来说，只有4种情况。</p>
+<ol type="1">
+<li><code>00</code>，那么明显，移位+掩码之后也是<code>00</code>，两者相减也是0</li>
+<li><code>01</code>，那么移位+掩码之后是<code>00</code>，两者相减是<code>01</code>。算出了这两位中有1个<code>1</code></li>
+<li><code>10</code>，那么移位+掩码之后是<code>01</code>，两者相减是<code>01</code>。算出了这两位中有1个<code>1</code></li>
+<li><code>11</code>，那么移位+掩码之后是<code>01</code>，两者相减是<code>10</code>。算出了这两位中有2个<code>1</code></li>
+</ol>
+<p>步骤1可以用下图表示：</p>
+<figure>
+<img src="./imgs/03-parallel_step1.png" alt="" /><figcaption>平行法步骤1</figcaption>
+</figure>
+<h4 id="步骤2">步骤2</h4>
+<p>有了第一步，第二步的做法就显得比较直接了。第一步我们将每两位的<code>1</code>的个数都存储在了最后得到数的每两位中，那么第二步就是将两位当作一组，把相邻的组相加起来：</p>
+<p>这里面主要就是将第一步的结果右移两位，然后每四位中的高两位清灵，这样两个数相加的结果就是每四位中的<code>1</code>的个数，且这数分别存储在每四位中。</p>
+<figure>
+<img src="./imgs/04-parallel_step2.png" alt="" /><figcaption>平行法步骤2</figcaption>
+</figure>
+<h4 id="步骤3">步骤3</h4>
+<p>步骤3的做法和步骤2的做法类似，只不过这里是将每四位当作一组，然后将相邻的组相加起来。</p>
+<h4 id="处理8位及以上的二进制数">处理8位及以上的二进制数</h4>
+<p>上面的步骤只能处理8位以内的二进制数，如果要处理8位以上的二进制数，那么就需要将上面的步骤进行扩展。假设<span class="math inline">\(n\)</span>为32bit的二进制数。那么前几个步骤处理完之后，每8位为一组的结果就存储在了每8位中。那么接下来的步骤就是怎么将每8位中的结果相加起来。也就是下面这段代码的最后一行。注意，下面这段代码在的输入是一个32bit二进制数，在return之前的代码除了掩码的位数不同之外，与上面的处理8位二进制数的代码是完全样的。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">unsigned</span> <span class="type">int</span> <span class="title">countBits</span><span class="params">(<span class="type">uint32_t</span> n)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="comment">// count bits of each 2-bit chunk</span></span><br><span class="line">n  = n - ((n &gt;&gt; <span class="number">1</span>) &amp; &amp; <span class="number">0x55555555</span>);</span><br><span class="line"><span class="comment">// count bits of each 4-bit chunk</span></span><br><span class="line">n  = (n &amp; <span class="number">0x33333333</span>) + ((n &gt;&gt; <span class="number">2</span>) &amp; <span class="number">0x33333333</span>);</span><br><span class="line"><span class="comment">// count bits of each 8-bit chunk</span></span><br><span class="line">n  = n + (n &gt;&gt; <span class="number">4</span>);</span><br><span class="line"><span class="comment">// mask out junk</span></span><br><span class="line">n &amp;= <span class="number">0x0F0F0F0F</span>;</span><br><span class="line"><span class="comment">// add all four 8-bit chunks</span></span><br><span class="line"><span class="keyword">return</span> (x * <span class="number">0x01010101</span>) &gt;&gt; <span class="number">24</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面这句代码相当于将每8位中的结果相加起来。是不是感觉特别神奇。具体的过程我们其实可以把第二个因数<span class="math inline">\(0\text{x}01010101\)</span>拆开，变成<span class="math inline">\(0\text{x}01000000+0\text{x}00010000+0\text{x}00000100+0\text{x}00000001\)</span>，然后最大的数与<span class="math inline">\(x\)</span>的最后8位相乘，以此类推，知道最小的数与<span class="math inline">\(x\)</span>的前8位相乘，经过相乘之后，<span class="math inline">\(x\)</span>中每8位为一组都移动到了最高8位的位置。然后再将<span class="math inline">\(x\)</span>右移24位，就得到了最终的结果。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(x * <span class="number">0x01010101</span>) &gt;&gt; <span class="number">24</span>;</span><br></pre></td></tr></table></figure>
+<p>用一个动画可以很清晰地演示这个过程</p>
+<video src="./imgs/05-parallel_step4.mp4" position="absolute" width="100%" height="100%" controls="controls">
+</video>
+<h2 id="回到最初的例子">回到最初的例子</h2>
+<p>有了上面的一系列说明之后，特别是<strong>平行法</strong>这个方法的详细说明之后，本文开头提到的代码就比较容易懂了。除去算法之外，代码中的一些操作符优先级也很容易让人头晕。现在让我们重新来看开头提到的代码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">uint64_t</span> *pa, *pb;</span><br><span class="line">pa = a.<span class="built_in">ptr</span>&lt;<span class="type">uint64_t</span>&gt;(); <span class="comment">// a &amp; b are actually CV_8U</span></span><br><span class="line">pb = b.<span class="built_in">ptr</span>&lt;<span class="type">uint64_t</span>&gt;(); </span><br><span class="line"></span><br><span class="line"><span class="type">uint64_t</span> v, ret = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span>(<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; a.cols / <span class="built_in">sizeof</span>(<span class="type">uint64_t</span>); ++i, ++pa, ++pb)</span><br><span class="line">&#123;</span><br><span class="line">  v = *pa ^ *pb;</span><br><span class="line">  v = v - ((v &gt;&gt; <span class="number">1</span>) &amp; (<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">3</span>);</span><br><span class="line">  v = (v &amp; (<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">15</span>*<span class="number">3</span>) + ((v &gt;&gt; <span class="number">2</span>) &amp; </span><br><span class="line">    (<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">15</span>*<span class="number">3</span>);</span><br><span class="line">  v = (v + (v &gt;&gt; <span class="number">4</span>)) &amp; (<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">255</span>*<span class="number">15</span>;</span><br><span class="line">  ret += (<span class="type">uint64_t</span>)(v * ((<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">255</span>)) &gt;&gt; </span><br><span class="line">    (<span class="built_in">sizeof</span>(<span class="type">uint64_t</span>) - <span class="number">1</span>) * CHAR_BIT;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们只抽取其中计算二进制数中<code>1</code>的个数部分，也就是<code>for</code>循环内部的代码，然后重新整理成与<code>平行法</code>中4个步骤互相对应的形式：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// step1: count bits of each 2-bit chunk</span></span><br><span class="line">v = v - ((v &gt;&gt; <span class="number">1</span>) &amp; (<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">3</span>);</span><br><span class="line"><span class="comment">// step2: count bits of each 4-bit chunk</span></span><br><span class="line">v = (v &amp; (<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">15</span>*<span class="number">3</span>) + ((v &gt;&gt; <span class="number">2</span>) &amp; </span><br><span class="line"> (<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">15</span>*<span class="number">3</span>);</span><br><span class="line"><span class="comment">// step3: count bits of each 8-bit chunk</span></span><br><span class="line">v = v + (v &gt;&gt; <span class="number">4</span>);</span><br><span class="line"><span class="comment">// mask out junk</span></span><br><span class="line">v = v &amp; (<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">255</span>*<span class="number">15</span>;</span><br><span class="line"><span class="comment">// step4: add all eight 8-bit chunks</span></span><br><span class="line">ret += (<span class="type">uint64_t</span>)(v * ((<span class="type">uint64_t</span>)~(<span class="type">uint64_t</span>)<span class="number">0</span>/<span class="number">255</span>)) &gt;&gt; </span><br><span class="line"> (<span class="built_in">sizeof</span>(<span class="type">uint64_t</span>) - <span class="number">1</span>) * CHAR_BIT;</span><br></pre></td></tr></table></figure>
+<h3 id="首先看步骤1">首先看步骤1</h3>
+<p>步骤1中的展开应该如下：</p>
+<ol type="1">
+<li><code>&amp;</code>号右边先计算<code>~(uint64_t)0</code>，表示对0的每一位取反，这样就得到了一个全为1的数:<code>0xFFFFFFFFFFFFFFFF</code>,<code>F</code>代表15</li>
+<li>然后将这个数除以3，得到的结果是<code>0x5555555555555555</code>，这个数的二进制表示为<code>0101010101010101010101010101010101010101010101010101010101010101</code>也就是平行法中第一步的掩码</li>
+</ol>
+<h3 id="步骤2-1">步骤2</h3>
+<p>步骤2中，<code>~(uint64_t)0/15</code>表示<code>0x1111...1111</code>,于是<code>(uint64_t)~(uint64_t)0/15*3</code>就表示平行法第二步的掩码<code>0x3333....3333</code></p>
+<h3 id="步骤3-1">步骤3</h3>
+<p>步骤3与平行法中的完全一致，也就是将每8位中的结果相加起来</p>
+<h3 id="步骤4">步骤4</h3>
+<p><code>(uint64_t)~(uint64_t)0/255</code>表示<code>0x0101....0101</code>，写成二进制的话就是，从左到由，每7个<code>0</code>跟1个<code>1</code>。这一步也就是平行法最后一步，将最终结果的二进制数每8位移动到最高的8位相加起来，然后总体往右移（去掉第八位之后的所有<code>0</code>），这样就得到最终结果。唯一不同的是，这里计算的是64bit的二进制数，因此需要移动的位数是<code>(sizeof(uint64_t) - 1) * CHAR_BIT = 56</code></p>
+<h3 id="平行法的时间复杂度">平行法的时间复杂度</h3>
+<p>由于无论什么二进制序列，都需要固定次数的操作就可以计算出结果，因此时间复杂度是<span class="math inline">\(O(1)\)</span></p>
+<h2 id="参考资料">参考资料</h2>
+<ol type="1">
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/graphics/archive/2010/06/21/1752421.html">算法-求二进制数中1的个数</a> —— 图示说明几种经典算法</li>
+<li><a target="_blank" rel="noopener" href="https://magodo.github.io/BitCount/#parallel-count">bit count algorithm</a> —— 列举更多的CountBits算法，并且都有代码和解释</li>
+<li><a target="_blank" rel="noopener" href="http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetKernighan">Bit Twiddling Hacks</a> —— 代码中提到的Brian Kernighan算法，包含更多的位操作算法。来自斯坦福大学的Graphics Group</li>
+<li><a target="_blank" rel="noopener" href="https://yuminlee2.medium.com/brian-kernighans-algorithm-count-set-bits-in-a-number-18ab05edca93">Brian Kernighan's Algorithm</a> —— 详细的图例说明Brian Kernighan算法，非常易懂</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/11/10/algos/CountBitsSet/" title="算法系列——统计二进制数中1的个数">https://zeal-up.github.io/2023/11/10/algos/CountBitsSet/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+              <a href="/tags/%E4%BA%8C%E8%BF%9B%E5%88%B6/" rel="tag"># 二进制</a>
+              <a href="/tags/%E4%BD%8D%E6%93%8D%E4%BD%9C/" rel="tag"># 位操作</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%95%B0%E4%B8%AD1%E7%9A%84%E4%B8%AA%E6%95%B0/" rel="tag"># 计算二进制数中1的个数</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/10/31/slam-theory/epipolor_geometry/" rel="prev" title="SLAM基础——对极几何(基础矩阵、本质矩阵与尺度模糊问题)">
+                  <i class="fa fa-chevron-left"></i> SLAM基础——对极几何(基础矩阵、本质矩阵与尺度模糊问题)
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/11/14/orbslam/DBoW2/" rel="next" title="ORB-SLAM3保姆级教程——DBoW2从理论到实现">
+                  ORB-SLAM3保姆级教程——DBoW2从理论到实现 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="a9e28da38edcf791134fb9cfce177288"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"covS4Q3Q0SaMRjqI2VomagVm-gzGzoHsz","app_key":"iK7kdlu4InjORoPr3oksi1IM","server_url":"https://covs4q3q.lc-cn-n1-shared.com","security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>

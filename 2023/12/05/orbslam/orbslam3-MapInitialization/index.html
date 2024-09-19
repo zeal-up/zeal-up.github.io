@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  目的 通过阅读本文，你至少可以收获如下内容：  对极几何、对极约束以及基础矩阵（Fundamental）&#x2F;本质矩阵（Essential）的数学原理，并且明白为何视觉SLAM中需要对极几何 单应矩阵（Homography）的基础概念，以及单应矩阵与基础矩阵的区别 如何通过匹配点对求解基础矩阵和单应矩阵 如">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ORB-SLAM3保姆级教程——详解地图初始化（基础矩阵&#x2F;单应矩阵&#x2F;三角化的实际应用）">
+<meta property="og:url" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  目的 通过阅读本文，你至少可以收获如下内容：  对极几何、对极约束以及基础矩阵（Fundamental）&#x2F;本质矩阵（Essential）的数学原理，并且明白为何视觉SLAM中需要对极几何 单应矩阵（Homography）的基础概念，以及单应矩阵与基础矩阵的区别 如何通过匹配点对求解基础矩阵和单应矩阵 如">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/01-init_pipeline.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/02-feature_point_matching.jpg">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/03-epipolar_constraint.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/03-epipolar_constraint.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/04-solve_essential_matrix.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/03-epipolar_constraint.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/05-homography_example.jpg">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/06_homographyMatrix.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/07-Rt_from_essential.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/08-four_situation_of_E.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/09-triangulate.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/run_01-features.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/run_02-matches.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/run_04-finestFeaturesWithTriangulated.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/run_05-3d_points.gif">
+<meta property="article:published_time" content="2023-12-05T04:00:00.000Z">
+<meta property="article:modified_time" content="2024-09-19T08:22:55.434Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="slam">
+<meta property="article:tag" content="SLAM_Theory">
+<meta property="article:tag" content="单应矩阵">
+<meta property="article:tag" content="基础矩阵">
+<meta property="article:tag" content="三角化">
+<meta property="article:tag" content="初始化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/imgs/01-init_pipeline.png">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/","path":"2023/12/05/orbslam/orbslam3-MapInitialization/","title":"ORB-SLAM3保姆级教程——详解地图初始化（基础矩阵/单应矩阵/三角化的实际应用）"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ORB-SLAM3保姆级教程——详解地图初始化（基础矩阵/单应矩阵/三角化的实际应用） | Zeal's Blog</title>
+  
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+  <a target="_blank" rel="noopener" href="https://github.com/zeal-up" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%AE%E7%9A%84"><span class="nav-number">1.</span> <span class="nav-text">目的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E8%A7%86%E8%A7%89slam%E4%B8%AD%E7%9A%84%E5%9C%B0%E5%9B%BE%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">一、视觉SLAM中的地图初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8Corb_slam%E5%9C%B0%E5%9B%BE%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">二、ORB_SLAM地图初始化流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89orb%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96%E5%8F%8A%E5%8C%B9%E9%85%8D"><span class="nav-number">4.</span> <span class="nav-text">三、ORB特征提取及匹配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E5%AF%B9%E6%9E%81%E5%87%A0%E4%BD%95%E5%8F%8A%E5%AF%B9%E6%9E%81%E7%BA%A6%E6%9D%9F"><span class="nav-number">5.</span> <span class="nav-text">四、对极几何及对极约束</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E5%AE%9E%E9%99%85%E9%97%AE%E9%A2%98%E5%87%BA%E5%8F%91"><span class="nav-number">5.1.</span> <span class="nav-text">4.1从实际问题出发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E6%9E%81%E5%87%A0%E4%BD%95"><span class="nav-number">5.2.</span> <span class="nav-text">4.2 对极几何</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E6%9E%81%E7%BA%A6%E6%9D%9F"><span class="nav-number">5.3.</span> <span class="nav-text">4.3 对极约束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%9F%A9%E9%98%B5fundamental-matrixf%E4%B8%8E%E6%9C%AC%E8%B4%A8%E7%9F%A9%E9%98%B5essential-matrixe"><span class="nav-number">5.4.</span> <span class="nav-text">4.4 基础矩阵（Fundamental Matrix）F与本质矩阵（Essential Matrix）E</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E6%9E%81%E7%BA%A6%E6%9D%9F%E7%9A%84%E5%87%A0%E4%BD%95%E6%84%8F%E4%B9%89"><span class="nav-number">5.5.</span> <span class="nav-text">4.5 对极约束的几何意义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E8%B4%A8%E7%9F%A9%E9%98%B5%E4%B8%8E%E5%9F%BA%E7%A1%80%E7%9F%A9%E9%98%B5%E7%9A%84%E6%B1%82%E8%A7%A3"><span class="nav-number">5.6.</span> <span class="nav-text">4.6 本质矩阵与基础矩阵的求解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%9F%A9%E9%98%B5%E7%9A%84%E6%B1%82%E8%A7%A3%E6%8E%A8%E5%AF%BC"><span class="nav-number">5.6.1.</span> <span class="nav-text">4.6.1 基础矩阵的求解推导</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8opencv%E6%B1%82%E8%A7%A3"><span class="nav-number">5.6.2.</span> <span class="nav-text">4.6.2 使用OpenCV求解</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E5%8D%95%E7%9B%AE%E5%B0%BA%E5%BA%A6%E4%B8%8D%E7%A1%AE%E5%AE%9A%E6%80%A7"><span class="nav-number">6.</span> <span class="nav-text">五、单目尺度不确定性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E5%8D%95%E7%9B%AE%E5%B0%BA%E5%BA%A6%E4%B8%8D%E7%A1%AE%E5%AE%9A%E6%80%A7"><span class="nav-number">6.1.</span> <span class="nav-text">5.1 如何理解单目尺度不确定性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E5%8D%95%E5%BA%94%E7%9F%A9%E9%98%B5homography-matrix"><span class="nav-number">7.</span> <span class="nav-text">六、单应矩阵（Homography Matrix）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E5%BA%94%E7%9F%A9%E9%98%B5%E4%B8%8E%E7%9B%B8%E6%9C%BA%E5%86%85%E5%A4%96%E5%8F%82%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">7.1.</span> <span class="nav-text">6.1 单应矩阵与相机内外参的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E5%BA%94%E7%9F%A9%E9%98%B5%E7%9A%84%E6%B1%82%E8%A7%A3"><span class="nav-number">7.2.</span> <span class="nav-text">6.2 单应矩阵的求解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E5%BA%94%E7%9F%A9%E9%98%B5%E7%9A%84%E6%B1%82%E8%A7%A3%E6%8E%A8%E5%AF%BC"><span class="nav-number">7.2.1.</span> <span class="nav-text">6.2.1 单应矩阵的求解推导</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8opencv%E6%B1%82%E8%A7%A3-1"><span class="nav-number">7.2.2.</span> <span class="nav-text">6.2.2 使用OpenCV求解</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E4%BB%8Ehe%E7%9F%A9%E9%98%B5%E6%81%A2%E5%A4%8Drt"><span class="nav-number">8.</span> <span class="nav-text">七、从H、E矩阵恢复R、t</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E8%A6%81%E7%82%B9"><span class="nav-number">8.1.</span> <span class="nav-text">7.1 基础要点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8Ee%E7%9F%A9%E9%98%B5%E6%81%A2%E5%A4%8Drt"><span class="nav-number">8.2.</span> <span class="nav-text">7.2 从E矩阵恢复R、t</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8opencv%E4%BB%8Ee%E4%B8%AD%E6%B1%82%E8%A7%A3rt"><span class="nav-number">8.3.</span> <span class="nav-text">7.3 使用OpenCV从E中求解R,t</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8Eh%E7%9F%A9%E9%98%B5%E6%81%A2%E5%A4%8Drt"><span class="nav-number">8.4.</span> <span class="nav-text">7.4 从H矩阵恢复R、t</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E6%AD%A3%E7%A1%AE%E7%9A%84rt"><span class="nav-number">9.</span> <span class="nav-text">八、如何选择正确的R、t</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E4%B8%89%E8%A7%92%E5%8C%96"><span class="nav-number">10.</span> <span class="nav-text">九、三角化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E8%A7%92%E5%8C%96%E7%9A%84%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5%E5%92%8C%E6%8E%A8%E5%AF%BC"><span class="nav-number">10.1.</span> <span class="nav-text">9.1 三角化的基础概念和推导</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E8%A7%92%E5%8C%96%E7%9A%84%E6%B1%82%E8%A7%A3%E5%AE%9E%E7%8E%B0"><span class="nav-number">10.2.</span> <span class="nav-text">9.2 三角化的求解实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8opencv%E8%BF%9B%E8%A1%8C%E4%B8%89%E8%A7%92%E5%8C%96"><span class="nav-number">10.3.</span> <span class="nav-text">9.3 使用OpenCV进行三角化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%81orb_slam%E4%B8%AD%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">11.</span> <span class="nav-text">十、ORB_SLAM中的初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E9%80%89%E6%8B%A9homography%E6%88%96%E8%80%85fundamental%E6%A8%A1%E5%9E%8B%E8%BF%9B%E8%A1%8C%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">11.1.</span> <span class="nav-text">10.1 自动选择Homography或者Fundamental模型进行初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8Ehf%E7%9F%A9%E9%98%B5%E6%81%A2%E5%A4%8Drt"><span class="nav-number">11.2.</span> <span class="nav-text">10.2 从H、F矩阵恢复R、t</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%AA%E5%9C%A8%E7%89%B9%E5%BE%81%E9%87%91%E5%AD%97%E5%A1%94%E7%9A%84%E6%9C%80%E5%BA%95%E5%B1%82%E8%BF%9B%E8%A1%8C%E7%89%B9%E5%BE%81%E7%82%B9%E5%8C%B9%E9%85%8D"><span class="nav-number">11.3.</span> <span class="nav-text">10.3 只在特征金字塔的最底层进行特征点匹配</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95a%E5%9C%A8%E5%A4%8D%E7%8E%B0%E8%BF%87%E7%A8%8B%E4%B8%AD%E7%9A%84%E4%B8%80%E4%BA%9B%E9%97%AE%E9%A2%98"><span class="nav-number">12.</span> <span class="nav-text">附录A：在复现过程中的一些问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#a-1-h%E7%9F%A9%E9%98%B5%E7%9A%84%E5%88%86%E6%95%B0%E4%B8%80%E7%9B%B4%E6%AF%94f%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%88%86%E6%95%B0%E4%BD%8E"><span class="nav-number">12.1.</span> <span class="nav-text">A-1 H矩阵的分数一直比F模型的分数低</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#a-2-%E4%B8%8Eopencv%E6%B1%82%E8%A7%A3hf%E7%9F%A9%E9%98%B5%E7%9A%84%E5%AF%B9%E6%AF%94"><span class="nav-number">12.2.</span> <span class="nav-text">A-2 与OpenCV求解H&#x2F;F矩阵的对比</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95bdemo%E7%BB%93%E6%9E%9C"><span class="nav-number">13.</span> <span class="nav-text">附录B：Demo结果</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#b.1-%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96%E7%BB%93%E6%9E%9C"><span class="nav-number">13.1.</span> <span class="nav-text">B.1 特征提取结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#b.2-%E7%89%B9%E5%BE%81%E7%82%B9%E5%8C%B9%E9%85%8D"><span class="nav-number">13.2.</span> <span class="nav-text">B.2 特征点匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#b.3-%E6%88%90%E5%8A%9F%E4%B8%89%E8%A7%92%E5%8C%96%E7%9A%84%E7%89%B9%E5%BE%81%E7%82%B9"><span class="nav-number">13.3.</span> <span class="nav-text">B.3 成功三角化的特征点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#b.4-%E4%B8%89%E8%A7%92%E5%8C%96%E7%9A%84%E7%82%B9"><span class="nav-number">13.4.</span> <span class="nav-text">B.4 三角化的点</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ORB-SLAM3保姆级教程——详解地图初始化（基础矩阵/单应矩阵/三角化的实际应用） | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ORB-SLAM3保姆级教程——详解地图初始化（基础矩阵/单应矩阵/三角化的实际应用）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-12-05 12:00:00" itemprop="dateCreated datePublished" datetime="2023-12-05T12:00:00+08:00">2023-12-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-09-19 16:22:55" itemprop="dateModified" datetime="2024-09-19T16:22:55+08:00">2024-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/SLAM/Orbslam/" itemprop="url" rel="index"><span itemprop="name">Orbslam</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/12/05/orbslam/orbslam3-MapInitialization/" class="post-meta-item leancloud_visitors" data-flag-title="ORB-SLAM3保姆级教程——详解地图初始化（基础矩阵/单应矩阵/三角化的实际应用）" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="ORB-SLAM3保姆级教程——详解地图初始化（基础矩阵/单应矩阵/三角化的实际应用）" href="/2023/12/05/orbslam/orbslam3-MapInitialization/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::df8e7ac64b3866bc3c1fc14719d1329a" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="目的">目的</h2>
+<p>通过阅读本文，你至少可以收获如下内容：</p>
+<ol type="1">
+<li>对极几何、对极约束以及基础矩阵（Fundamental）/本质矩阵（Essential）的数学原理，并且明白为何视觉SLAM中需要对极几何</li>
+<li>单应矩阵（Homography）的基础概念，以及单应矩阵与基础矩阵的区别</li>
+<li>如何通过匹配点对求解基础矩阵和单应矩阵</li>
+<li>如何通过基础矩阵和单应矩阵求解相机的位姿</li>
+<li>三角化的基础概念和应用</li>
+<li>ORBSLAM中的地图初始化详细流程</li>
+<li>一个精简的剥离了复杂的<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM">ORB_SLAM3</a>框架的地图初始化代码，并进行详细的中文注释。同时，提供可直接运行的demo。</li>
+</ol>
+<p>本文代码：<a target="_blank" rel="noopener" href="https://github.com/zeal-up/ORB_SLAM_Tracking">https://github.com/zeal-up/ORB_SLAM_Tracking</a></p>
+<h2 id="一视觉slam中的地图初始化">一、视觉SLAM中的地图初始化</h2>
+<p>在视觉SLAM中，地图初始化是一个非常重要的步骤，它决定了后续的跟踪、建图等模块的效果。简单来说，初始化的目的是利用前几帧图像，计算出相机位姿，并且构建出<strong>第一批3D地图点</strong></p>
+<p><strong>第一批3D地图点</strong>为跟踪、建图等模块提供了一个初始的地图，这样后续的模块就可以利用这些地图点进行跟踪、建图等工作。</p>
+<p>由于<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB_SLAM</a>系列工作将传感器模式扩展到了：单目、双目、RGBD、IMU+单目、IMU+双目、IMU+RGBD等多种模式，所以地图初始化的方式也有所不同。</p>
+<p>双目由于已知两个相机的内外参，可以直接三角化出3D点。三角化是单目的一个步骤，所以双目初始化比较简单。RGBD可以直接通过深度值还原3D坐标，更加简单。 配置了IMU之后实际也可以直接两个相机之间的姿态，也可以直接三角化出3D点（虽然IMU初始化需要考虑IMU参数的初始化，但是这部分内容不在本文的讨论范围内）。</p>
+<p>因此，本文将重点放在单目初始化上。单目初始化由于涉及到对极几何和三角化和矩阵求解等知识，对于初学者会比较复杂。</p>
+<h2 id="二orb_slam地图初始化流程">二、ORB_SLAM地图初始化流程</h2>
+<figure>
+<img src="imgs/01-init_pipeline.png" alt="" /><figcaption>初始化流程</figcaption>
+</figure>
+<p>本文将对这流程中的每一个步骤进行详细的讲解，并且给出代码实现。</p>
+<h2 id="三orb特征提取及匹配">三、ORB特征提取及匹配</h2>
+<p>特征点提取是一个比较独立的内容，对于ORB特征提取可以参考这篇文章：<a href="https://zeal-up.github.io/2023/05/18/orbslam/orbslam3-ORBextractor/">https://zeal-up.github.io/2023/05/18/orbslam/orbslam3-ORBextractor/</a></p>
+<p>特征点匹配也是传统视觉领域一个独立的内容，与本篇文章比较独立。在这里我们可以这样理解，对于第一帧图像<span class="math inline">\(F_1\)</span>和第二帧图像<span class="math inline">\(F_2\)</span>，经过特征提取后得到关键点和对应的描述子，通过描述子之间计算距离，可以对<span class="math inline">\(F_1\)</span>中的每一个关键点在<span class="math inline">\(F_2\)</span>中找到距离最近的关键点。</p>
+<h2 id="四对极几何及对极约束">四、对极几何及对极约束</h2>
+<h3 id="从实际问题出发">4.1从实际问题出发</h3>
+<p>为什么视觉SLAM需要对极几何？</p>
+<p>现在，我们通过特征提取和特征匹配，得到了两个图像<span class="math inline">\(F_1\)</span>和<span class="math inline">\(F_2\)</span>的一些匹配点对关系</p>
+<p><span class="math display">\[
+\begin{split}
+PP &amp;= \{(\textbf{p}_1^i, \textbf{p}_2^i)\} \quad i = [1,2,3,...,N]\\
+&amp;\textbf{p}_1^i \in \textbf{F}_1\\
+&amp;\textbf{p}_2^i \in \textbf{F}_2\\
+\end{split}
+\]</span></p>
+<p>比如下面这样：</p>
+<figure>
+<img src="./imgs/02-feature_point_matching.jpg" alt="" /><figcaption>特征点匹配</figcaption>
+</figure>
+<p><strong>那么，我们现在的问题是，如何从这些点对的匹配关系，得到相机之间的相对位姿？</strong></p>
+<p>PS：通常，我们会将第一帧图像当作参考帧，也就是世界坐标系。第二帧相机的位姿也就是相对于第一帧相机的位姿。</p>
+<h3 id="对极几何">4.2 对极几何</h3>
+<p>我们先把一个点对拿出来单独观察。这个点对（<span class="math inline">\(\textbf{p}_1,\textbf{p}_2\)</span>）对应着三维空间中一个点<span class="math inline">\(P\)</span>，可以画出下面的示意图</p>
+<figure>
+<img src="./imgs/03-epipolar_constraint.png" alt="" /><figcaption>对极约束</figcaption>
+</figure>
+<p>由相机的成像原理我们可以很直观地想象：从两个相机的光心分别射出一条光线并分别经过<span class="math inline">\(\textbf{p}_1\)</span>和<span class="math inline">\(\textbf{p}_2\)</span>，这两条光线会相交于空间中一个点<span class="math inline">\(P\)</span></p>
+<p>我们先对一些基础名词进行解释：</p>
+<ul>
+<li><strong>极平面（Epipolar plane）</strong>：由两个相机光心与空间中点<span class="math inline">\(P\)</span>组成的平面<span class="math inline">\(O_1O_2P\)</span></li>
+<li><strong>基线</strong>：两个相机光心的连线<span class="math inline">\(O_1O_2\)</span></li>
+<li><strong>极点（Epipoles）</strong>：两个相机光心的连线<span class="math inline">\(O_1O2\)</span>于两个像平面的交点<span class="math inline">\(e_1,e_2\)</span></li>
+<li><strong>极线（Epipolar line）</strong>：极平面于像平面的交点，也就是图中的线<span class="math inline">\(l_1=p_1e_1\)</span>,<span class="math inline">\(l_2=p_2e_2\)</span></li>
+</ul>
+<p>所谓的对极几何，就是指物体与两个相机之间空间几何关系。我们可以利用这个几何关系来求解相机之间的相对位姿。</p>
+<h3 id="对极约束">4.3 对极约束</h3>
+<p>其实我们的目标就是找出一些像素点对<span class="math inline">\((\textbf{p}_1^i,\textbf{p}_2^i)\)</span>是怎么被两个相机的相对位姿<span class="math inline">\(T_{21}=[R_{21},t_{21}]\)</span>联系起来的，然后求解方程就可以得到相机之间的位姿。而三维点<span class="math inline">\(P\)</span>只是一个中间代理。为了方便，我们先假设<span class="math inline">\(P_1=[X,Y,Z]\)</span>在相机1的坐标系下，则，根据相机的投影模型，有</p>
+<p><span class="math display">\[
+s_1\textbf{p}_1=KP_1,\quad s_2\textbf{p}_2=K(R_{21}P_1+t_{21})\tag{1}
+\]</span></p>
+<p>再使用齐次坐标式，上面的公式中<span class="math inline">\(s_1\textbf{p}_1\)</span>与<span class="math inline">\(\textbf{p}_1\)</span>在尺度意义下相等，可以记为</p>
+<p><span class="math display">\[
+s_1\textbf{p}_1 \simeq\textbf{p}_1\tag{2}
+\]</span></p>
+<p>我们另外记<span class="math inline">\(P\)</span>点在两个相机下的归一化平面坐标为<span class="math inline">\(\textbf{x}_1, \textbf{x}_2\)</span>（归一化平面即<span class="math inline">\(Z=1\)</span>）</p>
+<p><span class="math inline">\(\textbf{x}_1, \textbf{x}_2\)</span>与对应的原始点相差一个比例系数，即</p>
+<p><span class="math display">\[
+\begin{split}
+\lambda_1\textbf{x}_1 &amp;= P_1\\
+\lambda_2\textbf{x}_2 &amp;= P_2\\
+\end{split}
+\]</span></p>
+<p>根据<span class="math inline">\(P_1,P_2\)</span>的关系$P_2 = R_{21}P_1 + t_{21} $，可以得到</p>
+<p><span class="math display">\[
+\lambda_2\textbf{x}_2 = \lambda_1R_{21}\textbf{x}_1+\textbf{t}_{21}\tag{3}
+\]</span></p>
+<p>对于比例系数来说，具体数值我们是无法确定的，因此，上式可以整理成</p>
+<p><span class="math display">\[
+\textbf{x}_2 = \alpha R_{21}\textbf{x}_1+\beta \textbf{t}_{21}\tag{4}
+\]</span></p>
+<p>公式（4）两边同时与向量<span class="math inline">\(\textbf{t}_{21}\)</span>做外积（也就是叉乘），等价于同时左乘<span class="math inline">\(\textbf{t}^{\wedge}\)</span>（忽略下标）</p>
+<p><span class="math display">\[
+\textbf{t}^{\wedge}\textbf{x}_2 = \alpha \textbf{t}^{\wedge}R\textbf{x}_1 \tag{5}
+\]</span></p>
+<p>上式等号左右再左乘<span class="math inline">\(\textbf{x}_2^T\)</span></p>
+<p><span class="math display">\[
+\textbf{x}_2^T\textbf{t}^{\wedge}\textbf{x}_2 = \alpha\textbf{x}_2^T \textbf{t}^{\wedge}R\textbf{x}_1 \tag{6}
+\]</span></p>
+<p>由于向量<span class="math inline">\(\textbf{t}^{\wedge}\textbf{x}_2\)</span>垂直于<span class="math inline">\(\textbf{t}\)</span>和<span class="math inline">\(\textbf{x}_2\)</span>，因此，公式（6）的左侧严格为0。因此系数<span class="math inline">\(\alpha\)</span>可以消掉并简单记为</p>
+<p><span class="math display">\[
+\textbf{x}_2^T \textbf{t}^{\wedge}R\textbf{x}_1 = 0 \tag{7}
+\]</span></p>
+<p>归一化平面坐标<span class="math inline">\(\textbf{x}_1,\textbf{x}_2\)</span>可以由像素坐标左乘内参的逆得到，即</p>
+<p><span class="math display">\[
+\begin{split}
+\textbf{x}_1 &amp;= K^{-1}\textbf{p}_1\\
+\textbf{x}_2 &amp;= K^{-1}\textbf{p}_2\\
+\end{split}\tag{8}
+\]</span></p>
+<p>将公式（8）代入公式（7）可以得到</p>
+<p><span class="math display">\[
+\textbf{p}_2^TK^{-T}\textbf{t}^{\wedge}RK^{-1}\textbf{p}_1=0\tag{9}
+\]</span></p>
+<h3 id="基础矩阵fundamental-matrixf与本质矩阵essential-matrixe">4.4 基础矩阵（Fundamental Matrix）F与本质矩阵（Essential Matrix）E</h3>
+<p>公式（7）和公式（9）都可以叫做对极约束。公式（7）忽略了相机内参的影响，因为一般在SLAM中相机内参是已知的，而归一化平面坐标可以方便地由相机内参和像素坐标得到，因此公式（7）是公式（9）的简化形式。</p>
+<p>为了简便，我们可以记公式（9）中间部分为两个矩阵</p>
+<p><span class="math display">\[
+\begin{split}
+E &amp;= \textbf{t}^{\wedge}R \\
+F &amp;= K^{-T}EK^{-1}
+\end{split}\tag{10}
+\]</span></p>
+<p>其中<span class="math inline">\(E\)</span>称为本质矩阵（Essiential Matrix），<span class="math inline">\(F\)</span>称为基础矩阵（Fundamental Matrix）</p>
+<p>基于<span class="math inline">\(E,F\)</span>的定义，对极约束，即公式（7）（9）又可以记为</p>
+<p><span class="math display">\[
+\begin{split}
+\textbf{p}_2^T F \textbf{p}_1 &amp;= 0\\
+\textbf{x}_2^T E \textbf{x}_1 &amp;= 0
+\end{split}\tag{11}
+\]</span></p>
+<p><strong>要注意的是，由于上式中等式右边是0,因此左右两边同时乘以一个系数等式依旧成立</strong>，这一点我们在后面会再次提到</p>
+<h3 id="对极约束的几何意义">4.5 对极约束的几何意义</h3>
+<p>对极约束，即公式（11）实际上表达的是<span class="math inline">\(O_1PO_2\)</span>共面</p>
+<figure>
+<img src="./imgs/03-epipolar_constraint.png" alt="" /><figcaption>对极几何约束</figcaption>
+</figure>
+<p><strong>更为易懂的说法是，图像<span class="math inline">\(I_2\)</span>中的点<span class="math inline">\(p_2\)</span>，通过对极约束，可以用F或者E矩阵投影到<span class="math inline">\(I_1\)</span>中的极线（<span class="math inline">\(p_1e_1\)</span>）上</strong></p>
+<p>以公式<span class="math inline">\(\textbf{p}_2^TF\textbf{p}_1=0\)</span>为例，我们可以先将<span class="math inline">\(\textbf{p}_2^{T}F\)</span>其展开为</p>
+<p><span class="math display">\[
+\begin{split}
+\begin{bmatrix}{}
+u_2&amp;v_2&amp;1
+\end{bmatrix}
+\begin{bmatrix}{}
+f_{11}&amp;f_{12}&amp;f_{13}\\
+f_{21}&amp;f_{22}&amp;f_{23}\\
+f_{31}&amp;f_{32}&amp;f_{33}
+\end{bmatrix}
+= \
+\begin{bmatrix}
+a&amp;b&amp;c
+\end{bmatrix}
+\end{split}
+\]</span></p>
+<p><span class="math inline">\(a,b,c\)</span>可以看成是直线方程的三个参数，所有满足公式<span class="math inline">\(au + bv + c=0\)</span>的点都在这条直线上，这条直线也就是极线。</p>
+<p>因此，当我们要衡量<span class="math inline">\(F\)</span>矩阵的好坏的时候，可以通过计算<span class="math inline">\(\textbf{p}_1\)</span>到这条直线的距离，也就是</p>
+<p><span class="math display">\[
+d = \frac{au_1+bv_1+c}{\sqrt{a^2+b^2}}
+\]</span></p>
+<p>同理，如果要计算<span class="math inline">\(\textbf{p}_1\)</span>到<span class="math inline">\(I_2\)</span>的极线，然后计算<span class="math inline">\(\textbf{p}_2\)</span>到投影极线的距离，过程跟上面的基本一致，先计算<span class="math inline">\(F\textbf{p}_1\)</span>得到<span class="math inline">\(a,b,c\)</span>，然后再计算<span class="math inline">\(u_2,v_2,1\)</span>到直线的距离。或者直接将公式<span class="math inline">\(\textbf{p}_2^TF\textbf{p}_1=0\)</span>求一个转置，变成<span class="math inline">\(\textbf{p}_1^TF^T\textbf{p}_2=0\)</span>，然后再计算距离。</p>
+<h3 id="本质矩阵与基础矩阵的求解">4.6 本质矩阵与基础矩阵的求解</h3>
+<h4 id="基础矩阵的求解推导">4.6.1 基础矩阵的求解推导</h4>
+<p>本质矩阵是一个3x3矩阵，但其是由旋转与平移组成（6自由度），并且，要注意到公式（11）可以对任意尺度成立，也就是说本质矩阵可以放缩任意一个尺度，因此，本质矩阵有5个自由度。 因此，从理论上最少可以由5对点对求解（注意这里与PnP算法的不同，PnP算法等号两边没有0,一个点对可以建立两个等式，因此一个点对可以约束2个自由度。而这里一个点对只能建立一条等式，也就是约束一个自由度，因此需要5个点对）</p>
+<p>但是一般我们会用8个点对求解，也就是八点法。将8对点代入方程（11）的第二条等式，并将本质矩阵展开为一维向量，则可以建立线性方程组 （点对的归一化平面坐标：<span class="math inline">\(\textbf{x}_1^T = [u_1, v_1, 1]\)</span>， <span class="math inline">\(\textbf{x}_2^T=[u_2,v_2,1]\)</span>）</p>
+<p><span class="math display">\[
+\begin{split}
+\begin{bmatrix}{}
+u_2&amp;v_2&amp;1
+\end{bmatrix}
+= \
+\begin{bmatrix}{}
+e_1&amp;e_2&amp;e_3\\
+e_4&amp;e_5&amp;e_6\\
+e_7&amp;e_8&amp;e_9
+\end{bmatrix}
+\begin{bmatrix}{}
+u_1\\v_1\\1
+\end{bmatrix}
+\end{split}\tag{12}
+\]</span></p>
+<p>展开后可以得到如下形式</p>
+<figure>
+<img src="./imgs/04-solve_essential_matrix.png" alt="" /><figcaption>八点法求本质矩阵</figcaption>
+</figure>
+<p>以上方程求解后就可以得到本质矩阵（对任意尺度成立）</p>
+<h4 id="使用opencv求解">4.6.2 使用OpenCV求解</h4>
+<p>OpenCV有Api可以直接通过匹配点对计算基础矩阵</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function">Mat <span class="title">cv::findFundamentalMat</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">  InputArray points1,</span></span></span><br><span class="line"><span class="params"><span class="function">  InputArray points2,</span></span></span><br><span class="line"><span class="params"><span class="function">  <span class="type">int</span> method,</span></span></span><br><span class="line"><span class="params"><span class="function">  <span class="type">double</span> ransacReprojThreshold,</span></span></span><br><span class="line"><span class="params"><span class="function">  <span class="type">double</span> confidence,</span></span></span><br><span class="line"><span class="params"><span class="function">  <span class="type">int</span> maxIters,</span></span></span><br><span class="line"><span class="params"><span class="function">  OutputArray mask = noArray() </span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span></span><br></pre></td></tr></table></figure>
+<p>具体说明可以参考Api说明：<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#ga59b0d57f46f8677fb5904294a23d404a">findFundamentalMat()</a></p>
+<h2 id="五单目尺度不确定性">五、单目尺度不确定性</h2>
+<p>这是一个很重要的知识点：对于单目SLAM,我们并不能估计平移的具体尺度，我们只能够以第一帧和第二帧的移动距离当作单位(<span class="math inline">\(t=1\)</span>)，后续以这个单位进行跟踪和建图，我们实际上不能得出轨迹具体移动了多少米，地图点具体有几米远。这就是所谓的尺度不确定性。</p>
+<h3 id="如何理解单目尺度不确定性">5.1 如何理解单目尺度不确定性</h3>
+<p>让我们再次回到对极几何的图</p>
+<figure>
+<img src="./imgs/03-epipolar_constraint.png" alt="" /><figcaption>对极几何约束</figcaption>
+</figure>
+<p>对于上面这幅图，虽然我们知道两个相机光心与像素点的连线最终会相交与空间中的一个点，但是我们如果把<span class="math inline">\(O_1PO_2\)</span>以任意比例放缩，上面的关系仍然成立，因此我们没有办法通过<span class="math inline">\(p_1p_2\)</span>的匹配关系得出<span class="math inline">\(O_1O_2\)</span>具体有多少米。</p>
+<p>单目不确定性也可以通过公式体现体现出来。</p>
+<p>在对极约束的公式（11）中：</p>
+<p><span class="math display">\[
+\begin{split}
+\textbf{p}_2^T F \textbf{p}_1 &amp;= 0\\
+\textbf{x}_2^T E \textbf{x}_1 &amp;= 0
+\end{split}\tag{11}
+\]</span></p>
+<p>等式左边可以乘上一个任意的系数而不改变结果</p>
+<p>因为在公式（10）中我们知道<span class="math inline">\(E\)</span>的定义是这样的：</p>
+<p><span class="math display">\[
+\begin{split}
+E &amp;= \textbf{t}^{\wedge}R \\
+F &amp;= K^{-T}EK^{-1}
+\end{split}\tag{10}
+\]</span></p>
+<p>也就是说，因为我们可以在公式（11）中对<span class="math inline">\(E,F\)</span>乘以一个任意系数，因此我们也可以在公式（10）中对平移量<span class="math inline">\(t\)</span>乘以一个系数，因此我们没法得出<span class="math inline">\(t\)</span>的具体长度</p>
+<h2 id="六单应矩阵homography-matrix">六、单应矩阵（Homography Matrix）</h2>
+<p>我们前面讨论基础矩阵的概念以及如何从一些匹配点对关系中求解基础矩阵。我们没有对关键点是否在一个平面上进行任何假设。但是，如果我们假设关键点在一个平面上，那么我们就可以使用单应矩阵（Homography Matrix）来求解相机之间的位姿。</p>
+<figure>
+<img src="./imgs/05-homography_example.jpg" alt="" /><figcaption>单应矩阵例子</figcaption>
+</figure>
+<p>当匹配点对的关键点都是在3D空间中一个平面上时，这些点对关系可以通过单应矩阵来描述（相差一个常量系数）</p>
+<figure>
+<img src="./imgs/06_homographyMatrix.png" alt="" /><figcaption>单应矩阵投影</figcaption>
+</figure>
+<p>令<span class="math inline">\([u,v,1]^T\)</span>为图片1的像素齐次坐标，<span class="math inline">\([u^{\prime},v^{\prime},1]^T\)</span>为匹配点在图片2的像素齐次坐标，则上面那句话可以等价为如下关系：</p>
+<p><span class="math display">\[
+\lambda
+\begin{bmatrix}
+u^{\prime}\\
+v^{\prime}\\
+1
+\end{bmatrix}=
+\boldsymbol{H}
+\begin{bmatrix}
+u\\
+v\\
+1
+\end{bmatrix}=
+\begin{bmatrix}
+h_{00} &amp; h_{10} &amp; h_{20}\\
+h_{01} &amp; h_{11} &amp; h_{21}\\
+h_{02} &amp; h_{12} &amp; h_{22}
+\end{bmatrix}
+\begin{bmatrix}
+u\\
+v\\
+1
+\end{bmatrix}\tag{13}
+\]</span></p>
+<p>公式（13）中的系数<span class="math inline">\(\lambda\)</span>用来将变换后的坐标归一化（将第三个维度的值放缩为1） <strong>同时要注意，单应矩阵虽然有9个元素，但是可以除以<span class="math inline">\(h_{22}\)</span>进行归一化，因此自由度只有8</strong></p>
+<h3 id="单应矩阵与相机内外参的关系">6.1 单应矩阵与相机内外参的关系</h3>
+<p>单应矩阵除了用来恢复位姿<span class="math inline">\(R,t\)</span>之外，还可以用来做图像拼接。在自动驾驶中BEV的合成也需要单应矩阵。关于单应矩阵与相机内外参关系的详细推导可以看这篇博客：<a href="https://zeal-up.github.io/2023/06/08/cv/surround-view-projection/">https://zeal-up.github.io/2023/06/08/cv/surround-view-projection/</a></p>
+<p>这里只给出结论，单应矩阵与相机的内外参关系如下：</p>
+<p><span class="math display">\[
+H_{21} = R_{21}-\frac{\boldsymbol{t}_{21}\boldsymbol{n}^T}{d}\tag{14}
+\]</span></p>
+<h3 id="单应矩阵的求解">6.2 单应矩阵的求解</h3>
+<h4 id="单应矩阵的求解推导">6.2.1 单应矩阵的求解推导</h4>
+<p>从公式（13）我们可以知道，一个匹配点对可以建立两个等式（<span class="math inline">\(u,v\)</span>各一条），同时单应矩阵的最后一个元素<span class="math inline">\(h_{22}\)</span>可以设置为1,因此单应矩阵的自由度为8.于是，我们最少可以用4对匹配点对求解单应矩阵。</p>
+<p>当大于4对匹配点对时，我们可以使用最小二乘法求解：</p>
+<p><span class="math display">\[
+J = \sum_{i}\left(u_i^{\prime}-\frac{h_{00}u_i+h_{01}v_i+h_{02}}{h_{20}u_i+h_{21}v_i+h_{22}}\right)^2+\left(v_i^{\prime}-\frac{h_{10}u_i+h_{11}v_i+h_{21}}{h_{20}u_i+h_{21}v_i+h_{22}}\right)^2
+\]</span></p>
+<h4 id="使用opencv求解-1">6.2.2 使用OpenCV求解</h4>
+<p>OpenCV提供接口可以直接求解单应矩阵</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Mat <span class="title">cv::findHomography</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">  InputArray srcPoints,</span></span></span><br><span class="line"><span class="params"><span class="function">  InputArray dstPoints,</span></span></span><br><span class="line"><span class="params"><span class="function">  <span class="type">int</span> method = <span class="number">0</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">  <span class="type">double</span> ransacReprojThreshold = <span class="number">3</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">  OutputArray mask = noArray(),</span></span></span><br><span class="line"><span class="params"><span class="function">  <span class="type">const</span> <span class="type">int</span> maxIters = <span class="number">2000</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">  <span class="type">const</span> <span class="type">double</span> confidence = <span class="number">0.995</span> </span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span></span><br></pre></td></tr></table></figure>
+<p>详细的使用可以参考Api说明： <a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#ga4abc2ece9fab9398f2e560d53c8c9780">cv::findHomography()</a></p>
+<p>如果对内部实现有兴趣，可以参考这篇文章<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_25352981/article/details/51530751">博客：对OpenCV::findHomography的源码解读</a></p>
+<h2 id="七从he矩阵恢复rt">七、从H、E矩阵恢复R、t</h2>
+<h3 id="基础要点">7.1 基础要点</h3>
+<p>F矩阵与E矩阵只相差相机内参，通常我们会将F矩阵转换为E矩阵，然后再恢复R、t。</p>
+<p>从H、E矩阵求解R、t涉及到比较复杂的数学推导，对于CV从业人员我认为这部分可以忽略具体推导过程，但是要抓住几个要点：</p>
+<ol type="1">
+<li>无论是从H、E恢复位姿<span class="math inline">\(R,t\)</span>都会得出多种不同的解</li>
+<li>从E矩阵恢复<span class="math inline">\(R,t\)</span>可以得到4种解</li>
+<li>从H矩阵恢复<span class="math inline">\(R,t\)</span>可以得到8种解</li>
+<li>需要用一些判断方式从这些解中选择出正确的解</li>
+</ol>
+<h3 id="从e矩阵恢复rt">7.2 从E矩阵恢复R、t</h3>
+<p>求解推导过程忽略，我们只需要知道根据E可以分解出两对R,t如下</p>
+<figure>
+<img src="./imgs/07-Rt_from_essential.png" alt="" /><figcaption>从本质矩阵分解Rt</figcaption>
+</figure>
+<p>另外，由于<span class="math inline">\(-E\)</span>和<span class="math inline">\(E\)</span>等价，因此对<span class="math inline">\(t\)</span>取负号也可以，于是有4种<span class="math inline">\(R,t\)</span>的组合，分别对应下面图中的其中一种相机情况</p>
+<figure>
+<img src="./imgs/08-four_situation_of_E.png" alt="" /><figcaption>从本质矩阵分解R,t的四种相机摆放情况</figcaption>
+</figure>
+<h3 id="使用opencv从e中求解rt">7.3 使用OpenCV从E中求解R,t</h3>
+<p>OpenCV提供了一个api可以直接从E矩阵中分解出R、t</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">cv::decomposeEssentialMat</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">  InputArray E,</span></span></span><br><span class="line"><span class="params"><span class="function">  OutputArray R1,</span></span></span><br><span class="line"><span class="params"><span class="function">  OutputArray R2,</span></span></span><br><span class="line"><span class="params"><span class="function">  OutputArray t </span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span></span><br></pre></td></tr></table></figure>
+<p>Api给出两个<span class="math inline">\(R\)</span>和一个<span class="math inline">\(t\)</span>，我们可以构造四种可能的解：[R1,t], [R1,−t], [R2,t], [R2,−t]</p>
+<p>详细使用参考API说明： <a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#ga54a2f5b3f8aeaf6c76d4a31dece85d5d">cv::decomposeEssentialMat</a></p>
+<h3 id="从h矩阵恢复rt">7.4 从H矩阵恢复R、t</h3>
+<p>从H矩阵恢复R、t有多种方法，论文中的方法叫<a target="_blank" rel="noopener" href="https://inria.hal.science/inria-00174036v3/document">Faugeras SVD-based decomposition</a>，最终可以求解出8种解。另外一种有名的数值解法（通过奇异值分解）叫<a target="_blank" rel="noopener" href="https://inria.hal.science/inria-00174036v3/document">Zhang SVD-based decomposition</a></p>
+<p>OpenCV的接口使用的是分析解法：<a target="_blank" rel="noopener" href="https://inria.hal.science/inria-00174036v3/document">https://inria.hal.science/inria-00174036v3/document</a> OpenCV的接口最终返回4种解</p>
+<p>OpenCV的接口使用说明：<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#ga7f60bdff78833d1e3fd6d9d0fd538d92">cv::decomposeHomographyMat</a></p>
+<h2 id="八如何选择正确的rt">八、如何选择正确的R、t</h2>
+<p>无论从E矩阵还是H矩阵中恢复出R、t，都会得到多种解。我们需要从这些解中选择出正确的解。 最简单的做法是利用分解出的R、t对匹配点进行三角化，并检查该3D点在两个相机下的深度值，3D点必须在两个相机下都是正的才是正确的解。</p>
+<p>对于单应矩阵的分解结果，OpenCV提供了一个函数可以帮助我们选择正确的解：<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#ga32f867159200f7bd55e72dca92d8494c">cv::filterHomographyDecompByVisibleRefpoints</a></p>
+<p>在<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB_SLAM</a>中，对于每一种解，都会对所有匹配点进行三角化，对三角化出来的点，会进行很多步骤的检查，最后选择拥有最多内点的解作为正确的解。</p>
+<h2 id="九三角化">九、三角化</h2>
+<h3 id="三角化的基础概念和推导">9.1 三角化的基础概念和推导</h3>
+<p>当我们求出了两个相机之间的位姿<span class="math inline">\(T_{21}=[R_{21},t_{21}]\)</span>之后，我们就可以利用这个位姿，联合匹配点对关系，求解出三维点的坐标。</p>
+<figure>
+<img src="./imgs/09-triangulate.png" alt="" /><figcaption>三角化</figcaption>
+</figure>
+<p>三角化的求解实际上就是构造方程，然后求解方程。构造方程的方式有多种，这里介绍在<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB_SLAM</a>中的实现方式</p>
+<p>以空间中一个3D点<span class="math inline">\(X=[x,y,z]\)</span>为例，该点通过相机外参<span class="math inline">\(T_1=[R_1|t_1]\)</span>和<span class="math inline">\(T_2=[R_2|t_2]\)</span>转换到相机坐标系。该点在图像1和图像2的归一化平面坐标分别为<span class="math inline">\(\textbf{x}_1=[u_1,v_1,1]^T\)</span>和<span class="math inline">\(\textbf{x}_2=[u_2,v_2,1]^T\)</span>。（注意，这里的归一化平面坐标是使用相机内参进行反投影<span class="math inline">\(\textbf{x} = K^{-1}p\)</span>后得到的坐标），对于任意一个相机，我们都可以得到如下的等式：</p>
+<p><span class="math display">\[
+\lambda \textbf{x} = TX\tag{15}
+\]</span></p>
+<p>上式等号左右两边同时乘以<span class="math inline">\(\textbf{x}\)</span>的反对称矩阵<span class="math inline">\(\textbf{x}^{\hat{}}\)</span>（PS:一个向量乘以一个向量的反对称矩阵相当于向量叉乘，因此向量乘以自己的反对称矩阵相当于向量叉乘自己，结果为0），我们可以得到：</p>
+<p><span class="math display">\[
+\begin{split}
+\textbf{x}^{\hat{}}TX &amp;= 0\\
+\rightarrow
+\begin{bmatrix}
+0&amp;-1&amp;v\\
+1&amp;0&amp;-u\\
+-v&amp;u&amp;0
+\end{bmatrix}
+\begin{bmatrix}
+\textbf{r}_1\\
+\textbf{r}_2\\
+\textbf{r}_3
+\end{bmatrix}
+&amp; = 0\\
+\rightarrow
+\begin{bmatrix}
+v\textbf{r}_3-\textbf{r}_2\\
+\textbf{r}_1-u\textbf{r}_3\\
+-v\textbf{r}_1+u\textbf{r}_2\\
+\end{bmatrix}X
+&amp; = 0\\
+\end{split}\tag{16}
+\]</span></p>
+<p><span class="math inline">\(\textbf{r}_1,\textbf{r}_2, \textbf{r}_3\)</span>是<span class="math inline">\(T\)</span>的第一、二、三行。</p>
+<p>上式中，第三行<span class="math inline">\(-v\textbf{r}_2+u\textbf{r}_3\)</span>可以通过第一行和第二行线性组合得到（第一行乘以<span class="math inline">\(-u\)</span>，第二行乘以<span class="math inline">\(-v\)</span>，然后相加），因此可以忽略第三行，只用前两行构造方程。</p>
+<p>我们有两个相机，因此一共可以构造出四条方程：</p>
+<p><span class="math display">\[
+\begin{split}
+\begin{bmatrix}
+v_1\textbf{r}_3^{1}-\textbf{r}_2^1\\
+\textbf{r}_1^1-u_1\textbf{r}_3^1\\
+v_2\textbf{r}_3^{2}-\textbf{r}_2^2\\
+\textbf{r}_1^2-u_2\textbf{r}_3^2\\
+\end{bmatrix}X
+&amp; = 0
+\end{split}
+\]</span></p>
+<h3 id="三角化的求解实现">9.2 三角化的求解实现</h3>
+<p>可以用SVD求解上述方程，求解出的3D坐标有4个元素，需要将第四个元素归一化为1。这里把<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB_SLAM</a>的这部分代码也贴出来</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** </span></span><br><span class="line"><span class="comment"> * @brief 三角化获得三维点</span></span><br><span class="line"><span class="comment"> * @param x_c1 点在关键帧1下的归一化坐标</span></span><br><span class="line"><span class="comment"> * @param x_c2 点在关键帧2下的归一化坐标</span></span><br><span class="line"><span class="comment"> * @param Tc1w 关键帧1投影矩阵  [K*R | K*t]</span></span><br><span class="line"><span class="comment"> * @param Tc2w 关键帧2投影矩阵  [K*R | K*t]</span></span><br><span class="line"><span class="comment"> * @param x3D 三维点坐标，作为结果输出</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">GeometricTools::Triangulate</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    Eigen::Vector3f &amp;x_c1, Eigen::Vector3f &amp;x_c2, Eigen::Matrix&lt;<span class="type">float</span>,<span class="number">3</span>,<span class="number">4</span>&gt; &amp;Tc1w, Eigen::Matrix&lt;<span class="type">float</span>,<span class="number">3</span>,<span class="number">4</span>&gt; &amp;Tc2w,</span></span></span><br><span class="line"><span class="params"><span class="function">    Eigen::Vector3f &amp;x3D)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Eigen::Matrix4f A;</span><br><span class="line">    <span class="comment">// x = a*P*X， 左右两面乘x的反对称矩阵 a*[x]^ * P * X = 0 ，[x]^*P构成了A矩阵，中间涉及一个尺度a，因为都是归一化平面，但右面是0所以直接可以约掉不影响最后的尺度</span></span><br><span class="line">    <span class="comment">//  0 -1 v    P(0)     -P.row(1) + v*P.row(2)</span></span><br><span class="line">    <span class="comment">//  1 0 -u *  P(1)  =   P.row(0) - u*P.row(2) </span></span><br><span class="line">    <span class="comment">// -v u  0    P(2)    u*P.row(1) - v*P.row(0)</span></span><br><span class="line">    <span class="comment">// 发现上述矩阵线性相关(第一行乘以-u加上第二行乘以-v等于第三行），所以取前两维，两个点构成了4行的矩阵（X分别投影到相机1和相机2），就是如下的操作，求出的是4维的结果[X,Y,Z,A]，所以需要除以最后一维使之为1，就成了[X,Y,Z,1]这种齐次形式</span></span><br><span class="line">    A.<span class="built_in">block</span>&lt;<span class="number">1</span>,<span class="number">4</span>&gt;(<span class="number">0</span>,<span class="number">0</span>) = <span class="built_in">x_c1</span>(<span class="number">0</span>) * Tc1w.<span class="built_in">block</span>&lt;<span class="number">1</span>,<span class="number">4</span>&gt;(<span class="number">2</span>,<span class="number">0</span>) - Tc1w.<span class="built_in">block</span>&lt;<span class="number">1</span>,<span class="number">4</span>&gt;(<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">    A.<span class="built_in">block</span>&lt;<span class="number">1</span>,<span class="number">4</span>&gt;(<span class="number">1</span>,<span class="number">0</span>) = <span class="built_in">x_c1</span>(<span class="number">1</span>) * Tc1w.<span class="built_in">block</span>&lt;<span class="number">1</span>,<span class="number">4</span>&gt;(<span class="number">2</span>,<span class="number">0</span>) - Tc1w.<span class="built_in">block</span>&lt;<span class="number">1</span>,<span class="number">4</span>&gt;(<span class="number">1</span>,<span class="number">0</span>);</span><br><span class="line">    A.<span class="built_in">block</span>&lt;<span class="number">1</span>,<span class="number">4</span>&gt;(<span class="number">2</span>,<span class="number">0</span>) = <span class="built_in">x_c2</span>(<span class="number">0</span>) * Tc2w.<span class="built_in">block</span>&lt;<span class="number">1</span>,<span class="number">4</span>&gt;(<span class="number">2</span>,<span class="number">0</span>) - Tc2w.<span class="built_in">block</span>&lt;<span class="number">1</span>,<span class="number">4</span>&gt;(<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">    A.<span class="built_in">block</span>&lt;<span class="number">1</span>,<span class="number">4</span>&gt;(<span class="number">3</span>,<span class="number">0</span>) = <span class="built_in">x_c2</span>(<span class="number">1</span>) * Tc2w.<span class="built_in">block</span>&lt;<span class="number">1</span>,<span class="number">4</span>&gt;(<span class="number">2</span>,<span class="number">0</span>) - Tc2w.<span class="built_in">block</span>&lt;<span class="number">1</span>,<span class="number">4</span>&gt;(<span class="number">1</span>,<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 解方程 AX=0</span></span><br><span class="line">    <span class="function">Eigen::JacobiSVD&lt;Eigen::Matrix4f&gt; <span class="title">svd</span><span class="params">(A, Eigen::ComputeFullV)</span></span>;</span><br><span class="line"></span><br><span class="line">    Eigen::Vector4f x3Dh = svd.<span class="built_in">matrixV</span>().<span class="built_in">col</span>(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">x3Dh</span>(<span class="number">3</span>)==<span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Euclidean coordinates</span></span><br><span class="line">    x3D = x3Dh.<span class="built_in">head</span>(<span class="number">3</span>)/<span class="built_in">x3Dh</span>(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="使用opencv进行三角化">9.3 使用OpenCV进行三角化</h3>
+<p>OpenCV也提供接口进行三角化，且可以批量操作：<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d9/d0c/group__calib3d.html#gad3fc9a0c82b08df034234979960b778c">cv::triangulatePoints</a></p>
+<h2 id="十orb_slam中的初始化">十、ORB_SLAM中的初始化</h2>
+<p>ORB_SLAM中对于初始化部分的操作虽然基础原理离不开上面的内容，但是具体实现上有很多细节，不仅仅反应作者的深厚算法功底，也反映了作者的工程能力。我们这里介绍<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB_SLAM</a>中初始化部分的一些特殊操作</p>
+<h3 id="自动选择homography或者fundamental模型进行初始化">10.1 自动选择Homography或者Fundamental模型进行初始化</h3>
+<p>在<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB_SLAM</a>中，初始化阶段在特征提取和特征点匹配完成后，会开辟两个线程同时计算H矩阵和F矩阵，根据得分选择更好的模型进行<span class="math inline">\(R,t\)</span>分解并初始化。</p>
+<p>计算H矩阵和F矩阵的时候采用的是RANSAC算法，默认进行200个迭代，每次迭代随机选择8对匹配点对，然后根据这8对匹配点对计算H或者F矩阵，然后分别计算分数。这里的分数计算会计算双边投影误差。也就是，根据8对匹配点对，求出<span class="math inline">\(F_1\)</span>到<span class="math inline">\(F_2\)</span>的F/H矩阵，同时将该矩阵取逆，得到<span class="math inline">\(F_2\)</span>到<span class="math inline">\(F_1\)</span>的F/H矩阵，然后将两个矩阵分别作用在所有匹配点对上，计算双边投影误差，最后将两个误差相加，作为该模型的分数。</p>
+<p><strong>H矩阵的投影误差计算</strong> 由于H矩阵可以将<span class="math inline">\(p_1\)</span>投影到<span class="math inline">\(p_2^{\prime}\)</span>，因此从投影误差可以直接计算<span class="math inline">\(p_2\)</span>到<span class="math inline">\(p_2^{\prime}\)</span>的距离。</p>
+<p><strong>F矩阵的投影误差计算</strong> F矩阵可以将<span class="math inline">\(p_1\)</span>投影到图像2的极线上，因此投影误差计算的是<span class="math inline">\(p_2\)</span>到极线的距离。具体计算方式如下：</p>
+<p><span class="math display">\[
+d = \frac{au_2+bv_2+c}{\sqrt{a^2+b^2}}
+\]</span></p>
+<p>其中</p>
+<p><span class="math display">\[
+\begin{split}
+\begin{bmatrix}{}
+f_{11}&amp;f_{12}&amp;f_{13}\\
+f_{21}&amp;f_{22}&amp;f_{23}\\
+f_{31}&amp;f_{32}&amp;f_{33}
+\end{bmatrix}
+\begin{bmatrix}{}
+u_1\\v_1\\1
+\end{bmatrix}
+= \
+\begin{bmatrix}
+a&amp;b&amp;c
+\end{bmatrix}
+\end{split}
+\]</span></p>
+<h3 id="从hf矩阵恢复rt">10.2 从H、F矩阵恢复R、t</h3>
+<p>选择了H或者F模型之后，会对H/F进行分解得到R、t。对于每一种[R,t]组合，会对所有匹配点对进行三角化，然后对三角化出来的3D点进行检查，去除以下情况的点：</p>
+<ol type="1">
+<li>深度为负（需满足在两个相机下都是正的）</li>
+<li>重投影误差大于某个阈值（默认为2个像素）</li>
+</ol>
+<p>同时，对每个点会统计其到两个相机光心的夹角，最后对所有夹角进行从小到大排序，选择第50个夹角，如果这个夹角小于1度，会认为初始化失败。</p>
+<h3 id="只在特征金字塔的最底层进行特征点匹配">10.3 只在特征金字塔的最底层进行特征点匹配</h3>
+<p>在<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB_SLAM</a>中，初始化阶段特征点匹配是在特征金字塔的最底层进行的。这一点也可以理解。图像金字塔主要是用来解决移动造成的尺度变化，而在初始化阶段，两帧图像不会有大的尺度变化，因此只需要在最底层进行匹配即可。</p>
+<h2 id="附录a在复现过程中的一些问题">附录A：在复现过程中的一些问题</h2>
+<p>PS：本文提供详细注释的精简代码，并附有demo：<a target="_blank" rel="noopener" href="https://github.com/zeal-up/ORB_SLAM_Tracking">https://github.com/zeal-up/ORB_SLAM_Tracking</a></p>
+<h3 id="a-1-h矩阵的分数一直比f模型的分数低">A-1 H矩阵的分数一直比F模型的分数低</h3>
+<p>在实验的过程中发现，H矩阵的分数一直比F模型的分数低，初始化时一直是选择的F模型进行初始化。后来发现ORBSLAM3中有一个bug,在使用H模型重建时并没有对3D点赋值，所以H模型其实可能一直没有被用上。<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3/pull/806">https://github.com/UZ-SLAMLab/ORB_SLAM3/pull/806</a></p>
+<h3 id="a-2-与opencv求解hf矩阵的对比">A-2 与OpenCV求解H/F矩阵的对比</h3>
+<p>笔者在使用<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB_SLAM</a>提供的代码进行初始化的时候很容易失败，而且每次运行的结果可能都不太相同。后来尝试使用OpenCV的接口求解H/F矩阵，发现每次运行的结果都比较一致，而且很少失败。OpenCV在求解H/F矩阵时也是用的RANSAC方法，区别比较大的应该是分数的计算。<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB_SLAM</a>中计算分数的时候是计算双边投影误差，而OpenCV中计算分数的时候是计算内点个数。这两种方法的区别可能导致了<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB_SLAM</a>中的实现对随机数非常敏感，每次运行的结果都不一样。</p>
+<p>同时，使用<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB_SLAM</a>的实现找出来的H/F矩阵，很容易在后续的<code>三角化阶段</code>被拒绝。而使用OpenCV接口求解的H/F矩阵，很少被拒绝。</p>
+<p>另外，使用OpenCV的接口计算H、F矩阵，速度要比<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB_SLAM</a>中的实现快很多，一个原因可能还是双边投影误差的计算需要两次投影。</p>
+<h2 id="附录bdemo结果">附录B：Demo结果</h2>
+<p>PS：本文提供详细注释的精简代码，并附有demo：<a target="_blank" rel="noopener" href="https://github.com/zeal-up/ORB_SLAM_Tracking">https://github.com/zeal-up/ORB_SLAM_Tracking</a></p>
+<h3 id="b.1-特征提取结果">B.1 特征提取结果</h3>
+<p>同时可视化特征点的角度方向 <img src="./imgs/run_01-features.png" alt="ORB特征提取" /></p>
+<h3 id="b.2-特征点匹配">B.2 特征点匹配</h3>
+<figure>
+<img src="./imgs/run_02-matches.png" alt="" /><figcaption>特征点匹配</figcaption>
+</figure>
+<h3 id="b.3-成功三角化的特征点">B.3 成功三角化的特征点</h3>
+<figure>
+<img src="./imgs/run_04-finestFeaturesWithTriangulated.png" alt="" /><figcaption>成功三角化的特征点</figcaption>
+</figure>
+<h3 id="b.4-三角化的点">B.4 三角化的点</h3>
+<figure>
+<img src="./imgs/run_05-3d_points.gif" alt="" /><figcaption>3D点</figcaption>
+</figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/" title="ORB-SLAM3保姆级教程——详解地图初始化（基础矩阵&#x2F;单应矩阵&#x2F;三角化的实际应用）">https://zeal-up.github.io/2023/12/05/orbslam/orbslam3-MapInitialization/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/slam/" rel="tag"># slam</a>
+              <a href="/tags/SLAM-Theory/" rel="tag"># SLAM_Theory</a>
+              <a href="/tags/%E5%8D%95%E5%BA%94%E7%9F%A9%E9%98%B5/" rel="tag"># 单应矩阵</a>
+              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A9%E9%98%B5/" rel="tag"># 基础矩阵</a>
+              <a href="/tags/%E4%B8%89%E8%A7%92%E5%8C%96/" rel="tag"># 三角化</a>
+              <a href="/tags/%E5%88%9D%E5%A7%8B%E5%8C%96/" rel="tag"># 初始化</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/11/14/orbslam/DBoW2/" rel="prev" title="ORB-SLAM3保姆级教程——DBoW2从理论到实现">
+                  <i class="fa fa-chevron-left"></i> ORB-SLAM3保姆级教程——DBoW2从理论到实现
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/02/08/thirdparty/opencv_deallocate/" rel="next" title="OpenCV对象析构时错误">
+                  OpenCV对象析构时错误 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="df8e7ac64b3866bc3c1fc14719d1329a"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"covS4Q3Q0SaMRjqI2VomagVm-gzGzoHsz","app_key":"iK7kdlu4InjORoPr3oksi1IM","server_url":"https://covs4q3q.lc-cn-n1-shared.com","security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>

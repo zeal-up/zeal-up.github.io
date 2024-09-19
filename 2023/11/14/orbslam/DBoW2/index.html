@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Bag of Words - 词袋模型 Bag of Words模型是信息检索领域常用的文档表示方法。简单来说，不同的单词可以组成一段文本，我们不考虑这些单词出现的频率，那么这段文本就可以用这些单词出现的频率直方图表示。这些单词就是Words，直方图就是Bag of Words。 举个例子 （来自维基百科Bag of Word）： 文本1：John likes to watch movies. M">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ORB-SLAM3保姆级教程——DBoW2从理论到实现">
+<meta property="og:url" content="https://zeal-up.github.io/2023/11/14/orbslam/DBoW2/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="Bag of Words - 词袋模型 Bag of Words模型是信息检索领域常用的文档表示方法。简单来说，不同的单词可以组成一段文本，我们不考虑这些单词出现的频率，那么这段文本就可以用这些单词出现的频率直方图表示。这些单词就是Words，直方图就是Bag of Words。 举个例子 （来自维基百科Bag of Word）： 文本1：John likes to watch movies. M">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/11/14/orbslam/DBoW2/imgs/01-vocabulary_tre.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/11/14/orbslam/DBoW2/imgs/02-process_to_build_tree.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/11/14/orbslam/DBoW2/imgs/03-dbow2_data_structure.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/11/14/orbslam/DBoW2/imgs/04-LoopDetector.gif">
+<meta property="article:published_time" content="2023-11-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2024-09-19T08:22:54.901Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="slam">
+<meta property="article:tag" content="SLAM_Theory">
+<meta property="article:tag" content="回环检测">
+<meta property="article:tag" content="DBoW2">
+<meta property="article:tag" content="Orbslam">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/11/14/orbslam/DBoW2/imgs/01-vocabulary_tre.png">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/11/14/orbslam/DBoW2/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/11/14/orbslam/DBoW2/","path":"2023/11/14/orbslam/DBoW2/","title":"ORB-SLAM3保姆级教程——DBoW2从理论到实现"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ORB-SLAM3保姆级教程——DBoW2从理论到实现 | Zeal's Blog</title>
+  
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+  <a target="_blank" rel="noopener" href="https://github.com/zeal-up" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#bag-of-words---%E8%AF%8D%E8%A2%8B%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">Bag of Words - 词袋模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BE%E4%B8%AA%E4%BE%8B%E5%AD%90"><span class="nav-number">1.1.</span> <span class="nav-text">举个例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E8%AF%8D%E6%95%B0%E9%87%8F%E8%BF%87%E5%A4%9A%E9%97%AE%E9%A2%98"><span class="nav-number">1.2.</span> <span class="nav-text">单词数量过多问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E5%83%8F%E7%9A%84bag-of-words"><span class="nav-number">2.</span> <span class="nav-text">图像的Bag of Words</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%BE%E5%83%8Fbag-of-words%E8%AF%8D%E6%B1%87%E8%A1%A8%E7%9A%84%E6%9E%84%E5%BB%BA"><span class="nav-number">2.1.</span> <span class="nav-text">图像Bag of Words词汇表的构建</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%8D%E6%B1%87%E6%9D%83%E9%87%8D"><span class="nav-number">3.</span> <span class="nav-text">词汇权重</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#term-frequency-tf"><span class="nav-number">3.1.</span> <span class="nav-text">Term-Frequency : TF</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#inverse-document-frequency-idf"><span class="nav-number">3.2.</span> <span class="nav-text">Inverse Document Frequency : IDF</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tf-idf"><span class="nav-number">3.3.</span> <span class="nav-text">TF-IDF</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%8D%E5%85%B8%E5%8F%8A%E8%AF%8D%E6%B1%87%E6%A0%91%E5%88%9B%E5%BB%BA"><span class="nav-number">4.</span> <span class="nav-text">词典及词汇树创建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%AF%8D%E6%B1%87%E6%A0%91"><span class="nav-number">4.1.</span> <span class="nav-text">创建词汇树</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%AF%8D%E5%85%B8"><span class="nav-number">4.2.</span> <span class="nav-text">创建词典</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%A1%E7%AE%97%E5%8D%95%E8%AF%8D%E6%9D%83%E9%87%8D%E5%8D%B3%E5%8F%B6%E5%AD%90%E8%8A%82%E7%82%B9%E6%9D%83%E9%87%8D"><span class="nav-number">4.3.</span> <span class="nav-text">计算单词权重（即叶子节点权重）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%8D%E5%85%B8%E5%8F%8A%E8%AF%8D%E6%B1%87%E6%A0%91%E7%9A%84%E4%BF%9D%E5%AD%98"><span class="nav-number">4.4.</span> <span class="nav-text">词典及词汇树的保存</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E5%9B%BE%E7%89%87%E5%88%B0%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">5.</span> <span class="nav-text">添加图片到数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E7%89%B9%E5%BE%81%E9%9B%86%E5%90%88%E8%AE%A1%E7%AE%97bag-of-words"><span class="nav-number">5.1.</span> <span class="nav-text">通过特征集合计算Bag of Words</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E4%B8%AD%E7%9A%84tf-idf%E6%9D%83%E9%87%8D%E7%9A%84%E8%AE%A1%E7%AE%97%E6%96%B9%E5%BC%8F"><span class="nav-number">5.2.</span> <span class="nav-text">实现中的TF-IDF权重的计算方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84"><span class="nav-number">5.3.</span> <span class="nav-text">数据库的存储结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A3%80%E7%B4%A2%E7%9B%B8%E4%BC%BC%E5%9B%BE%E7%89%87%E5%8F%8A%E7%89%B9%E5%BE%81%E7%82%B9%E5%8C%B9%E9%85%8D"><span class="nav-number">6.</span> <span class="nav-text">使用数据库检索相似图片及特征点匹配</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%BE%E5%83%8F%E6%A3%80%E7%B4%A2"><span class="nav-number">6.1.</span> <span class="nav-text">图像检索</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E7%82%B9%E5%8C%B9%E9%85%8D"><span class="nav-number">6.2.</span> <span class="nav-text">特征点匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E7%82%B9%E5%8C%B9%E9%85%8D%E7%AE%97%E6%B3%95"><span class="nav-number">6.3.</span> <span class="nav-text">特征点匹配算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BE%93%E5%85%A5"><span class="nav-number">6.3.1.</span> <span class="nav-text">输入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BE%93%E5%87%BA"><span class="nav-number">6.3.2.</span> <span class="nav-text">输出</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4"><span class="nav-number">6.3.3.</span> <span class="nav-text">步骤</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8dbow2%E5%81%9A%E5%9B%9E%E7%8E%AF%E6%A3%80%E6%B5%8B"><span class="nav-number">7.</span> <span class="nav-text">使用DBoW2做回环检测</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%95%B0%E5%BD%92%E4%B8%80%E5%8C%96"><span class="nav-number">7.1.</span> <span class="nav-text">分数归一化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%80%99%E9%80%89%E5%B8%A7%E8%81%9A%E5%90%88"><span class="nav-number">7.2.</span> <span class="nav-text">候选帧聚合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E8%BF%9E%E7%BB%AD%E4%B8%80%E8%87%B4%E6%80%A7"><span class="nav-number">7.3.</span> <span class="nav-text">时间连续一致性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E6%AD%A5%E9%AA%A4"><span class="nav-number">7.4.</span> <span class="nav-text">算法步骤</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%8F%8A%E5%AE%9E%E6%93%8D"><span class="nav-number">8.</span> <span class="nav-text">代码及实操</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E8%B5%84%E6%96%99"><span class="nav-number">9.</span> <span class="nav-text">相关资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/11/14/orbslam/DBoW2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ORB-SLAM3保姆级教程——DBoW2从理论到实现 | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ORB-SLAM3保姆级教程——DBoW2从理论到实现
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-11-14 00:00:00" itemprop="dateCreated datePublished" datetime="2023-11-14T00:00:00+08:00">2023-11-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-09-19 16:22:54" itemprop="dateModified" datetime="2024-09-19T16:22:54+08:00">2024-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/SLAM/Orbslam/" itemprop="url" rel="index"><span itemprop="name">Orbslam</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/11/14/orbslam/DBoW2/" class="post-meta-item leancloud_visitors" data-flag-title="ORB-SLAM3保姆级教程——DBoW2从理论到实现" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="ORB-SLAM3保姆级教程——DBoW2从理论到实现" href="/2023/11/14/orbslam/DBoW2/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::46760b7157397df11976e8695456a233" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="bag-of-words---词袋模型">Bag of Words - 词袋模型</h2>
+<p><code>Bag of Words</code>模型是信息检索领域常用的文档表示方法。简单来说，不同的单词可以组成一段文本，我们不考虑这些单词出现的频率，那么这段文本就可以用这些单词出现的频率直方图表示。这些单词就是<code>Words</code>，直方图就是<code>Bag of Words</code>。</p>
+<h3 id="举个例子">举个例子</h3>
+<p>（来自维基百科<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E8%AF%8D%E8%A2%8B%E6%A8%A1%E5%9E%8B">Bag of Word</a>）：</p>
+<p>文本1：John likes to watch movies. Mary likes movies too 文本2：John also likes to watch football games.</p>
+<p><strong>词典：["John", "likes", "to", "watch", "movies", "also", "football", "games", "Mary", "too"]</strong></p>
+<p>那么这两段文本的<code>Bag of Words</code>就是： 文本1的<code>Bag of Words</code>：[1, 2, 1, 1, 2, 0, 0, 0, 1, 1] 文本2的<code>Bag of Words</code>：[1, 1, 1, 1, 0, 1, 1, 1, 0, 0] 其中的数字表示对应位置单词出现的次数</p>
+<h3 id="单词数量过多问题">单词数量过多问题</h3>
+<p>如果文本中的单词数量过多，那么<code>Bag of Words</code>的向量就会非常稀疏，而且向量长度会非常大。这样的话，就会导致计算距离的时候，计算量非常大。因此，需要对单词进行聚类，将相似的单词聚类到一起，这样就可以减少单词的数量。</p>
+<p>一个最简单的处理方法是使用哈希表（Hashing），将单词通过哈希映射到一个固定的长度的向量中。这样的话，就可以将单词的数量控制在一个固定的长度。但是这样的话，就会导致相似的单词被哈希到不同的位置，这样的话，相似的单词就无法聚类到一起了。</p>
+<h2 id="图像的bag-of-words">图像的Bag of Words</h2>
+<p><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E8%AF%8D%E8%A2%8B%E6%A8%A1%E5%9E%8B">Bag of Word</a>模型是文本检索中一个很常用的模型。在图像检索中，也可以使用这个模型。但是图像和文本有很大的不同，文本本身可以看作是一个离散信号，由不同的单词组成;但是图像是一个二位矩阵，没法直接当作一些元素的集合。因此，图像的<code>Bag of Words</code>模型需要经过一些处理才能够使用。</p>
+<p>简单来说，通过一些特征提取算法，可以将图像中的特征点提取出来，然后将这些特征点当作单词，就可以使用<code>Bag of Words</code>模型了。</p>
+<h3 id="图像bag-of-words词汇表的构建">图像Bag of Words词汇表的构建</h3>
+<p>通过离线对一大批数据进行特征点提取之后会得到非常多的特征点和特征描述符。通过对这些描述符进行<code>K-mean</code>/<code>K-means++</code>聚类，可以得到一批中心点，称为<code>nodes</code>。在进行聚类的过程中因为求平均，会导致如果特征描述符是二值向量的话，会导致聚类中心点的二值向量不是0或1，而是浮点数。这样的话，就需要对这些中心点的值进行二值化，得到<code>nodes</code>。这些<code>nodes</code>就是<code>Bag of Words</code>中的<code>words</code>。也就是词汇。</p>
+<p>那么<code>Bag of Words</code>就是图像特征点集在这些词汇的频率直方图（或者说频率向量）</p>
+<p>具体来说，新来一个图片，进行特征点提取之后，对于每个特征点，计算其与<code>nodes</code>中的每个<code>node</code>的距离，找到最近的<code>node</code>，然后将这个<code>node</code>的索引作为这个特征点的<code>word</code>。这样就得到了这张图片的<code>word</code>的集合。然后对这个集合进行直方图统计，就得到了这张图片的<code>Bag of Words</code>。</p>
+<h2 id="词汇权重">词汇权重</h2>
+<p>不同的单词所包含的信息量是不同的，比如<code>frequency</code>这个词就比<code>the</code>这个词更有区分度，应该赋予这些高区分度的单词更大的权重，反之亦然。下面介绍几种常用的权重计算方式。</p>
+<h3 id="term-frequency-tf">Term-Frequency : TF</h3>
+<p>Term Frequency(TF) :</p>
+<p><span class="math display">\[w_i^{TF} = \frac{n_{id}}{n_d}\]</span></p>
+<p>其中</p>
+<ul>
+<li><span class="math inline">\(n_{id}\)</span> : number of occurrences of word <span class="math inline">\(i\)</span> in document <span class="math inline">\(d\)</span>,</li>
+<li><span class="math inline">\(n_d\)</span> : number of words in document <span class="math inline">\(d\)</span>.</li>
+</ul>
+<p><strong>直观含义：某个特征在当前图片中出现的频率</strong></p>
+<h3 id="inverse-document-frequency-idf">Inverse Document Frequency : IDF</h3>
+<p>Inverse document frequency (IDF):</p>
+<p><span class="math display">\[w_i^{IDF} = log(\frac{N}{N_i})\]</span></p>
+<p>其中</p>
+<ul>
+<li><span class="math inline">\(N\)</span>: number of documents</li>
+<li><span class="math inline">\(N_i\)</span>: number of documents containing word <span class="math inline">\(i\)</span>.</li>
+</ul>
+<p><strong>直观含义：某个特征在数据集中出现的频次</strong></p>
+<h3 id="tf-idf">TF-IDF</h3>
+<p>这是使用比较多的权重计算方式，也是在<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a>中的默认权重计算方式</p>
+<p>Term Frequency – Inverse Document Frequency</p>
+<p><span class="math display">\[w_i = \frac{n_{id}}{n_d} log(\frac{N}{N_i})\]</span>.</p>
+<p><strong>直观含义：在整个数据集中频繁出现的词汇，比如说<code>the</code>（在图像中则是频繁出现的特征）区分度较小，权重应该降低。但是如果某个单词在文档中频繁出现，那么这个单词的权重应该变大</strong></p>
+<p>通过<code>tf-idf</code>的加权，那些较少出现的特征，即更有辨识度的特征就会占据更大的权重。</p>
+<p>相关的权重定义在<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBow">DBoW初始版本的README中有说明</a></p>
+<h2 id="词典及词汇树创建">词典及词汇树创建</h2>
+<p>所谓<code>词典</code>，就是从大量的特征描述符中聚类得到的<code>nodes</code>。这些<code>nodes</code>就是<code>Bag of Words</code>中的<code>words</code>。也就是词汇。这些词汇代表了图像中较为有代表性的特征。</p>
+<p><code>Bag of Words</code>中传统意义上的词典并不具有树结构，只是一些词汇（特征）的集合。但是在<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a>中，词典是具有树结构的。这样的话，可以通过树结构来加速搜索。树只是用来加速搜索的，树的所有叶子节点的集合才是词典。叶子节点也叫<code>words</code>.</p>
+<h3 id="创建词汇树">创建词汇树</h3>
+<p>最终要构建出如下的词汇树</p>
+<figure>
+<img src="./imgs/01-vocabulary_tre.png" alt="" /><figcaption>词汇树</figcaption>
+</figure>
+<p>论文中关于构建词汇树是这样描述的：</p>
+<blockquote>
+<p>To build it, we extract a rich set of features from some training images, independently of those processed online later. The descriptors extracted are ﬁrst discretized into kw binary clusters by performing k-medians clustering with the k-means++ seeding [22]. The medians that result in a non binary value are truncated to 0. These clusters form the ﬁrst level of nodes in the vocabulary tree. Subsequent levels are created by repeating this operation with the descriptors associated to each node, up to Lw times.</p>
+</blockquote>
+<p>论文中的描述与图中的描述有些歧义。图中的叶子节点是<code>level 0</code>。但是在上面这段描述中的意思是自顶向下，<code>node 0</code>是根节点，依次往下聚类。这样的话，叶子节点的层级应该是<code>level Lw</code>。这里的<code>Lw</code>是<code>level word</code>的意思。也就是词汇树的层级。<span class="math inline">\(k_w\)</span>是每个节点的子节点的个数。</p>
+<p>在代码实现中，实际的构建顺序其实是下图这样子：</p>
+<figure>
+<img src="./imgs/02-process_to_build_tree.png" alt="" /><figcaption>代码中的词汇树构建过程</figcaption>
+</figure>
+<h3 id="创建词典">创建词典</h3>
+<p>创建词典的过程实际上只是遍历词汇树，并把所有叶子节点收集起来。</p>
+<h3 id="计算单词权重即叶子节点权重">计算单词权重（即叶子节点权重）</h3>
+<p>这里之以默认的权重计算方式<code>TF-IDF</code>为例。<code>TF-IDF</code>的计算方式在上面已经有说明。在创建词典的时候，只能够先计算<code>IDF</code>项，<code>TF</code>项是当使用这个词典，对一张图片进行<code>Bag of Words</code>的时候才能够计算出来。</p>
+<p>再次复习，<code>IDF</code>中的<code>N</code>是所有的图片的数量，<code>N_i</code>是包含这个词汇的图片的数量。</p>
+<p>因此，计算<code>IDF</code>的时候也需要利用第一步创建的词汇树，统计每个叶子节点的图片数量。具体的计算过程可以如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> each image:</span><br><span class="line">    <span class="keyword">for</span> each feature in image:</span><br><span class="line">        word_id = tree.<span class="built_in">find</span>(word)</span><br><span class="line">        <span class="keyword">if</span> word_id <span class="keyword">not</span> been counted:</span><br><span class="line">            word_Ni[word_id] += <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> each word_id:</span><br><span class="line">    word_idf[word_id] = <span class="built_in">log</span>(N / word_Ni[word_id])</span><br></pre></td></tr></table></figure>
+<h3 id="词典及词汇树的保存">词典及词汇树的保存</h3>
+<p><a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a>对词典和词汇的保存直接使用的是<code>YAML</code>结构，同时利用<code>cv:FFileStorage</code>来进行读写，可以直接保存压缩文件。生成的词典和词汇树文件如下</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">%YAML:1.0</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">vocabulary:</span></span><br><span class="line">   <span class="attr">k:</span> <span class="number">9</span></span><br><span class="line">   <span class="attr">L:</span> <span class="number">3</span></span><br><span class="line">   <span class="attr">scoringType:</span> <span class="number">0</span></span><br><span class="line">   <span class="attr">weightingType:</span> <span class="number">0</span></span><br><span class="line">   <span class="attr">nodes:</span></span><br><span class="line">      <span class="bullet">-</span> &#123; <span class="string">nodeId:1</span>, <span class="string">parentId:0</span>, <span class="string">weight:0.</span>,</span><br><span class="line">          <span class="string">descriptor:&quot;114</span> <span class="number">237</span> <span class="number">18</span> <span class="number">190</span> <span class="number">93</span> <span class="number">135</span> <span class="number">214</span> <span class="number">232</span> <span class="number">143</span> <span class="number">132</span> <span class="number">232</span> <span class="number">11</span> <span class="number">110</span> <span class="number">202</span> <span class="number">37</span> <span class="number">208</span> <span class="number">248</span> <span class="number">251</span> <span class="number">235</span> <span class="number">227</span> <span class="number">78</span> <span class="number">3</span> <span class="number">218</span> <span class="number">255</span> <span class="number">179</span> <span class="number">244</span> <span class="number">143</span> <span class="number">59</span> <span class="number">17</span> <span class="number">63</span> <span class="number">47</span> <span class="number">142</span> <span class="string">&quot; &#125;</span></span><br><span class="line"><span class="string">      - &#123; nodeId:2, parentId:0, weight:0.,</span></span><br><span class="line"><span class="string">          descriptor:&quot;</span><span class="number">190</span> <span class="number">116</span> <span class="number">236</span> <span class="number">103</span> <span class="number">236</span> <span class="number">127</span> <span class="number">255</span> <span class="number">216</span> <span class="number">123</span> <span class="number">238</span> <span class="number">247</span> <span class="number">191</span> <span class="number">91</span> <span class="number">125</span> <span class="number">223</span> <span class="number">59</span> <span class="number">255</span> <span class="number">221</span> <span class="number">247</span> <span class="number">231</span> <span class="number">173</span> <span class="number">246</span> <span class="number">255</span> <span class="number">138</span> <span class="number">127</span> <span class="number">251</span> <span class="number">229</span> <span class="number">181</span> <span class="number">231</span> <span class="number">253</span> <span class="number">94</span> <span class="number">243</span> <span class="string">&quot; &#125;</span></span><br><span class="line"><span class="string">      - ...</span></span><br><span class="line"><span class="string">      - &#123; nodeId:9, parentId:0, weight:0.,</span></span><br><span class="line"><span class="string">          descriptor:&quot;</span><span class="number">208</span> <span class="number">188</span> <span class="number">159</span> <span class="number">182</span> <span class="number">168</span> <span class="number">236</span> <span class="number">17</span> <span class="number">7</span> <span class="number">190</span> <span class="number">159</span> <span class="number">130</span> <span class="number">25</span> <span class="number">247</span> <span class="number">183</span> <span class="number">64</span> <span class="number">91</span> <span class="number">161</span> <span class="number">119</span> <span class="number">109</span> <span class="number">16</span> <span class="number">58</span> <span class="number">77</span> <span class="number">147</span> <span class="number">35</span> <span class="number">217</span> <span class="number">227</span> <span class="number">126</span> <span class="number">89</span> <span class="number">128</span> <span class="number">64</span> <span class="number">135</span> <span class="number">43</span> <span class="string">&quot; &#125;</span></span><br><span class="line"><span class="string">      - &#123; nodeId:717, parentId:9, weight:0.,</span></span><br><span class="line"><span class="string">          descriptor:&quot;</span><span class="number">208</span> <span class="number">62</span> <span class="number">159</span> <span class="number">183</span> <span class="number">170</span> <span class="number">106</span> <span class="number">52</span> <span class="number">55</span> <span class="number">190</span> <span class="number">191</span> <span class="number">130</span> <span class="number">245</span> <span class="number">247</span> <span class="number">183</span> <span class="number">192</span> <span class="number">91</span> <span class="number">167</span> <span class="number">119</span> <span class="number">108</span> <span class="number">0</span> <span class="number">57</span> <span class="number">205</span> <span class="number">131</span> <span class="number">2</span> <span class="number">200</span> <span class="number">163</span> <span class="number">127</span> <span class="number">144</span> <span class="number">168</span> <span class="number">112</span> <span class="number">135</span> <span class="number">27</span> <span class="string">&quot; &#125;</span></span><br><span class="line"><span class="string">      - &#123; nodeId:718, parentId:9, weight:0.,</span></span><br><span class="line"><span class="string">          descriptor:&quot;</span><span class="number">208</span> <span class="number">189</span> <span class="number">31</span> <span class="number">254</span> <span class="number">43</span> <span class="number">204</span> <span class="number">85</span> <span class="number">103</span> <span class="number">185</span> <span class="number">19</span> <span class="number">226</span> <span class="number">56</span> <span class="number">190</span> <span class="number">183</span> <span class="number">32</span> <span class="number">115</span> <span class="number">162</span> <span class="number">247</span> <span class="number">108</span> <span class="number">0</span> <span class="number">105</span> <span class="number">203</span> <span class="number">146</span> <span class="number">111</span> <span class="number">209</span> <span class="number">243</span> <span class="number">86</span> <span class="number">27</span> <span class="number">0</span> <span class="number">16</span> <span class="number">167</span> <span class="number">43</span> <span class="string">&quot; &#125;</span></span><br><span class="line"><span class="string">      - ...</span></span><br><span class="line"><span class="string">      - 省略后续所有节点...</span></span><br><span class="line"><span class="string">   words:</span></span><br><span class="line"><span class="string">      - &#123; wordId:0, nodeId:19 &#125;</span></span><br><span class="line"><span class="string">      - &#123; wordId:1, nodeId:20 &#125;</span></span><br><span class="line"><span class="string">      - &#123; wordId:2, nodeId:21 &#125;</span></span><br><span class="line"><span class="string">      - &#123; wordId:3, nodeId:22 &#125;</span></span><br><span class="line"><span class="string">      - &#123; wordId:4, nodeId:23 &#125;</span></span><br><span class="line"><span class="string">      - 省略后续所有单词...</span></span><br></pre></td></tr></table></figure>
+<p>上面有几点值得注意：</p>
+<ol type="1">
+<li>由于上文提到的创建词汇树时候的遍历顺序问题（实际上即不是广度优先也不是深度优先遍历），因此会出现根节点的最后一个子节点，也就是上面的<code>nodeId:9</code>的子节点的序号特别大，这个序号是根据遍历顺序来的，而不是根据树的结构来的。</li>
+<li>特征描述符（以ORB特征为说明）在<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a>中的类型是<code>cv::Mat, type = CV_8UC1</code>的矩阵，一个<code>ORB</code>特征一共256bit,因此保存的时候使用32个<code>unsigned char</code>来保存。可以看到上面的<code>descriptor</code>字段是一串32个数字，每个数字在0-255之间</li>
+<li>只有叶子节点（也就是<code>word</code>）才有权重，其他的权重都是0</li>
+</ol>
+<h2 id="添加图片到数据库">添加图片到数据库</h2>
+<p>添加图片到数据库的过程可以理解成在实时运行时，对新增的图片计算<code>Bag of Words</code>，同时要计算所谓<code>Direct index</code>和<code>Inverted index</code>。</p>
+<p><code>Inverted index</code>存储的是每个<code>word</code>对应的图片的索引。当一个新的图片被送进来计算<code>Bag of Words</code>时，就可以得到该图像每个word中包含的其他图片的索引。这样可以大大加速搜索。</p>
+<p><code>Direct index</code>存储的是每个图片的<code>word</code>中包含的特征点的索引。主要是用来做特征点匹配加速使用。当一帧图像<span class="math inline">\(I_t\)</span>被送进来，并通过某种方式（上一帧或者回环检测）得到其对应的图片<code>\prime&#123;I_t&#125;</code>的时候，就可以通过<code>Direct index</code>找到这两帧图像中相同<code>word</code>中包含的特征点，在这些特征点之间再进行检索和匹配会比直接对所有特征点进行距离计算、匹配要快很多。</p>
+<h3 id="通过特征集合计算bag-of-words">通过特征集合计算<code>Bag of Words</code></h3>
+<p>实际上更准确的描述是<code>特征集合</code>转<code>Bag of Words</code>。需要先用特征点检测器提取特征点，然后用特征描述器计算特征描述符。然后对这些特征描述符进行<code>Bag of Words</code>。</p>
+<p>每一个特征可以通过<code>词汇树</code>找到最终的一个<code>node</code>，这个<code>node</code>的投票加1。对所有特征执行这个操作这后就得出了<code>words</code>的直方图。这个直方图就是<code>Bag of Words</code>。</p>
+<p>这里的特征集合是指一张图片中的所有特征点的描述子。</p>
+<p>具体的过程其实很简单：</p>
+<ol type="1">
+<li>对于每个特征点，找到其对应的<code>node</code>，也就找到了这个特征点的<code>word</code>。</li>
+<li>收集该<code>word</code>的权重，并在<code>BoW vector</code>的对应位置上加上这个权重。</li>
+<li>遍历完所有的特征点之后，对<code>BoW vector</code>进行归一化，归一化后的<code>vector</code>就是这张图片的<code>Bag of Words</code>。</li>
+</ol>
+<h3 id="实现中的tf-idf权重的计算方式">实现中的TF-IDF权重的计算方式</h3>
+<p><code>IDF</code>的计算在上面已经有说明，每个<code>word</code>的<code>IDF</code>在词典构建的时候就已经确定了。至于<code>TF</code>项，也就是某个<code>word</code>在某张图片中出现的频率，并没有被显式的计算出来。而是在计算<code>BoW vector</code>的时候，直接对每个<code>feature</code>的<code>word</code>的权重进行累加。这样的话，后续再进行一次归一化，<code>BoW vector</code>中的每个<code>word</code>的权重就是<code>TF-IDF</code></p>
+<h3 id="数据库的存储结构">数据库的存储结构</h3>
+<p>数据库的存储结构在词典/词汇表的存储结构后面添加了一个<code>database</code>字段</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">%YAML:1.0</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">vocabulary:</span></span><br><span class="line">   <span class="attr">k:</span> <span class="number">9</span></span><br><span class="line">   <span class="attr">L:</span> <span class="number">3</span></span><br><span class="line">   <span class="attr">scoringType:</span> <span class="number">0</span></span><br><span class="line">   <span class="attr">weightingType:</span> <span class="number">0</span></span><br><span class="line">   <span class="string">nodes:...</span></span><br><span class="line">   <span class="string">words:...</span></span><br><span class="line"><span class="attr">database:</span></span><br><span class="line">   <span class="attr">nEntries:</span> <span class="number">4</span></span><br><span class="line">   <span class="attr">usingDI:</span> <span class="number">1</span></span><br><span class="line">   <span class="attr">diLevels:</span> <span class="number">0</span></span><br><span class="line">   <span class="attr">invertedIndex:</span></span><br><span class="line">      <span class="bullet">-</span></span><br><span class="line">         <span class="bullet">-</span> &#123; <span class="string">imageId:0</span>, <span class="string">weight:1.5644960771493644e-03</span> &#125;</span><br><span class="line">         <span class="bullet">-</span> &#123; <span class="string">imageId:2</span>, <span class="string">weight:2.0755306357238515e-03</span> &#125;</span><br><span class="line">      <span class="bullet">-</span></span><br><span class="line">         <span class="bullet">-</span> &#123; <span class="string">imageId:3</span>, <span class="string">weight:4.0272643792627289e-03</span> &#125;</span><br><span class="line">      <span class="bullet">-</span></span><br><span class="line">         <span class="bullet">-</span> &#123; <span class="string">imageId:0</span>, <span class="string">weight:1.5644960771493644e-03</span> &#125;</span><br><span class="line">         <span class="bullet">-</span> &#123; <span class="string">imageId:2</span>, <span class="string">weight:4.1510612714477030e-03</span> &#125;</span><br><span class="line">      <span class="bullet">-</span></span><br><span class="line">         <span class="bullet">-</span> &#123; <span class="string">imageId:0</span>, <span class="string">weight:1.5644960771493644e-03</span> &#125;</span><br><span class="line">         <span class="bullet">-</span> &#123; <span class="string">imageId:1</span>, <span class="string">weight:3.7071104700705723e-03</span> &#125;</span><br><span class="line">      <span class="bullet">-</span> <span class="string">...</span></span><br><span class="line">   <span class="attr">directIndex:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="comment"># 图片1</span></span><br><span class="line">         <span class="bullet">-</span></span><br><span class="line">            <span class="attr">nodeId:</span> <span class="number">19</span></span><br><span class="line">            <span class="attr">features:</span></span><br><span class="line">               <span class="bullet">-</span> [ <span class="number">20</span>, <span class="number">40</span>, <span class="number">256</span>, <span class="number">300</span>, <span class="string">...</span>, <span class="string">feature_id</span>]</span><br><span class="line">         <span class="bullet">-</span></span><br><span class="line">            <span class="attr">nodeId:</span> <span class="number">21</span></span><br><span class="line">            <span class="attr">features:</span></span><br><span class="line">               <span class="bullet">-</span> [ <span class="number">34</span> ]</span><br><span class="line">         <span class="bullet">-</span></span><br><span class="line">            <span class="attr">nodeId:</span> <span class="number">22</span></span><br><span class="line">            <span class="attr">features:</span></span><br><span class="line">               <span class="bullet">-</span> [ <span class="number">207</span> ]</span><br><span class="line">      <span class="bullet">-</span> <span class="comment"># 图片2</span></span><br><span class="line">         <span class="bullet">-</span></span><br><span class="line">            <span class="attr">nodeId:</span> <span class="number">19</span></span><br><span class="line">            <span class="attr">features:</span></span><br><span class="line">               <span class="bullet">-</span> [ <span class="number">256</span> ]</span><br><span class="line">         <span class="bullet">-</span> <span class="string">...</span></span><br><span class="line">      <span class="bullet">-</span> <span class="comment"># 图片3</span></span><br><span class="line">         <span class="bullet">-</span></span><br><span class="line">            <span class="attr">nodeId:</span> <span class="number">19</span></span><br><span class="line">            <span class="attr">features:</span></span><br><span class="line">               <span class="bullet">-</span> [ <span class="number">256</span> ]</span><br><span class="line">         <span class="bullet">-</span> <span class="string">...</span></span><br><span class="line">      <span class="bullet">-</span> <span class="comment"># 图片4</span></span><br><span class="line">         <span class="bullet">-</span></span><br><span class="line">            <span class="attr">nodeId:</span> <span class="number">19</span></span><br><span class="line">            <span class="attr">features:</span></span><br><span class="line">               <span class="bullet">-</span> [ <span class="number">256</span> ]</span><br><span class="line">         <span class="bullet">-</span> <span class="string">...</span></span><br></pre></td></tr></table></figure>
+<h2 id="使用数据库检索相似图片及特征点匹配">使用数据库检索相似图片及特征点匹配</h2>
+<h3 id="图像检索">图像检索</h3>
+<p>过程可以拆解成两个步骤：</p>
+<ol type="1">
+<li>计算<code>Bag of Words</code>，得到<code>BoW vector</code>，记为<span class="math inline">\(v_t\)</span>（注意，<span class="math inline">\(v_t\)</span>的长度为词汇表的长度，也就是词汇树叶子节点的个数）</li>
+<li>从数据库中检索与该<code>BoW vector</code>距离最近的图片</li>
+</ol>
+<p>但是实际上，由于有了<code>Inverse index</code>，可以直接从<code>Inverse index</code>拿到<span class="math inline">\(v_t\)</span>中每一个<code>word</code>对应的图片的索引。这样就可以直接从数据库中拿到这些图片，然后再计算这些图片与<span class="math inline">\(v_t\)</span>的距离，找到最近的图片。实际计算步骤如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">image_value: map&lt;ImageId, RelavantCoefficient&gt;</span><br><span class="line"><span class="keyword">return</span>: map&lt;ImageId, RelavantCoefficient&gt;</span><br><span class="line"><span class="keyword">for</span> each word in <span class="type">v_t</span>:</span><br><span class="line">    <span class="keyword">for</span> each image in invertedIndex[word]:</span><br><span class="line">        coeff = <span class="built_in">fabs</span>(word.weight - image.weight) - <span class="built_in">fabs</span>(word.weight) - <span class="built_in">fabs</span>(image.weight)</span><br><span class="line">        image_value[image.imageId] += coeff</span><br><span class="line"></span><br><span class="line">sort image_value by <span class="built_in">value</span> (ascending)</span><br><span class="line"></span><br><span class="line">select top N images from image_value -&gt; <span class="keyword">return</span></span><br><span class="line"><span class="keyword">for</span> each image in <span class="keyword">return</span>:</span><br><span class="line">    image.coeff = -image_value[image.imageId] * <span class="number">0.5</span></span><br></pre></td></tr></table></figure>
+<p>这里唯一比较奇怪的是权重的计算。理论上计算<code>BoW vector</code>的距离计算是这样的（以<code>L1</code>距离为例）：</p>
+<p><span class="math display">\[
+d(v_t, v_q) = ||v_t - v_q||_1 = \sum_{i=1}^{N} |v_t[i] - v_q[i]|
+\]</span></p>
+<p>这样计算出来的分数在0-2之间，0代表最好，2代表最差。但是在<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a>为了将最后的分数控制在0-1之间，并且0表示最差，1表示最好，因此对上面的距离计算进行了一些变换：</p>
+<p>首先，<code>L1</code>距离可以写成如下形式：</p>
+<p>（当然，这个转换的前提是<span class="math inline">\(v_t\)</span>和<span class="math inline">\(v_q\)</span>都是经过归一化的）</p>
+<p><span class="math display">\[
+d(v_t, v_q) = ||v_t - v_q||_1 = 2 + \sum_{i=1}^{N} |v_t[i] - v_q[i]| - |v_t[i]| - |v_q[i]|
+\]</span></p>
+<p>将距离的计算拆成两个步骤：</p>
+<p><span class="math display">\[
+\begin{split}
+&amp;d^1(v_t, v_q) = \sum_{i=1}^{N} |v_t[i] - v_q[i]| - |v_t[i]| - |v_q[i]| ,\quad [-2 \ best\  ...\  0 \ worst]\\
+&amp;d(v_t, v_q) = - 0.5 * d^1(v_t, v_q),  \quad[0\ worst\ ...\ 1\ best]
+\end{split}
+\]</span></p>
+<h3 id="特征点匹配">特征点匹配</h3>
+<p>对于图片<span class="math inline">\(I_q\)</span>和<span class="math inline">\(I_d\)</span>, (q for query &amp;&amp; d for destination)，分别拥有特征集合<span class="math inline">\(F_q = \{f_i, i\in N_q\}\)</span>和<span class="math inline">\(F_d = \{f_j, j\in N_d\}\)</span>。其中<span class="math inline">\(N_q\)</span>和<span class="math inline">\(N_d\)</span>分别是两张图片中特征点的个数。<span class="math inline">\(f\)</span>为特征描述子，对于ORB特征来说，<span class="math inline">\(f\in \mathbb{ [ 0,1 ] }^{256}\)</span>。不管是什么特征描述子，传统的进行特征点匹配的做法大概有两种：</p>
+<ol type="1">
+<li><strong>Exhaustive</strong> : 对于每个<span class="math inline">\(f_i\)</span>，计算其与<span class="math inline">\(F_d\)</span>中所有<span class="math inline">\(f_j\)</span>的距离，找到最近的<span class="math inline">\(f_j\)</span>，如果这个距离小于某个阈值，就认为这两个特征点匹配。这种方法的缺点是计算量大，因为需要对<span class="math inline">\(F_d\)</span>中的所有特征点进行距离计算。</li>
+<li><strong>Flaann</strong>: 先对<span class="math inline">\(F_d\)</span>构建<code>KD-tree</code>，然后对于每个<span class="math inline">\(f_i\)</span>，在<code>KD-tree</code>中搜索最近的特征点。一般来说会用<code>flann(Fast Library for Approximate Nearest Neighbors)</code>来加速<code>KD-tree</code>构建和搜索。在论文中作者也对这种方法进行了实验，实际上的效率由于构建<code>KD-tree</code>的额外耗时，<code>flann</code>方法的效率并没有比</li>
+</ol>
+<p>在<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a>中，为了加速特征点匹配的搜索过程，在图像加入数据库的时候，额外保存该图像的每个<code>word</code>所对应的特征点集合，称做所谓的<code>direct index</code>。这样的话，当进行两张图像的特征点匹配的时候，只需要对两张图像逐一遍历<code>word</code>，对两张图片中该<code>word</code>所包含的特征点进行__Exhaustive__的特征点匹配，就可以找到匹配的特征点。由于每个<code>word</code>中包含的特征数量都很有限，因此可以大大提升特征点匹配的效率。</p>
+<p>这里比较值得学习的是代码中的数据结构的设计。在<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a>中，主要用来存储一个图片的数据结构有以下几种</p>
+<figure>
+<img src="./imgs/03-dbow2_data_structure.png" alt="" /><figcaption>DBoW2数据结构</figcaption>
+</figure>
+<p>特征点匹配的步骤在<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a>中，主要是用来当通过<code>BoW vector</code>及一些其他手段检索出__一张__分数最高的候选图片之后，再对这个候选图片进行特征点匹配。通过图片之间的匹配特征点集，可以计算两者的基础矩阵（<code>Fundamental Matrix</code>）。具体怎么算基础矩阵后文再详细讲解，本小节先重点讲解特征点匹配的过程。</p>
+<h3 id="特征点匹配算法">特征点匹配算法</h3>
+<h4 id="输入">输入</h4>
+<ul>
+<li>图片<span class="math inline">\(I_1\)</span>,<span class="math inline">\(I_2\)</span>为两张待做特征点匹配的图片</li>
+<li><span class="math inline">\(F_1\)</span>,<span class="math inline">\(F_2\)</span>为两张图片的特征集合，<span class="math inline">\(F_1 = \{f_i, i\in N_1\}\)</span>，<span class="math inline">\(F_2 = \{f_j, j\in N_2\}\)</span></li>
+<li><span class="math inline">\(D_1\)</span>,<span class="math inline">\(D_2\)</span>为两张图片的<code>direct index</code>，里面存储各个<code>word</code>包含的特征id</li>
+</ul>
+<h4 id="输出">输出</h4>
+<ul>
+<li><span class="math inline">\(M\)</span>为两张图片的匹配特征点集合，<span class="math inline">\(M = \{m_k, k\in N_m\}\)</span>，<span class="math inline">\(m_k = (i, j)\)</span>，<span class="math inline">\(i\)</span>为图片1中的特征id，<span class="math inline">\(j\)</span>为图片2中的特征点id;<span class="math inline">\(N_m\)</span>为匹配特征点的个数</li>
+</ul>
+<h4 id="步骤">步骤</h4>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> d1,<span class="function">d2 <span class="title">in</span> <span class="params">(D1,D2)</span>:</span></span><br><span class="line"><span class="function">      for f1_id in d1.featureIds:</span></span><br><span class="line"><span class="function">         best_dist_1 =</span> DOUBLE_MAX</span><br><span class="line">         best_dist_2 = DOUBLE_MAX</span><br><span class="line">         best_f2_id = <span class="number">-1</span></span><br><span class="line">         <span class="keyword">for</span> f2_id in d2.featureIds:</span><br><span class="line">               dist = <span class="built_in">distance</span>(F1[f1_id], F2[f2_id]) <span class="comment">// 计算特征之间的距离（注意是二值化特征）</span></span><br><span class="line">               <span class="keyword">if</span> dist &lt; best_dist_1:</span><br><span class="line">                  best_dist_2 = best_dist_1</span><br><span class="line">                  best_dist_1 = dist</span><br><span class="line">                  best_f2_id = f2_id</span><br><span class="line">               <span class="keyword">else</span> <span class="keyword">if</span> dist &lt; best_dist_2:</span><br><span class="line">                  best_dist_2 = dist</span><br><span class="line">         </span><br><span class="line">         <span class="keyword">if</span> best_dist_1 &lt; best_dist_2 * THRESHOLD: <span class="comment">// 最近距离需要比第二近距离小一定的阈值</span></span><br><span class="line">            <span class="keyword">if</span> f1_id <span class="keyword">not</span> in M:</span><br><span class="line">               M.<span class="built_in">push_back</span>((f1_id, best_f2_id))</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">               compare the distance <span class="built_in">of</span> (F1[f1_id], F2[M[f1_id]]) <span class="built_in">and</span> (F1[f1_id], F2[best_f2_id])</span><br><span class="line">               <span class="keyword">and</span> choose the small one</span><br></pre></td></tr></table></figure>
+<h2 id="使用dbow2做回环检测">使用DBoW2做回环检测</h2>
+<p>回环检测是在<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a>作者的另外一个仓库<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DLoopDetector">DLoopDetector</a>中实现的。<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DLoopDetector">DLoopDetector</a>利用<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a>库做<code>Bag of word</code>构建，同时利用<code>Direct Index</code>加速特征点匹配，用匹配后的特征点对求解基础矩阵，从而判断找到图像是否符合物理约束，即求解出来的基础矩阵应该能够使特征点重投影误差很小，这个步骤叫做<code>geometric verification</code>。</p>
+<p>做回环检测的时候本质上就是找到一个相似图片，但是为了保证准确率足够高（需要接近100%，因为回环检测如果错误那么整个轨迹都会乱掉。当然，召回率就可以不需要这么高。简单说来就是可以检测不出来，但是检测出的必须得正确）。为了达到这么高的准确率，在回环检测的时候还用到了一些特殊处理方法用来筛选候选的回环匹配帧：</p>
+<h3 id="分数归一化">分数归一化</h3>
+<p>使用当前帧与上一帧的分数作为分母，归一化候选帧的分数。归一化分数的原因是<code>BoW vector</code>的距离计算受各种条件影响比较大，使用归一化后的分数可以方便确定一个统一阈值。在实际中，为了计算当前帧与上一帧的匹配分数，是通过缓存上一帧的<code>BoW vector</code>进行实现的。设定的阈值一般不大，默认是0.3。</p>
+<h3 id="候选帧聚合">候选帧聚合</h3>
+<p>将检索到的一批候选帧按照帧序号进行“聚合”，论文中叫做“island”。也就是将相近序号的帧聚合在一起，当前后两帧间距小于阈值时认为属于同一个island，当聚合的帧数足够才认为这是一个合格的候选“island”。每个<code>island</code>的分数为其中所有帧的分数之和。挑选分数最大的<code>island</code>作为最终的匹配<code>island</code>。同时，该<code>island</code>中最大分数的帧为匹配的帧。</p>
+<h3 id="时间连续一致性">时间连续一致性</h3>
+<p>检查island与上一帧的候选island的时间连续性。当前的匹配结果<span class="math inline">\(&lt;v_t,V_{T\prime}&gt;\)</span>与上一帧的匹配结果<span class="math inline">\(&lt;v_{t-\Delta t},V_{T_1}&gt;\)</span>应该满足<span class="math inline">\(V_{T\prime}\)</span>与<span class="math inline">\(V_{T_1}\)</span>是非常接近或者有重叠的。</p>
+<h3 id="算法步骤">算法步骤</h3>
+<ol type="1">
+<li>计算当前帧<span class="math inline">\(v_t\)</span>的<code>BoW vector</code>，记为<span class="math inline">\(v_t\)</span></li>
+<li>从数据库中检索与<span class="math inline">\(v_t\)</span>距离最近的__一批图片__，记为<span class="math inline">\(V\)</span></li>
+<li>计算<span class="math inline">\(v_t\)</span>与<span class="math inline">\(V\)</span>中所有候选帧的归一化分数，并去除阈值之下的帧，记为<span class="math inline">\(V^\prime\)</span></li>
+<li>对<span class="math inline">\(V^\prime\)</span>中的帧按照帧序号进行聚合，并找到分数最高的<code>island</code>，记为<span class="math inline">\(V^\prime_{best}\)</span></li>
+<li>PS:在代码中，时间连续一致性似乎没有起到作用</li>
+<li>将<code>island</code>中分数最高的帧作为候选帧，并进行<code>geometry verification</code>，如果通过则认为找到了回环帧</li>
+</ol>
+<h2 id="代码及实操">代码及实操</h2>
+<p><a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a>中的回环检测器的代码放置在<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DLoopDetector">DLoopDetector</a>。实际运行的时候，需要先解决一下依赖问题，可能还有一些bug需要修复。但是一个没法忍受的点是，<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a>默认的词典保存格式是<code>yml</code>，在读取<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DLoopDetector">DLoopDetector</a>提供的词典文件的时候，花费了几个小时还没有读取结束。在<a target="_blank" rel="noopener" href="https://github.com/UZ-SLAMLab/ORB_SLAM3">ORB_SLAM</a>中，作者将词典保存为<code>txt</code>格式，这样读取起来非常快，只需要花费几秒。</p>
+<p>笔者将<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a>和<a target="_blank" rel="noopener" href="https://github.com/dorian3d/DLoopDetector">DLoopDetector</a>打包，并修复依赖问题及一些bug,可以直接使用。<a target="_blank" rel="noopener" href="https://github.com/zeal-up/DLoopDetector">代码链接</a></p>
+<p>改进点：</p>
+<ul>
+<li>从txt中读取字典</li>
+<li>修复了DLoopDetector中的一些bug</li>
+<li>将DBoW2,DLib,DLoopDetector整合到一个工程中，避免依赖问题和编译问题</li>
+<li>整个项目只需要依赖OpenCV</li>
+<li>在DLoopDetector提供的<code>demo_brief.cpp</code>基础上，增加了<code>demo_orb.cpp</code>，并提供字典可以直接运行检验结果</li>
+</ul>
+<p>运行效果：</p>
+<figure>
+<img src="./imgs/04-LoopDetector.gif" alt="" /><figcaption>demo_orb</figcaption>
+</figure>
+<h2 id="相关资料">相关资料</h2>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://machinelearningmastery.com/gentle-introduction-bag-words-model/">Bag of Words在图像检索中的基础知识</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBow">DBoW</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/dorian3d/DBoW2/tree/master">DBoW2</a></li>
+<li><a target="_blank" rel="noopener" href="https://medium.com/@srv96/kmeans-a-careful-seeding-technique-5951aca993d6">k-means++</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/11/14/orbslam/DBoW2/" title="ORB-SLAM3保姆级教程——DBoW2从理论到实现">https://zeal-up.github.io/2023/11/14/orbslam/DBoW2/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/slam/" rel="tag"># slam</a>
+              <a href="/tags/SLAM-Theory/" rel="tag"># SLAM_Theory</a>
+              <a href="/tags/%E5%9B%9E%E7%8E%AF%E6%A3%80%E6%B5%8B/" rel="tag"># 回环检测</a>
+              <a href="/tags/DBoW2/" rel="tag"># DBoW2</a>
+              <a href="/tags/Orbslam/" rel="tag"># Orbslam</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/11/10/algos/CountBitsSet/" rel="prev" title="算法系列——统计二进制数中1的个数">
+                  <i class="fa fa-chevron-left"></i> 算法系列——统计二进制数中1的个数
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/12/05/orbslam/orbslam3-MapInitialization/" rel="next" title="ORB-SLAM3保姆级教程——详解地图初始化（基础矩阵/单应矩阵/三角化的实际应用）">
+                  ORB-SLAM3保姆级教程——详解地图初始化（基础矩阵/单应矩阵/三角化的实际应用） <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="46760b7157397df11976e8695456a233"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"covS4Q3Q0SaMRjqI2VomagVm-gzGzoHsz","app_key":"iK7kdlu4InjORoPr3oksi1IM","server_url":"https://covs4q3q.lc-cn-n1-shared.com","security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  从问题出发 在单目SLAM的场景下，我们可以通过特征特征，在两帧RGB图像中找到一些具有对应关系的特征点对（一一对应关系）  特征点匹配  \[ \begin{split} PP &amp;&#x3D; \{(\textbf{p}_1^i, \textbf{p}_2^i)\} \quad i &#x3D; [1,2,3,.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SLAM基础——对极几何(基础矩阵、本质矩阵与尺度模糊问题)">
+<meta property="og:url" content="https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  从问题出发 在单目SLAM的场景下，我们可以通过特征特征，在两帧RGB图像中找到一些具有对应关系的特征点对（一一对应关系）  特征点匹配  \[ \begin{split} PP &amp;&#x3D; \{(\textbf{p}_1^i, \textbf{p}_2^i)\} \quad i &#x3D; [1,2,3,.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/imgs02/01-feature_point_matching.jpg">
+<meta property="og:image" content="https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/imgs02/02-epipolar_constraint.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/imgs02/03-solve_essential_matrix.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/imgs02/04-Rt_from_essential.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/imgs02/05-four_situation_of_E.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/imgs02/02-epipolar_constraint.png">
+<meta property="og:image" content="https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/imgs02/02-epipolar_constraint.png">
+<meta property="article:published_time" content="2023-10-31T13:56:58.000Z">
+<meta property="article:modified_time" content="2024-09-19T08:23:08.505Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="slam">
+<meta property="article:tag" content="对极几何">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/imgs02/01-feature_point_matching.jpg">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/","path":"2023/10/31/slam-theory/epipolor_geometry/","title":"SLAM基础——对极几何(基础矩阵、本质矩阵与尺度模糊问题)"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SLAM基础——对极几何(基础矩阵、本质矩阵与尺度模糊问题) | Zeal's Blog</title>
+  
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+  <a target="_blank" rel="noopener" href="https://github.com/zeal-up" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E9%97%AE%E9%A2%98%E5%87%BA%E5%8F%91"><span class="nav-number">1.</span> <span class="nav-text">从问题出发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E6%9E%81%E5%87%A0%E4%BD%95"><span class="nav-number">2.</span> <span class="nav-text">对极几何</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E5%AE%9A%E4%B9%89"><span class="nav-number">2.1.</span> <span class="nav-text">一些定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E6%9E%81%E7%BA%A6%E6%9D%9F"><span class="nav-number">2.2.</span> <span class="nav-text">对极约束</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%9F%A9%E9%98%B5fundamental-matrixf%E4%B8%8E%E6%9C%AC%E8%B4%A8%E7%9F%A9%E9%98%B5essential-matrixe"><span class="nav-number">2.3.</span> <span class="nav-text">基础矩阵（Fundamental Matrix）F与本质矩阵（Essential Matrix）E</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E8%B4%A8%E7%9F%A9%E9%98%B5%E4%B8%8E%E5%9F%BA%E7%A1%80%E7%9F%A9%E9%98%B5%E7%9A%84%E6%B1%82%E8%A7%A3"><span class="nav-number">2.4.</span> <span class="nav-text">本质矩阵与基础矩阵的求解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E6%B1%82%E8%A7%A3%E6%8E%A8%E5%AF%BC"><span class="nav-number">2.5.</span> <span class="nav-text">具体求解推导</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8E%E5%8D%95%E5%BA%94%E7%9F%A9%E9%98%B5%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">2.6.</span> <span class="nav-text">与单应矩阵的区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E6%9E%81%E7%BA%A6%E6%9D%9F%E7%9A%84%E5%87%A0%E4%BD%95%E6%84%8F%E4%B9%89"><span class="nav-number">3.</span> <span class="nav-text">对极约束的几何意义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%BA%E5%BA%A6%E4%B8%8D%E7%A1%AE%E5%AE%9A%E6%80%A7"><span class="nav-number">4.</span> <span class="nav-text">尺度不确定性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E7%9B%AEslam%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">4.1.</span> <span class="nav-text">单目SLAM的初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.2.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="SLAM基础——对极几何(基础矩阵、本质矩阵与尺度模糊问题) | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SLAM基础——对极几何(基础矩阵、本质矩阵与尺度模糊问题)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-10-31 21:56:58" itemprop="dateCreated datePublished" datetime="2023-10-31T21:56:58+08:00">2023-10-31</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-09-19 16:23:08" itemprop="dateModified" datetime="2024-09-19T16:23:08+08:00">2024-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/SLAM/Theory/" itemprop="url" rel="index"><span itemprop="name">Theory</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/10/31/slam-theory/epipolor_geometry/" class="post-meta-item leancloud_visitors" data-flag-title="SLAM基础——对极几何(基础矩阵、本质矩阵与尺度模糊问题)" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="SLAM基础——对极几何(基础矩阵、本质矩阵与尺度模糊问题)" href="/2023/10/31/slam-theory/epipolor_geometry/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::ffbde104dc025eefa8c2d23c304a3520" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="从问题出发">从问题出发</h2>
+<p>在单目SLAM的场景下，我们可以通过特征特征，在两帧RGB图像中找到一些具有对应关系的特征点对（一一对应关系）</p>
+<figure>
+<img src="./imgs02/01-feature_point_matching.jpg" alt="" /><figcaption>特征点匹配</figcaption>
+</figure>
+<p><span class="math display">\[
+\begin{split}
+PP &amp;= \{(\textbf{p}_1^i, \textbf{p}_2^i)\} \quad i = [1,2,3,...,N]\\
+&amp;\textbf{p}_1^i \in \textbf{I}_1\\
+&amp;\textbf{p}_2^i \in \textbf{I}_2\\
+\end{split}
+\]</span></p>
+<p>我们现在的目的是从两张图片之间这些匹配的点对，恢复这两张图像的相机相对位姿</p>
+<h2 id="对极几何">对极几何</h2>
+<p>我们先把一个点对拿出来单独观察。这个点对（<span class="math inline">\(\textbf{p}_1,\textbf{p}_2\)</span>）对应着三维空间中一个点<span class="math inline">\(P\)</span>，可以画出下面的示意图</p>
+<figure>
+<img src="./imgs02/02-epipolar_constraint.png" alt="" /><figcaption>对极约束</figcaption>
+</figure>
+<p>由相机的成像原理我们可以很直观地想象：从两个相机的光心分别射出一条光线并分别经过<span class="math inline">\(\textbf{p}_1\)</span>和<span class="math inline">\(\textbf{p}_2\)</span>，这两条光线会相交于空间中一个点<span class="math inline">\(P\)</span></p>
+<h3 id="一些定义">一些定义</h3>
+<ul>
+<li><strong>极平面（Epipolar plane）</strong>：由两个相机光心与空间中点<span class="math inline">\(P\)</span>组成的平面<span class="math inline">\(O_1O_2P\)</span></li>
+<li><strong>基线</strong>：两个相机光心的连线<span class="math inline">\(O_1O_2\)</span></li>
+<li><strong>极点（Epipoles）</strong>：两个相机光心的连线<span class="math inline">\(O_1O2\)</span>于两个像平面的交点<span class="math inline">\(e_1,e_2\)</span></li>
+<li><strong>极线（Epipolar line）</strong>：极平面于像平面的交点，也就是图中的线<span class="math inline">\(l_1=p_1e_1\)</span>,<span class="math inline">\(l_2=p_2e_2\)</span></li>
+</ul>
+<p><strong><em>PS：提前插入一点尺度不确定性相关内容</em></strong></p>
+<p>在上面的图中，我们如果把整个图中<span class="math inline">\(O_1P,O_2P,O_1O_2\)</span>等比例放大一下，保持两个图像不变和两个像素点<span class="math inline">\(p_1,p_2\)</span>的坐标不变，其实整个几何约束关系也是成立的。这其实也就是说，两个相机之间的平移，其实也就是基线，乘以一个非零系数，那么依旧符合相机成像的约束。我们后面会在公式推导中也发现这一点。</p>
+<h3 id="对极约束">对极约束</h3>
+<p>其实我们的目标就是找出一些像素点对<span class="math inline">\((\textbf{p}_1^i,\textbf{p}_2^i)\)</span>是怎么被两个相机的相对位姿<span class="math inline">\(T_{21}=[R_{21},t_{21}]\)</span>联系起来的，然后求解方程就可以得到相机之间的位姿。而三维点<span class="math inline">\(P\)</span>只是一个中间代理。为了方便，我们先假设<span class="math inline">\(P_1=[X,Y,Z]\)</span>在相机1的坐标系下，则，根据相机的投影模型，有</p>
+<p><span class="math display">\[
+s_1\textbf{p}_1=KP_1,\quad s_2\textbf{p}_2=K(R_{21}P_1+t_{21})\tag{1}
+\]</span></p>
+<p>在使用齐次坐标式，上面的公式中<span class="math inline">\(s_1\textbf{p}_1\)</span>与<span class="math inline">\(\textbf{p}_1\)</span>在尺度意义下相等，可以记为</p>
+<p><span class="math display">\[
+s_1\textbf{p}_1 \simeq\textbf{p}_1\tag{2}
+\]</span></p>
+<p>我们另外记<span class="math inline">\(P\)</span>点在两个相机下的归一化平面坐标为<span class="math inline">\(\textbf{x}_1, \textbf{x}_2\)</span>（归一化平面即<span class="math inline">\(Z=1\)</span>）</p>
+<p><span class="math inline">\(\textbf{x}_1, \textbf{x}_2\)</span>与对应的原始点相差一个比例系数，即</p>
+<p><span class="math display">\[
+\lambda_1\textbf{x}_1 = P_1\\
+\lambda_2\textbf{x}_2 = P_2\\
+\]</span></p>
+<p>根据<span class="math inline">\(P_1,P_2\)</span>的关系，可以得到</p>
+<p><span class="math display">\[
+\lambda_2\textbf{x}_2 = \lambda_1R_{21}\textbf{x}_1+\textbf{t}_{21}\tag{3}
+\]</span></p>
+<p>对于比例系数来说，具体数值我们是无法确定的，因此，上式可以整理成</p>
+<p><span class="math display">\[
+\textbf{x}_2 = \alpha R_{21}\textbf{x}_1+\beta \textbf{t}_{21}\tag{4}
+\]</span></p>
+<p>公式（4）两边同时与向量<span class="math inline">\(\textbf{t}_{21}\)</span>做外积，等价于同时左乘<span class="math inline">\(\textbf{t}^{\wedge}\)</span>（忽略下标）</p>
+<p><span class="math display">\[
+\textbf{t}^{\wedge}\textbf{x}_2 = \alpha \textbf{t}^{\wedge}R\textbf{x}_1 \tag{5}
+\]</span></p>
+<p>上式等号左右再左乘<span class="math inline">\(\textbf{x}_2^T\)</span></p>
+<p><span class="math display">\[
+\textbf{x}_2^T\textbf{t}^{\wedge}\textbf{x}_2 = \alpha\textbf{x}_2^T \textbf{t}^{\wedge}R\textbf{x}_1 \tag{6}
+\]</span></p>
+<p>由于向量<span class="math inline">\(\textbf{t}^{\wedge}\textbf{x}_2\)</span>垂直于<span class="math inline">\(\textbf{t}\)</span>和<span class="math inline">\(\textbf{x}_2\)</span>，因此，公式（6）的左侧严格为0。因此系数<span class="math inline">\(\alpha\)</span>可以消掉并简单记为</p>
+<p><span class="math display">\[
+\textbf{x}_2^T \textbf{t}^{\wedge}R\textbf{x}_1 = 0 \tag{7}
+\]</span></p>
+<p>归一化平面坐标<span class="math inline">\(\textbf{x}_1,\textbf{x}_2\)</span>可以由像素坐标左乘内参的逆得到，即</p>
+<p><span class="math display">\[
+\begin{split}
+\textbf{x}_1 &amp;= K^{-1}\textbf{p}_1\\
+\textbf{x}_2 &amp;= K^{-1}\textbf{p}_2\\
+\end{split}\tag{8}
+\]</span></p>
+<p>将公式（8）代入公式（7）可以得到</p>
+<p><span class="math display">\[
+\textbf{p}_2^TK^{-T}\textbf{t}^{\wedge}RK^{-1}\textbf{p}_1=0\tag{9}
+\]</span></p>
+<h3 id="基础矩阵fundamental-matrixf与本质矩阵essential-matrixe">基础矩阵（Fundamental Matrix）F与本质矩阵（Essential Matrix）E</h3>
+<p>公式（7）和公式（9）都可以叫做对极约束。公式（7）忽略了相机内参的影响，因为一般在SLAM中相机内参是已知的，而归一化平面坐标可以方便地由相机内参和像素坐标得到，因此公式（7）是公式（9）的简化形式。</p>
+<p><strong>一句话总结对极约束：</strong></p>
+<p>对极约束实际上描述匹配点对（像素）的空间关系（与相机位姿的关系）</p>
+<p>为了简便，我们可以记公式（9）中间部分为两个矩阵</p>
+<p><span class="math display">\[
+\begin{split}
+E &amp;= \textbf{t}^{\wedge}R \\
+F &amp;= K^{-T}EK^{-1}
+\end{split}\tag{10}
+\]</span></p>
+<p>其中<span class="math inline">\(E\)</span>称为本质矩阵（Essiential Matrix），<span class="math inline">\(F\)</span>称为基础矩阵（Fundamental Matrix）</p>
+<p>基于<span class="math inline">\(E,F\)</span>的定义，对极约束，即公式（7）（9）又可以记为</p>
+<p><span class="math display">\[
+\begin{split}
+\textbf{p}_2^T F \textbf{p}_1 &amp;= 0\\
+\textbf{x}_2^T E \textbf{x}_1 &amp;= 0
+\end{split}\tag{11}
+\]</span></p>
+<p>也就是，本质矩阵和基础矩阵实际上可以将一个图像中的特征点映射到另一个图像中。</p>
+<h3 id="本质矩阵与基础矩阵的求解">本质矩阵与基础矩阵的求解</h3>
+<p>公式（11）简洁地描述了对极约束。让我们回归到最原始问题，如何根据匹配点对恢复相机间的运动？可以拆分成下面两步</p>
+<ol type="1">
+<li>根据匹配点对的关系（即公式（11））求解本质矩阵或者基础矩阵。因为内参已知，我们一般直接求解本质矩阵</li>
+<li>根据本质矩阵的内在关系进行分解，求出<span class="math inline">\(R,\textbf{t}\)</span></li>
+</ol>
+<p>我们先来看看怎么根据<strong>匹配点对集</strong>来求解本质矩阵。</p>
+<p>本质矩阵是一个3x3矩阵，但其是由旋转与平移组成（6自由度），并且，要注意到公式（11）可以对任意尺度成立，也就是说本质矩阵可以放缩任意一个尺度，因此，本质矩阵有5个自由度。 因此，从理论上最少可以由5对点对求解（注意这里与PnP算法的不同，PnP算法等号两边没有0,一个点对可以建立两个等式，因此一个点对可以约束2个自由度。而这里一个点对只能建立一条等式，也就是约束一个自由度，因此需要5个点对）</p>
+<p>但是一般我们会用8个点对求解，也就是八点法。将8对点代入方程（11）的第二条等式，并将本质矩阵展开为一维向量，则可以建立线性方程组 （点对的归一化平面坐标：<span class="math inline">\(\textbf{x}_1^T = [u_1, v_1, 1]\)</span>， <span class="math inline">\(\textbf{x}_2^T=[u_2,v_2,1]\)</span>）</p>
+<p><span class="math display">\[
+\begin{split}
+\begin{bmatrix}{}
+u_2&amp;v_2&amp;1
+\end{bmatrix}
+= \
+\begin{bmatrix}{}
+e_1&amp;e_2&amp;e_3\\
+e_4&amp;e_5&amp;e_6\\
+e_7&amp;e_8&amp;e_9
+\end{bmatrix}
+\begin{bmatrix}{}
+u_1\\v_1\\1
+\end{bmatrix}
+\end{split}\tag{12}
+\]</span></p>
+<p>展开后可以得到如下形式</p>
+<figure>
+<img src="./imgs02/03-solve_essential_matrix.png" alt="" /><figcaption>八点法求本质矩阵</figcaption>
+</figure>
+<p>以上方程求解后就可以得到本质矩阵（对任意尺度成立）</p>
+<p><strong>接下來第二步就是根据本质矩阵求出对应的旋转平移</strong></p>
+<p>这一个部分推导可能比较复杂，SLAM十四讲没有给出这部分推导，记住步骤和结论就可以</p>
+<ol type="1">
+<li>记住本质矩阵的内在性质：本质矩阵的奇异值是<span class="math inline">\([\sigma,\sigma,0]^T\)</span>的形式</li>
+<li>通过对本质矩阵<span class="math inline">\(E\)</span>进行SVD分解得到<span class="math inline">\(E = U \Sigma V^T\)</span></li>
+<li>对于一个<span class="math inline">\(E\)</span>，存在两个可能的<span class="math inline">\(t,R\)</span>与其对应</li>
+</ol>
+<p>求解过程忽略，我们只需要只能根据E可以分解出两对R,t如下</p>
+<figure>
+<img src="./imgs02/04-Rt_from_essential.png" alt="" /><figcaption>从本质矩阵分解Rt</figcaption>
+</figure>
+<p>另外，由于<span class="math inline">\(-E\)</span>和<span class="math inline">\(E\)</span>等价，因此对<span class="math inline">\(t\)</span>取负号也可以，于是有4中<span class="math inline">\(R,t\)</span>的组合，分别对应下面图中的其中一种相机情况</p>
+<figure>
+<img src="./imgs02/05-four_situation_of_E.png" alt="" /><figcaption>从本质矩阵分解R,t的四种相机摆放情况</figcaption>
+</figure>
+<p>我们需要利用任何一个点进行三角化，并根据<span class="math inline">\(R,t\)</span>检查其在两个相机坐标系下的深度值，当在两个相机下深度值都为正，说明该解为最终解</p>
+<h3 id="具体求解推导">具体求解推导</h3>
+<ol type="1">
+<li>本质矩阵分解求取<span class="math inline">\(R,t\)</span>可以参考：<a target="_blank" rel="noopener" href="https://en.wikipedia.org/w/index.php?title=Essential_matrix&amp;action=edit&amp;section=9">Wiki:Essential_matrix</a></li>
+<li>根据本质矩阵进行三角化可以参考：<a target="_blank" rel="noopener" href="https://en.wikipedia.org/w/index.php?title=Triangulation_(computer_vision)&amp;action=edit&amp;section=9">Wiki:Triangulation</a></li>
+</ol>
+<h3 id="与单应矩阵的区别">与单应矩阵的区别</h3>
+<ol type="1">
+<li>单应矩阵是基于平面假设，可以将一个图像中的平面映射到另一个图像。而对极约束不依赖平面假设。</li>
+<li>单应矩阵的求解中，一个点可以构造两条方程，同时单应矩阵的自由度为8（具有尺度不变性），因此最少可以用4对点求解</li>
+<li>从单应矩阵也可以分解出多组<span class="math inline">\(R,t\)</span>，此时也需要进行三角化确认哪一组是正确的解</li>
+<li>通常我们会同时估计本质矩阵<span class="math inline">\(E\)</span>和单应矩阵<span class="math inline">\(H\)</span>，最终选择重投影误差更小的作为当前的几何假设</li>
+</ol>
+<h2 id="对极约束的几何意义">对极约束的几何意义</h2>
+<p>对极约束的基础公式是公式（9）：</p>
+<p><span class="math display">\[
+\textbf{p}_2^TK^{-T}\textbf{t}^{\wedge}RK^{-1}\textbf{p}_1=0\tag{9}
+\]</span></p>
+<p>或者写成<span class="math inline">\(F,E\)</span>的形式：</p>
+<p><span class="math display">\[
+\begin{split}
+\textbf{p}_2^T F \textbf{p}_1 &amp;= 0\\
+\textbf{x}_2^T E \textbf{x}_1 &amp;= 0
+\end{split}\tag{11}
+\]</span></p>
+<p>对极约束公式实际上表示的是<span class="math inline">\(O_1PO_2\)</span>三点共面，也就是对于点<span class="math inline">\(p1\)</span>，用基础矩阵<span class="math inline">\(F\)</span>可以将其映射到图2的几线上。</p>
+<p>！！！注意，基础矩阵并不能将<span class="math inline">\(p_1\)</span>映射到图2的<span class="math inline">\(p_2\)</span>上！！！</p>
+<figure>
+<img src="./imgs02/02-epipolar_constraint.png" alt="" /><figcaption>对极约束</figcaption>
+</figure>
+<p>在[ORB-SLAM]中，计算基础矩阵的投影分数是这样计算的</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">const</span> cv::KeyPoint &amp;kp1 = mvKeys1[mvMatches12[i].first];</span><br><span class="line"><span class="type">const</span> cv::KeyPoint &amp;kp2 = mvKeys2[mvMatches12[i].second];</span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">float</span> u1 = kp1.pt.x;</span><br><span class="line"><span class="type">const</span> <span class="type">float</span> v1 = kp1.pt.y;</span><br><span class="line"><span class="type">const</span> <span class="type">float</span> u2 = kp2.pt.x;</span><br><span class="line"><span class="type">const</span> <span class="type">float</span> v2 = kp2.pt.y;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Reprojection error in second image</span></span><br><span class="line"><span class="comment">// l2=F21x1=(a2,b2,c2)</span></span><br><span class="line"><span class="comment">// 计算 img1 上的点在 img2 上投影得到的极线 l2 = F21 * p1 = (a2,b2,c2)</span></span><br><span class="line"><span class="type">const</span> <span class="type">float</span> a2 = f11 * u1 + f12 * v1 + f13;</span><br><span class="line"><span class="type">const</span> <span class="type">float</span> b2 = f21 * u1 + f22 * v1 + f23;</span><br><span class="line"><span class="type">const</span> <span class="type">float</span> c2 = f31 * u1 + f32 * v1 + f33;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 计算误差 e = (a * p2.x + b * p2.y + c) /  sqrt(a * a + b * b)</span></span><br><span class="line"><span class="type">const</span> <span class="type">float</span> num2 = a2 * u2 + b2 * v2 + c2;</span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">float</span> squareDist1 = num2 * num2 / (a2 * a2 + b2 * b2);</span><br></pre></td></tr></table></figure>
+<h2 id="尺度不确定性">尺度不确定性</h2>
+<p>在上一节中，我们讨论到<span class="math inline">\(E\)</span>有尺度不变性，因此分解出来的<span class="math inline">\(R,t\)</span>也有尺度不变性。<span class="math inline">\(R\)</span>本身有约束，对于<span class="math inline">\(t\)</span>,我们可以将其归一化，让它长度为1。因此，我们无法确定<span class="math inline">\(t\)</span>的单位。这一点实际上从最开始的图，也就是下图可以看出，<strong>当我们同时对地图和轨迹进行放缩，我们得到的图像实际上是一样的！！！</strong>，也就是说，<strong>在单目SLAM中，我们无法确定地图和轨迹的真实尺度</strong></p>
+<figure>
+<img src="./imgs02/02-epipolar_constraint.png" alt="" /><figcaption>对极约束</figcaption>
+</figure>
+<h3 id="单目slam的初始化">单目SLAM的初始化</h3>
+<p>由于在单目SLAM中，相机轨迹之间的平移是尺度不确定的，因此我们必须进行初始化，以初始化是两张图片之间的<span class="math inline">\(t\)</span>作为单位1,后续的点就可以用3D-2D匹配的方法求解。这样后续的轨迹中的平移就会以初始化时的平移为单位。</p>
+<p>另外注意到，如果初始化时两帧之间没有平移，那么<span class="math inline">\(E\)</span>就会变成0,此时也无法分解出<span class="math inline">\(R\)</span>，因此，我们要求在初始化的时候相机之间必须有平移。一般的做法是初始化的时候相机之间的平移要较大一点。</p>
+<h3 id="总结">总结</h3>
+<ol type="1">
+<li>真正理解对极约束和基础矩阵、本质矩阵的求解还是需要通过实践。虽然OpenCV已经将本质矩阵和基础矩阵的求解封装为函数</li>
+<li>基础矩阵反映了两个图像中对应的图像点对坐标的关系;本质矩阵反映了两个图像对应特征点的归一化平面坐标的几何联系;单应矩阵反映了两个图像中同一个3D平面的像素点关系</li>
+<li>本质矩阵可以通过匹配点对，并使用八点法求解。求解出本质矩阵之后，进一步分解可以得到四组<span class="math inline">\(R,t\)</span>，需要根据三角化选择让三维点在两个相机坐标系下均有正的深度值的那一组解</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/" title="SLAM基础——对极几何(基础矩阵、本质矩阵与尺度模糊问题)">https://zeal-up.github.io/2023/10/31/slam-theory/epipolor_geometry/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/slam/" rel="tag"># slam</a>
+              <a href="/tags/%E5%AF%B9%E6%9E%81%E5%87%A0%E4%BD%95/" rel="tag"># 对极几何</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/10/20/linux/generate_corefile/" rel="prev" title="linux生成core文件">
+                  <i class="fa fa-chevron-left"></i> linux生成core文件
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/11/10/algos/CountBitsSet/" rel="next" title="算法系列——统计二进制数中1的个数">
+                  算法系列——统计二进制数中1的个数 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="ffbde104dc025eefa8c2d23c304a3520"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"covS4Q3Q0SaMRjqI2VomagVm-gzGzoHsz","app_key":"iK7kdlu4InjORoPr3oksi1IM","server_url":"https://covs4q3q.lc-cn-n1-shared.com","security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>
