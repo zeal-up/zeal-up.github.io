@@ -132,7 +132,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-count">60</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -156,6 +156,547 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/06/08/cv/surround-view-projection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/06/08/cv/surround-view-projection/" class="post-title-link" itemprop="url">超详细！从单应矩阵推导到自动驾驶环视投影应用</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-06-08 09:38:44" itemprop="dateCreated datePublished" datetime="2023-06-08T09:38:44+08:00">2023-06-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-09-19 16:28:10" itemprop="dateModified" datetime="2024-09-19T16:28:10+08:00">2024-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Algorithms/" itemprop="url" rel="index"><span itemprop="name">Algorithms</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Algorithms/Computor-Vision/" itemprop="url" rel="index"><span itemprop="name">Computor Vision</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/06/08/cv/surround-view-projection/" class="post-meta-item leancloud_visitors" data-flag-title="超详细！从单应矩阵推导到自动驾驶环视投影应用" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="超详细！从单应矩阵推导到自动驾驶环视投影应用" href="/2023/06/08/cv/surround-view-projection/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::f13a6e5ecc3be4fc943645106759d469" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="本文内容">本文内容</h2>
+<p>本文的主要目的在于介绍自动驾驶中环视投影，也就是所谓的俯瞰图/鸟瞰图/BEV图，其背后的计算机视觉原理。环视投影的背后理论基础就是单应矩阵（Homography Matrix）。为了建立从直观到一般形式，本文从以下章节内容展开</p>
+<p>在第一节中先规定相机坐标系和图像坐标系，以及介绍常用的车辆坐标系的规定。同时，对相机投影中常使用的齐次坐标做了简要介绍，顺带回顾相机投影方程。</p>
+<p>第二节先对单应矩阵做介绍。对于一个空间中一个平面，以及两个不同姿态的相机，两个相机的对该平面的成像之间的联系是单应矩阵。但是如何从相机间的关系推导单应矩阵的具体形式？该节从特殊化形式和一般化形式两个角度对单应矩阵的表达进行推导。</p>
+<p>环视投影是多个方向的地面成像结果到一个位于车辆上方，平行于地面往下成像的虚拟相机的成像结果的变换。第三节详细推导这个应用中的投影过程以及相机内外参与单应矩阵的关系。</p>
+<p>第四节介绍如何在不知道相机内外参的情况下通过点对匹配的方法求解单应矩阵。</p>
+<h2 id="基础知识及相关定义">基础知识及相关定义</h2>
+<h3 id="相机坐标系与图像坐标系">相机坐标系与图像坐标系</h3>
+<p>在计算机视觉的一般任务中，我们规定<strong>相机坐标系</strong>为光轴（经过相机原点）往前为<span class="math inline">\(Z\)</span>轴正方向，右为<span class="math inline">\(X\)</span>，下为<span class="math inline">\(Y\)</span> 对空间中的点放缩到归一化平面，归一化平面的坐标系定义也类似相机坐标系。 但是在图像中，我们一般令图片的左上角为坐标原点，横轴往右为<span class="math inline">\(u/X\)</span>正方向，竖轴往下为<span class="math inline">\(v/Y\)</span>正方向，又叫<strong>像素坐标系</strong></p>
+<p>如下图所示</p>
+<figure>
+<img src="./imgs/01-pinhole.png" alt="" /><figcaption>相机及像素坐标系</figcaption>
+</figure>
+<h3 id="车辆坐标系">车辆坐标系</h3>
+<p>我们一般规定车的后轮横轴中心在地面的点为坐标系原点，<span class="math inline">\(X\)</span>正方向指向车头，<span class="math inline">\(Y\)</span>轴正方向指向车左</p>
+<figure>
+<img src="./imgs/02-vehical_coordinate.png" alt="" /><figcaption>车辆坐标系</figcaption>
+</figure>
+<h3 id="齐次坐标homogeneous-coordinate">齐次坐标（Homogeneous Coordinate）</h3>
+<p>当我们对三维空间中一个点<span class="math inline">\(P_1=[X_1,Y_1,Z_1]^T\)</span>做旋转平移变换到另一个点<span class="math inline">\(P_2\)</span>，可以用下面的公式</p>
+<p><span class="math display">\[
+P_2 = RP_1+\boldsymbol{t}
+\]</span></p>
+<p>其中<span class="math inline">\(R\in \mathbb{R}^{3\times3}\)</span>为旋转矩阵，<span class="math inline">\(\boldsymbol{t}\in \mathbb{R}^{3\times 1}\)</span>为平移向量</p>
+<p>上式也可以将点坐标写为<span class="math inline">\(P_1=[X_1,Y_1,Z_1,1]^T\)</span>的形式，然后用变换矩阵对点做坐标变换</p>
+<p><span class="math display">\[
+P_2 = T_{21}P_1
+\]</span></p>
+<p><span class="math display">\[
+T_{21} =
+\begin{bmatrix}
+R&amp;\boldsymbol{t}\\
+\boldsymbol{0}&amp;1
+\end{bmatrix}\in \mathbb{R}^{4\times 4}
+\]</span></p>
+<p><span class="math inline">\(T_{21}\)</span>称为变换矩阵;<span class="math inline">\(P_1=[X_1,Y_1,Z_1,1]^T\)</span>这种形式也叫齐次坐标（Homogeneous Coordinate）</p>
+<p><strong>注意</strong>：齐次坐标其实有严格的定义，具体形式可以参考<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/zh-hans/%E9%BD%90%E6%AC%A1%E5%9D%90%E6%A0%87">Wiki:Homogeneous Coordinate</a></p>
+<p>同理，在做像素坐标的逆变换，也通常将像素坐标<span class="math inline">\([u,v]^T\)</span>后面添加一个1变为齐次坐标<span class="math inline">\(p=[u,v,1]^T\)</span></p>
+<p><span class="math display">\[
+p_n=K^{-1}p
+\]</span></p>
+<h3 id="投影方程">投影方程</h3>
+<p>空间中的一个点<span class="math inline">\(P_W\)</span>投影到图像上的点<span class="math inline">\(\boldsymbol{p}\)</span>，我们直接记这个过程为</p>
+<p><span class="math display">\[
+\begin{split}
+\lambda \boldsymbol{p}
+&amp;=\
+KT_{CW}P_W\\
+&amp;=\
+\begin{bmatrix}
+u&amp;v&amp;1
+\end{bmatrix}^T
+\end{split}
+\]</span></p>
+<p>这里面包含了一次齐次坐标的转换（<span class="math inline">\(T_{CW}P_W \in \mathbb{R}^{4\times 1}\)</span>,<span class="math inline">\(K\in \mathbb{R}^{3\times 1}\)</span>），但是不会对理解有歧义</p>
+<h2 id="单应矩阵homography-matrix">单应矩阵（Homography Matrix）</h2>
+<p>在计算机视觉中，两个相机对于空间中的同一个平面的成像结果可以通过单应矩阵进行映射（相差一个常量系数）</p>
+<p>另<span class="math inline">\([x,y,1]^T\)</span>为图片1的像素齐次坐标，<span class="math inline">\([x^{\prime},y^{\prime},1]^T\)</span>为同一个点在图片2的像素齐次坐标，则上面那句话可以等价为如下关系：</p>
+<p><span class="math display">\[
+\lambda
+\begin{bmatrix}
+x^{\prime}\\
+y^{\prime}\\
+1
+\end{bmatrix}=
+\boldsymbol{H}
+\begin{bmatrix}
+x\\
+y\\
+1
+\end{bmatrix}=
+\begin{bmatrix}
+h_{00} &amp; h_{10} &amp; h_{20}\\
+h_{01} &amp; h_{11} &amp; h_{21}\\
+h_{02} &amp; h_{12} &amp; h_{22}
+\end{bmatrix}
+\begin{bmatrix}
+x\\
+y\\
+1
+\end{bmatrix}\tag{2-1}
+\]</span></p>
+<p>公式（2-1）中的系数<span class="math inline">\(\lambda\)</span>用来将变换后的坐标归一化（将第三个维度的值放缩为1） <strong>同时要注意，单应矩阵虽然有9个元素，但自由度只有8，可以除以<span class="math inline">\(h_{22}\)</span>进行归一化</strong></p>
+<p>下面我们分别从用形象化的解释和一般化的推导来建立单应矩阵与相机内参、外参的关系</p>
+<h3 id="特殊形式推导">特殊形式推导</h3>
+<p>我们假设空间中有一平面，两个相机<span class="math inline">\(C_1,C_2\)</span>在两个不同的姿态下对这个平面进行成像。同时，我们令世界坐标系（<span class="math inline">\(O_G\)</span>)<span class="math inline">\(的\)</span>Z<span class="math inline">\(轴垂直于该平面，并且令该平面刚好位于世界坐标系的\)</span>XY<span class="math inline">\(平面，这样这个平面上的点\)</span>z$坐标等于0。可以用下图帮忙理解</p>
+<figure>
+<img src="./imgs/03-multi_camera.png" alt="" /><figcaption>双相机成像统一平面</figcaption>
+</figure>
+<p>同时，我们记世界坐标系到相机<span class="math inline">\(C_1\)</span>的变换矩阵为<span class="math inline">\(T_{C_1W}\)</span>，到相机<span class="math inline">\(C_2\)</span>的变换矩阵为<span class="math inline">\(T_{C_2W}\)</span>;<span class="math inline">\(K_1,K_2\)</span>为两个相机的内参。</p>
+<p>我们现在对平面上的一个点<span class="math inline">\(P_W=[X_w,Y_w,Z_w=0,1]^T\)</span>进行投影，得到在两个相机成像的图片上对应的像素点<span class="math inline">\(\boldsymbol{p}_1,\boldsymbol{p}_2\)</span>。投影过程具有如下形式</p>
+<p><span class="math display">\[
+\begin{split}
+\lambda_1\boldsymbol{p}_1
+&amp;=\
+\begin{bmatrix}
+u_1\\
+v_1\\
+1
+\end{bmatrix}
+=\
+K_1T_{C_1W}P_W\\
+&amp;=\
+K_1
+\begin{bmatrix}
+r_{00} &amp; r_{01} &amp; r_{02} &amp; t_0\\
+r_{10} &amp; r_{11} &amp; r_{12} &amp; t_1\\
+r_{20} &amp; r_{21} &amp; r_{22} &amp; t_2\\
+0 &amp; 0 &amp; 0 &amp; 1
+\end{bmatrix}
+\begin{bmatrix}
+X_W\\
+Y_W\\
+0\\
+1
+\end{bmatrix}\\
+&amp;=\
+K_1
+\begin{bmatrix}
+r_{00} &amp; r_{01} &amp; t_0\\
+r_{10} &amp; r_{11} &amp; t_1\\
+r_{20} &amp; r_{21} &amp; t_2
+\end{bmatrix}
+\begin{bmatrix}
+X_W\\
+Y_W\\
+1
+\end{bmatrix}\\
+&amp;=\
+K_1T_{C_1W}^{0:3;0:2,3}P_W
+\end{split}
+\]</span></p>
+<p>上式中<span class="math inline">\(T^{0:3;0:2,3}\)</span>表示变换矩阵前3行的0,1,3列。为了方便记号，我们将<span class="math inline">\(T_{C_1W}^{0:3;0:2,3}\)</span>记为<span class="math inline">\(J_{C_1W}\)</span></p>
+<p>同理，我们可以得到图像2的类似投影方程，我们整理如下</p>
+<p><span class="math display">\[
+\begin{split}
+\lambda_1\boldsymbol{p}_1 &amp;= K_1J_{C_1W}P_W\\
+\\
+\lambda_2\boldsymbol{p}_2 &amp;= K_2J_{C_2W}P_W\\
+\end{split}\tag{2-2}
+\]</span></p>
+<p>注意上式中<span class="math inline">\(P_W=[X_W,Y_W,1]\)</span>，且上式中矩阵相乘的行列数量都是对应的</p>
+<p>我们将上式（2-2）重新整理一下，将<span class="math inline">\(P_W\)</span>写为<span class="math inline">\(p_1\)</span>的函数，有</p>
+<p><span class="math display">\[
+P_W=\lambda_1J_{C_1W}^{-1}K_1^{-1}\boldsymbol{p}_1\tag{2-3}
+\]</span></p>
+<p>将（2-3）带入（2-2）中的相机2方程</p>
+<p><span class="math display">\[
+\lambda_2\boldsymbol{p}_2=\lambda_1K_2J_{C_2W}J_{C_1W}^{-1}K_1^{-1}\boldsymbol{p}_1
+\]</span></p>
+<p>其中<span class="math inline">\(\lambda_1,\lambda_2\)</span>只是为了将投影后的值进行放缩，使得第三个元素的值为1,所以两者可以写成一个，最后我们可以得到如下形式</p>
+<p><span class="math display">\[
+\begin{split}
+&amp;\lambda\boldsymbol{p}_2=\boldsymbol{H}_{21}\boldsymbol{p}_1\\
+&amp; \boldsymbol{H}_{21} = K_2J_{C_2W}J_{C_1W}^{-1}K_1^{-1}\\
+&amp;J=T^{0:3,0:2,3}
+\end{split}\tag{2-4}
+\]</span></p>
+<p>可以看到，公式（2-4）的形式和公式（2-1）是一样的，同时将单应矩阵与相机的内参外参联系起来</p>
+<h3 id="单应矩阵与相机内外参关系的一般形式">单应矩阵与相机内外参关系的一般形式</h3>
+<p>上一个小节我们对单应矩阵与相机的内外参之间的关系建立了公式化的联系和直观上的理解。上一小节的推导可以看出，对于空间中的一快平面，存在一个<span class="math inline">\(3 \times 3\)</span>的矩阵（自由度为8）将两个相机对这块平面的成像结果联系起来。</p>
+<p>在上一小节中，我们假设世界坐标系与成像平面对齐。我们在这一小节中继续推导更一般的表达形式，这一小节的内容主要参考<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Homography_(computer_vision)">Wiki:Homography (computer vision)</a></p>
+<p>由于一般情况下，我们都是知道相机的外参（也就是世界坐标系到相机坐标系的变换关系），所以我们这一节不假设平面的坐标系与世界坐标系对齐，我们假设平面在相机<span class="math inline">\(C_1\)</span>下的法向量为<span class="math inline">\(\boldsymbol{n}\)</span>，平面到相机<span class="math inline">\(C_1\)</span>的距离为<span class="math inline">\(d\)</span>，且对于法向量的方向，我们做如下规定：对于平面上的点<span class="math inline">\(P_{C_1}\)</span>，满足<span class="math inline">\(\boldsymbol{n}^TP_{C_1}+d=0\)</span>，其中<span class="math inline">\(\boldsymbol{n}^TP_{C_1}\)</span>为点到法向量的投影</p>
+<figure>
+<img src="./imgs/04-homo_general.png" alt="" /><figcaption>单应矩阵的一般形式推导</figcaption>
+</figure>
+<p>假设相机<span class="math inline">\(C_1\)</span>的外参为<span class="math inline">\(T_{C_1W}=[R_1|\boldsymbol{t}_1]\)</span>，相机<span class="math inline">\(C_2\)</span>的外参为<span class="math inline">\(T_{C_2W}=[R_2|\boldsymbol{t}_2]\)</span>，由变换矩阵的性质，我们可以得到</p>
+<p><span class="math display">\[
+\begin{split}
+T_{WC_1} &amp;= T_{C_1W}^{-1}\\
+&amp;= 
+\begin{bmatrix}
+R_1&amp;\boldsymbol{t}_1\\
+\boldsymbol{0}&amp;1
+\end{bmatrix}^{-1}\\
+&amp;=\
+\begin{bmatrix}
+R_1^{-1}&amp;-R_1^{-1}\boldsymbol{t}_1\\
+\boldsymbol{0}&amp;1
+\end{bmatrix}
+\end{split}\tag{2-5}
+\]</span></p>
+<p>所以相机1到相机2的变换矩阵为</p>
+<p><span class="math display">\[
+\begin{split}
+T_{C_2C_1} &amp;= T_{C_2W}T_{WC_1}\\
+&amp;= 
+\begin{bmatrix}
+R_2&amp;\boldsymbol{t}_2\\
+\boldsymbol{0}&amp;1
+\end{bmatrix}
+\begin{bmatrix}
+R_1^{-1}&amp;-R_1^{-1}\boldsymbol{t}_1\\
+\boldsymbol{0}&amp;1
+\end{bmatrix}\\
+&amp;=\
+\begin{bmatrix}
+R_2R_1^{-1}&amp;-R_2R_1^{-1}\boldsymbol{t}_1+\boldsymbol{t}_2\\
+\boldsymbol{0}&amp;1
+\end{bmatrix}\\
+&amp;=\
+\begin{bmatrix}
+R_{21}&amp;\boldsymbol{t}_{21}\\
+\boldsymbol{0}&amp;1
+\end{bmatrix}
+\end{split}\tag{2-6}
+\]</span></p>
+<p>根据相机投影关系，我们有</p>
+<p><span class="math display">\[
+\begin{split}
+&amp;\boldsymbol{p}_1=\frac{1}{Z_{C_1}}K_1P_1\\
+&amp;\boldsymbol{p}_2=\frac{1}{Z_{C_2}}K_2P_2\\
+\end{split}\tag{2-7}
+\]</span></p>
+<p><span class="math display">\[
+P_1 = Z_{C_1}K_1^{-1}\boldsymbol{p}_1\tag{2-8}
+\]</span></p>
+<p>又<span class="math inline">\(P_1,P_2\)</span>为点<span class="math inline">\(P_W\)</span>在两个相机坐标系下的坐标，这两个点又可以通过下面的变换联系</p>
+<p><span class="math display">\[
+P_2 = R_{21}P_1 + \boldsymbol{t}_{21}\tag{2-9}
+\]</span></p>
+<p>联合（2-7）到（2-9），我们可以得出</p>
+<p><span class="math display">\[
+\boldsymbol{p}_2=\frac{1}{Z_{C_2}}K_2(R_{21}Z_{C_1}K_1^{-1}\boldsymbol{p}_1+\boldsymbol{t}_{21})\tag{2-10}
+\]</span></p>
+<p>对于平面，我们已经做了如下规定： 在相机<span class="math inline">\(C_1\)</span>坐标系下，对于平面上的点<span class="math inline">\(P_{1}\)</span>，满足<span class="math inline">\(\boldsymbol{n}^TP_{1}+d=0\)</span>，其中<span class="math inline">\(\boldsymbol{n}^TP_{1}\)</span>为点到法向量的投影。即</p>
+<p><span class="math display">\[
+\frac{\boldsymbol{n}^TP_1}{-d}=1\tag{2-11}
+\]</span></p>
+<p>将（2-11）带入公式（2-10）中的<span class="math inline">\(\boldsymbol{t}_{21}\)</span>可以得到</p>
+<p><span class="math display">\[
+\begin{split}
+\boldsymbol{t}_{21}
+&amp;=\
+\boldsymbol{t}_{21}\frac{\boldsymbol{n}^TP_1}{-d}\\
+&amp;=\
+\frac{\boldsymbol{t}_{21}\boldsymbol{n}^T}{-d}P_1\\
+&amp;\overset{2-8}{=}\
+-\frac{\boldsymbol{t}_{21}\boldsymbol{n}^T}{d}Z_{C_1}K_1^{-1}\boldsymbol{p}_1
+\end{split}\tag{2-12}
+\]</span></p>
+<p>将（2-12）代入公式（2-10）中，我们可以得到</p>
+<p><span class="math display">\[
+\begin{split}
+\boldsymbol{p}_2&amp;=\frac{1}{Z_{C_2}}K_2\left(R_{21}-\frac{\boldsymbol{t}_{21}\boldsymbol{n}^T}{d}\right)Z_{C_1}K_1^{-1}\boldsymbol{p}_1\\
+&amp;=\
+\frac{Z_{C_1}}{Z_{C_2}}K_2H_{21}K_1^{-1}\boldsymbol{p_1}
+\end{split}\tag{2-13}
+\]</span></p>
+<p>于是，我们可以得到单应矩阵的表达形式</p>
+<p><span class="math display">\[
+H_{21} = R_{21}-\frac{\boldsymbol{t}_{21}\boldsymbol{n}^T}{d}\tag{2-14}
+\]</span></p>
+<p>如果我们将<span class="math inline">\(R_{21}\)</span>与<span class="math inline">\(t_{21}\)</span>的展开形式，即公式（2-6），则我们可以得到</p>
+<p><span class="math display">\[
+H_{21} = R_2R_1^{-1} - \frac{\left(-R_2R_1^{-1}\boldsymbol{t}_1+\boldsymbol{t}_2\right)\boldsymbol{n}^T}{d}\tag{2-15}
+\]</span></p>
+<hr />
+<p>这篇论文<a target="_blank" rel="noopener" href="https://sci-hub.st/10.1145/3343031.3350885">Online Camera Pose Optimization for the Surround-viewSystem</a>，中关于环视图的地平面投影一章的公式推导很详细，作为基础理论学习很不错。</p>
+<h2 id="环视投影bev">环视投影/BEV</h2>
+<h3 id="基础概念">基础概念</h3>
+<p>从前文中我们可以得出，对于空间中的一个平面，不同位姿的相机成像的图片可以通过单应矩阵在不同的图片中进行变换。对于自动驾驶车辆来说，环绕车周的多个摄像头(一般是4个及以上)会同时拍摄到地面。同时，我们可以假设有一个虚拟相机位于车辆正上方往下拍摄。这样，车周的摄像头可以根据地平面对应的单应矩阵投影到虚拟相机，得到所谓的俯瞰图/鸟瞰图，也就是 <strong>BEV(Bird Eye View)</strong></p>
+<h3 id="图示说明">图示说明</h3>
+<hr />
+<figure>
+<img src="./imgs/05-ground_coor.png" alt="" /><figcaption>地面坐标系与环视图片坐标系的联系</figcaption>
+</figure>
+<p>上图中<span class="math inline">\(O_G\)</span>是地面坐标系，这里与第一节中说明的车辆坐标系有一点不同，主要是为了方便后文进行公式推导。实际中只需要把图中的地面坐标系与车辆坐标系根据车身参数简单计算出变换矩阵即可。</p>
+<p>上图中<span class="math inline">\(O_I\)</span>是图像坐标系，以左上角为坐标原点，<span class="math inline">\(u,v\)</span>为像素的横轴、纵轴坐标值。<span class="math inline">\(H,W\)</span>为我们希望得到的地平面投影图像的投影范围，单位是<span class="math inline">\(米\)</span>。同时，我们令<span class="math inline">\(d_W,d_H\)</span>为图像每个像素对应的实际中方格的大小，单位也是<span class="math inline">\(米\)</span></p>
+<hr />
+<h3 id="地平面点到相机投影">地平面点到相机投影</h3>
+<p>假设车周有4个相机<span class="math inline">\(C_1,C_2,C_3,C_4\)</span>，4个相机的与地面坐标系的位姿关系为<span class="math inline">\(T_{C_1G}, T_{C_2G}, T_{C_3G}, T_{C_4G}\)</span></p>
+<p>对于一个地面坐标系下的点<span class="math inline">\(P_{G}=[X_G,Y_G,Z_G,1]^T\)</span>，在通过投影方程投影在相机<span class="math inline">\(C_i\)</span>上的图像像素坐标<span class="math inline">\(\boldsymbol{p}_i\)</span>有如下关系：</p>
+<p><span class="math display">\[
+\begin{split}
+P_{C_i}&amp;=T_{C_iG}P_G\\
+&amp;=
+\begin{bmatrix}
+X_{C_i} &amp; Y_{C_i} &amp; Z_{C_i} &amp; 1
+\end{bmatrix}^T
+\end{split}
+\]</span></p>
+<p>则<span class="math inline">\(P_G\)</span>在相机<span class="math inline">\(C_i\)</span>中对应的像素坐标为</p>
+<p><span class="math display">\[
+\begin{split}
+\lambda_{C_i} \boldsymbol{p}_{C_i} 
+&amp;=\
+K_{C_i}P_{C_{i}}\\
+&amp;=\
+K_{C_i}T_{C_iG}P_G
+\end{split}\tag{3-1}
+\]</span></p>
+<p><span class="math inline">\(K_{C_i}\)</span>是相机<span class="math inline">\(C_i\)</span>的内参，<span class="math inline">\(\lambda_{C_i}\)</span>是放缩系数，确保最后<span class="math inline">\(\boldsymbol{p}_{C_i}\)</span>的第三个维度值为1,也就是具有如下形式：<span class="math inline">\(\boldsymbol{p}_{C_i}=[u,v,1]^T\)</span>。另外，要注意（3-1）中包含一个齐次坐标的变换。</p>
+<p>现在假设点<span class="math inline">\(P_G\)</span>的<span class="math inline">\(Z\)</span>轴坐标是0,也就是点位于地面，则 <span class="math inline">\(P_{G}=[X_G,Y_G,0,1]^T\)</span>，上面<span class="math inline">\(P_{C_i}=T_{C_iG}P_G\)</span>展开会变成</p>
+<p><span class="math display">\[
+\begin{split}
+P_{C_i}&amp;=T_{C_iG}P_G\\
+&amp;=
+\begin{bmatrix}
+r_{00} &amp; r_{01} &amp; r_{02} &amp; t_0\\
+r_{10} &amp; r_{11} &amp; r_{12} &amp; t_1\\
+r_{20} &amp; r_{21} &amp; r_{22} &amp; t_2\\
+0 &amp; 0 &amp; 0 &amp; 1
+\end{bmatrix}
+\begin{bmatrix}
+X_{G_i}\\
+Y_{G_i}\\
+0\\
+1
+\end{bmatrix}\\
+&amp;=
+\begin{bmatrix}
+r_{00} &amp; r_{01} &amp; t_0\\
+r_{10} &amp; r_{11} &amp; t_1\\
+r_{20} &amp; r_{21} &amp; t_2\\
+0 &amp; 0 &amp; 1
+\end{bmatrix}
+\begin{bmatrix}
+X_{G_i}\\
+Y_{G_i}\\
+1
+\end{bmatrix}
+\end{split}
+\]</span></p>
+<p>我们可以重新记公式（3-1）为</p>
+<p><span class="math display">\[
+\begin{split}
+\lambda_{C_i}\boldsymbol{p}_{C_i}=K_{C_i}T_{C_iG}^{0:3;0:2,3}P_G
+\end{split}\tag{3-3}
+\]</span></p>
+<p>其中</p>
+<p><span class="math display">\[
+T_{C_iG}^{0:3;0:2,3} =
+\begin{bmatrix}
+r_{00} &amp; r_{01} &amp; t_0\\
+r_{10} &amp; r_{11} &amp; t_1\\
+r_{20} &amp; r_{21} &amp; t_2
+\end{bmatrix}
+\]</span></p>
+<p>表示变换矩阵的前三行，第0,1,3列</p>
+<p>公式（3-3）实际就是第二节中推导出的公式（2-2）</p>
+<h3 id="地平面点虚拟相机投影">地平面点虚拟相机投影</h3>
+<p>根据上图，假设我们想要投影以地面坐标系原点为中心，<span class="math inline">\(H\times W\)</span>的地面区域。同时，我们希望投影后的像素分辨率为一个像素对应横轴、长轴为<span class="math inline">\(d_W,d_H\)</span>长度的地面方格。<strong>（PS:实际上相机的焦距的定义就是每个像素对应的实际尺寸，焦距的单位为<span class="math inline">\(pixel/meter\)</span>）</strong>。对于地平面投影，我们可以假设有一个虚拟相机位于地面上1米，这样<span class="math inline">\(u=f_xX_G+c_x\)</span>，<span class="math inline">\(f_x=\frac{1}{d_W}\)</span>，<span class="math inline">\(c_x=\frac{W}{2d_W}\)</span>。我们可以写成如下的形式</p>
+<p><span class="math display">\[
+\begin{bmatrix}
+u_G\\
+v_G\\
+1
+\end{bmatrix}=
+\begin{bmatrix}
+\frac{1}{d_W} &amp; 0 &amp; \frac{W}{2d_W}\\
+0 &amp; \frac{1}{d_H} &amp; \frac{H}{2d_H}\\
+0 &amp; 0 &amp; 1
+\end{bmatrix}
+\begin{bmatrix}
+X_G\\
+Y_G\\
+1
+\end{bmatrix}\tag{3-4}
+\]</span></p>
+<p>上式可以写成矩阵形式，我们记<span class="math inline">\(K_G\)</span>为上式中的矩阵（虚拟相机的内参）</p>
+<p><span class="math display">\[
+\boldsymbol{p}_G = K_GP_G\tag{3-5}
+\]</span></p>
+<p>联立公式（3-3）和公式（3-5）可以写为如下形式</p>
+<p><span class="math display">\[
+\lambda \boldsymbol{p}_G=K_G\left(T_{C_iG}^{0:3;0:2,3}\right)^{-1}K_{C_i}^{-1}\boldsymbol{p}_{C_i}\tag{3-6}
+\]</span></p>
+<p>其中，<span class="math inline">\(\lambda\)</span>系数只是为了将<span class="math inline">\(\boldsymbol{p}_G\)</span>的最后一个维度归一化，不需要具体形式。</p>
+<h2 id="直接估计环视投影的单应矩阵">直接估计环视投影的单应矩阵</h2>
+<p>除了根据第三节的推导，从相机内外参直接推导出车周相机到地平面的投影矩阵，还可以直接人工选点估计单应矩阵。这一点跟透视矫正（Perspective Correction）任务基本类似。所谓的透视矫正，就是对于同一个平面的不同成像结果（两张图片），我们选择两张图片上的对应点构建对应点集，根据单应矩阵的定义</p>
+<p><span class="math display">\[
+\boldsymbol{p}_2 = H_{21}\boldsymbol{p}_1
+\]</span></p>
+<p>我们可以从对应的点集中求解出单应矩阵。由于前面第二节我们知道单应矩阵的实际自由度为8，而一个对应点对可以构建两个约束方程（<span class="math inline">\(x,y\)</span>），所以我们一共最少需要4个点对来求解单应矩阵。</p>
+<h3 id="示例图">示例图</h3>
+<p>还是以上文的简笔图来说明</p>
+<figure>
+<img src="./imgs/06-perspective_correction.png" alt="" /><figcaption>透视矫正示意图</figcaption>
+</figure>
+<p>上图中两个相机对同一个平面成像，得到两张图片。两张图片中<span class="math inline">\(A,B,C,D\)</span>四个点是一一对应的关系，记这些点对为<span class="math inline">\(\boldsymbol{p}_i,\boldsymbol{p}_i^{\prime}\)</span>，则我们可以建立方程</p>
+<p><span class="math display">\[
+\begin{split}
+\lambda \boldsymbol{p}_i^{\prime}&amp;=H\boldsymbol{p}_i
+\end{split}
+\]</span></p>
+<p>即 <span class="math display">\[
+\lambda
+\begin{bmatrix}
+u_i^{\prime}\\
+v_i^{\prime}\\
+1
+\end{bmatrix}
+=\
+\begin{bmatrix}
+h_{00}&amp;h_{01}&amp;h_{02}\\
+h_{10}&amp;h_{11}&amp;h_{21}\\
+h_{20}&amp;h_{21}&amp;h_{22}\\
+\end{bmatrix}
+\begin{bmatrix}
+u_i\\
+v_i\\
+1
+\end{bmatrix}\tag{4-1}
+\]</span></p>
+<h3 id="单应矩阵求解">单应矩阵求解</h3>
+<p>公式（4-1）的求解可以用最小二乘法，或者最小二乘法+RANSAC等算法，优化目标为：</p>
+<p><span class="math display">\[
+J = \sum_{i}\left(u_i^{\prime}-\frac{h_{00}u_i+h_{01}v_i+h_{02}}{h_{20}u_i+h_{21}v_i+h_{22}}\right)^2+\left(v_i^{\prime}-\frac{h_{10}u_i+h_{11}v_i+h_{21}}{h_{20}u_i+h_{21}v_i+h_{22}}\right)^2
+\]</span></p>
+<p>这部分的求解可以使用OpenCV的函数<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.7.0/d9/d0c/group__calib3d.html#ga4abc2ece9fab9398f2e560d53c8c9780">OpenCV:findHomography</a></p>
+<h3 id="环视投影单应矩阵求解">环视投影单应矩阵求解</h3>
+<p>在环视投影中，我们需要一些额外的标定物要求解单应矩阵。主要的原理就是我们将地面上的坐标和图像中的坐标联立写成如公式（4-1）的形式，然后调用接口计算单应矩阵。图像中的坐标可以通过手工选点，也可以通过一些角点检测程序。</p>
+<figure>
+<img src="./imgs/07-compute-homo.png" alt="" /><figcaption>环视单应矩阵求解</figcaption>
+</figure>
+<p>上图引用自：https://www.guyuehome.com/39649</p>
+<p>上图中0,1,2,3四个点是在图片上选择的点，因此知道像素值。同时，我们又可以通过标定布的几何属性以及我们提前设定的投影图的分辨率，得出这四个点在BEV上的等效像素值，于是我们就可以求解方程（4-1）得出单应矩阵</p>
+<h2 id="单应矩阵的其他应用">单应矩阵的其他应用</h2>
+<p>单应矩阵还可以用在求解平面标定板的位姿、全景图拼接等应用，<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d9/dab/tutorial_homography.html">OpenCV的这一篇教程</a>写得十分详细，这里就不再赘述。</p>
+<h2 id="参考资料">参考资料</h2>
+<ol type="1">
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Homography_(computer_vision)">Wiki:Homography_(computer_vision)</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.opencv.org/4.7.0/d9/d0c/group__calib3d.html#ga4abc2ece9fab9398f2e560d53c8c9780">OpenCV:findHomography</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.guyuehome.com/39649">古月居:AVM 环视拼接方法介绍</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d9/dab/tutorial_homography.html">OpenCV：Basic concepts of the homography explained with code</a></li>
+</ol>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -4729,189 +5270,6 @@ P^-_t&amp;=\mathbb{E}[\big((A_tx_{t-1}+w_t)-A_tx_{t-1}^+\big)\big((A_tx_{t-1}+w_
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/kalman_filter/%E6%89%A9%E5%B1%95%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2-%E5%90%AB%E4%BE%8B%E5%AD%90%E5%8F%8A%E4%BB%A3%E7%A0%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zeal">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zeal's Blog">
-      <meta itemprop="description" content="学习记录及分享">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Zeal's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/03/13/kalman_filter/%E6%89%A9%E5%B1%95%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2-%E5%90%AB%E4%BE%8B%E5%AD%90%E5%8F%8A%E4%BB%A3%E7%A0%81/" class="post-title-link" itemprop="url">扩展卡尔曼滤波-含例子及代码</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-03-13 17:58:21" itemprop="dateCreated datePublished" datetime="2023-03-13T17:58:21+08:00">2023-03-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-09-19 16:29:19" itemprop="dateModified" datetime="2024-09-19T16:29:19+08:00">2024-09-19</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Algorithms/" itemprop="url" rel="index"><span itemprop="name">Algorithms</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Algorithms/Kalman-Filter/" itemprop="url" rel="index"><span itemprop="name">Kalman Filter</span></a>
-        </span>
-    </span>
-
-  
-    <span id="/2023/03/13/kalman_filter/%E6%89%A9%E5%B1%95%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2-%E5%90%AB%E4%BE%8B%E5%AD%90%E5%8F%8A%E4%BB%A3%E7%A0%81/" class="post-meta-item leancloud_visitors" data-flag-title="扩展卡尔曼滤波-含例子及代码" title="阅读次数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-eye"></i>
-      </span>
-      <span class="post-meta-item-text">阅读次数：</span>
-      <span class="leancloud-visitors-count"></span>
-    </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Changyan：</span>
-    
-    <a title="扩展卡尔曼滤波-含例子及代码" href="/2023/03/13/kalman_filter/%E6%89%A9%E5%B1%95%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2-%E5%90%AB%E4%BE%8B%E5%AD%90%E5%8F%8A%E4%BB%A3%E7%A0%81/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::625693331e78b31e9faa26065f21d020" class="cy_cmt_count" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="概述">概述</h1>
-<p>卡尔曼滤波器在1960年被卡尔曼发明之后，被广泛应用在动态系统预测。在自动驾驶、机器人、AR领域等应用广泛。卡尔曼滤波器使用类似马尔可夫链的性质，假设系统状态只与上一时刻的系统状态有关。基础的卡尔曼滤波器使用线型方程对系统状态进行建模。为了能够应用到非线性系统，扩展卡尔曼滤波器利用泰勒展开，并只保留一次项，抛弃高次项，将非线性关系近似为线性关系。</p>
-<p>这一篇文章对扩展卡尔曼滤波器（EKF:Extended Kalman Filter）的具体步骤和公式进行讲解。由于EKF是KF在非线性关系下的扩展，因此必须要先对卡尔曼滤波有必要的认识：</p>
-<ol type="1">
-<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/578920168">卡尔曼滤波器的基础知识及公式推导</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.cs.unc.edu/~welch/kalman/media/pdf/Kalman1960.pdf">Kalman Filter的原始论文</a></li>
-<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Kalman_filter#Derivations">准确的公式推导-wiki</a></li>
-</ol>
-<p>PS：上面的资料2原始论文较为学术化，资料1较为通俗易懂。维基百科中对公式推导部分较为完善。看其中任何一份资料都可以掌握对卡尔曼滤波的基本认识。</p>
-<h1 id="卡尔曼滤波器回顾">卡尔曼滤波器回顾</h1>
-<p><strong>状态方程和观测方程</strong> <span class="math display">\[x_t = A_tx_{t-1}+B_tu_t+w_t\tag{1}\]</span> <span class="math display">\[z_t = Hx_t+v_t\tag{2}\]</span> 其中<span class="math inline">\(x_t \in\mathbb{R}^n\)</span>是系统状态向量，<span class="math inline">\(z_t\in\mathbb{R}^m\)</span>是测量向量。<span class="math inline">\(w_t,v_t\)</span>分别是过程噪声和观测噪声，且满足高斯分布 <span class="math display">\[w_t\sim N(0,Q_t)\]</span> <span class="math display">\[v_t\sim N(0,R_t)\]</span> <strong>预测过程</strong> <span class="math display">\[\hat{x}_t^-=A_t\hat{x}_{t-1}^++B_tu_t\tag{3}\]</span> <span class="math display">\[P_t^-=A_tP_{t-1}^+A_t^T+Q_t\tag{4}\]</span> 其中，<span class="math inline">\(P_t^-\)</span>是先验状态的误差协方差矩阵 <span class="math display">\[P_t^-\triangleq \mathbb{E}[(x_t-\hat{x}_t^-)(x_t-\hat{x}_t^-)^T]\]</span></p>
-<p><strong>更新过程</strong> <span class="math display">\[\tilde{y}_t=z_t-H_t\hat{x}_t^-\]</span> <span class="math display">\[S_t=H_tP_t^-H_t^T+R_t\]</span> <span class="math display">\[K_t=P_t^-H_t^TS_t^{-1}\tag{5}\]</span> <span class="math display">\[x_t^+=x_t^-+K_t\tilde{y}_t\tag{6}\]</span> <span class="math display">\[P_t^+=(I-K_tH_t)P_t^-\tag{7}\]</span></p>
-<h1 id="扩展卡尔曼滤波器">扩展卡尔曼滤波器</h1>
-<p>卡尔曼滤波器建立在线性的状态方程和测量方程也就是公式（1）和公式（2）。但是在实际应用中，更多的关系是非线形关系，比如如何从连续的角速度计算出车辆当前的姿态角等。为了能够利用基本卡尔曼滤波器的预测和更新过程，对于非线性的状态方程和观测方程，我们利用一阶的泰勒展开，将非线性公式近似为线性公式。</p>
-<h2 id="状态方程及观测方程">状态方程及观测方程</h2>
-<p><span class="math display">\[x_t=f(x_{t-1}, u_t, w_t)\tag{8}\]</span> <span class="math display">\[z_t=h(x_t,v_t)\tag{9}\]</span> 公式（8-9）可以类比基础卡尔曼滤波器中的公式（1-2） ## 一阶泰勒展开 我们先假设已知<span class="math inline">\(t-1\)</span>时刻滤波器的输出，也就是<span class="math inline">\(t-1\)</span>时刻的状态后验，以及对应的协方差矩阵为 <span class="math display">\[\hat{x}_{t-1}^+,P_{t-1}^+\]</span> 同时，我们令<span class="math inline">\(x_t\)</span>的先验为 <span class="math display">\[\hat{x}_t^-=f(\hat{x}_{t-1}^+, u_t, 0)\tag{10}\]</span> <strong>公式（10）可类比公式（3）</strong></p>
-<p>对公式（8）在<span class="math inline">\(\hat{x}_{t}^-\)</span>这一点做展开，并只保留一次项 <span class="math display">\[x_t\approx \hat{x}_t^-+A_t(x_{t-1}-\hat{x}_{t-1}^+)+W_tw_t\tag{11}\]</span> 同时，对公式（9）在<span class="math inline">\(\hat{z}_t^-=h(\hat{x}_t^-,0)\)</span>这一点做泰勒展开，并只保留一次项 <span class="math display">\[z_t\approx \hat{z}_t^-+H(x_t-\hat{x}_t^-)+V_tv_t\tag{12}\]</span></p>
-<p>在公式（11）和公式（12）中： - <span class="math display">\[A_{[i,j]}=\frac{\partial f_{i}}{\partial x_j}(\hat{x}_{t-1}^+, u_t, 0)\]</span> - <span class="math display">\[W_{[i,j]}=\frac{\partial f_i}{\partial w_j}(\hat{x}_{t-1}^+, u_t, 0)\]</span> - <span class="math display">\[H_{[i,j]}=\frac{\partial h_i}{\partial x_j}(\hat{x}_t^-,0)\]</span> - <span class="math display">\[V_{[i,j]}=\frac{\partial h_i}{\partial v_j}(\hat{x}_t^-,0)\]</span></p>
-<p>经过泰勒展开后，我们得到了非线性的状态方程和观测方程的线性近似。同样，我们可以将公式（11-12）类比公式（1-2） ## 预测方程及状态协方差矩阵 <span class="math display">\[\hat{x}_t^-=f(\hat{x}_{t-1}^+,u_t,0)\tag{13}\]</span> <span class="math display">\[P_t^-=A_tP_{t-1}^-A_t^T+W_tQ_tW_t^T\tag{14}\]</span> 其中，公式（14）中的第二项，因为在线性近似方程（11）中，噪声项满足分布 <span class="math display">\[W_tw_t\sim N(0, W_tQW_t^T)\]</span> <strong><em>公式（13-14）可以类比公式（3-4）</em></strong></p>
-<h2 id="更新方程及卡尔曼增益">更新方程及卡尔曼增益</h2>
-<p><span class="math display">\[\tilde{y}_t=z_t-h(\hat{x}_t^-,0)\]</span> <span class="math display">\[S_t=H_tP_t^-H_t^T+V_tR_tV_t^T\]</span> <span class="math display">\[K_t=P_t^-H_t^TS_t^{-1}\tag{15}\]</span> <span class="math display">\[\hat{x}_t^+=\hat{x}_t^-+K_t\tilde{y_t}\tag{16}\]</span> <span class="math display">\[P_t^+=(I-K_tH_t)P_t^-\tag{17}\]</span></p>
-<p><strong><em>公式（15-17）可以类比公式（5-7）</em></strong> # 加性噪声（addtive noise）形式 前面我们将噪声加在EKF的状态方程和观测方程的变量中，一种简化的形式是将噪声加在非线性函数外，变成如下形式 <span class="math display">\[x_t=f(x_{t-1}, u_t)+ w_t\tag{18}\]</span> <span class="math display">\[z_t=h(x_t)+v_t\tag{19}\]</span> 这种加性噪声的形式带来的改变只需要将<span class="math inline">\(P_t^-,S_t\)</span>中第二项的<span class="math inline">\(W_t,V_t\)</span>去掉即可，其余都一样 # 总结 ## 理解 重点还是要理解卡尔曼滤波器的中心思想，如何对预测方程和观测方程建立联系，从系统状态先验和测量得出系统状态的后验。扩展卡尔曼滤波器的最核心之处是利用了一阶泰勒展开，对状态方程上一时刻的后验处展开，对测量方程在状态先验处展开，抛弃高阶项，使得非线性方程能够用线性方程近似。近似后就又可以利用卡尔曼滤波器中的过程进行分析。 ## 缺点 1. EKF毕竟只是做一阶近似，如果近似的点与实际的点偏差较大，一阶近似可能误差就会很大。 2. KF和EKF都假设了马尔可夫性质，也就是此刻的状态只与上一时刻的状态有关，实际中可能不是如此 3. KF和EKF如果在系统状态变量数量太大的情况下，公式中的各个矩阵会呈变量数的平方增长，因此不适合状态变量规模大的情况。</p>
-<h1 id="例子">例子</h1>
-<p>详细代码可以移步：https://github.com/zeal-github/KalmanFilterTutorial ## 问题 假设有一个小车从原点出发，每个时间间隔<span class="math inline">\(\Delta T\)</span>，车上的传感器可以输出车此时的速度<span class="math inline">\(v_t\)</span>和角速度<span class="math inline">\(\omega_t\)</span>。同时，在原点处有一个探测器，同样可以每个<span class="math inline">\(\Delta T\)</span>的时间间隔，探测出车辆距离原点的距离<span class="math inline">\(d_t\)</span>。 我们希望能够求出小车每一时刻对应的x轴和y轴坐标<span class="math inline">\(a_t,b_t\)</span> <img src="./imgs/示例图.png" alt="例子图" /></p>
-<h2 id="状态向量和观测向量">状态向量和观测向量</h2>
-<p>我们另小车每一时刻的x，y坐标、此时小车的车身角度，速度和角速度这5个状态当作状态向量，于是 <span class="math display">\[x_t=\begin{bmatrix}a_t\\b_t\\\theta_t\\v_t\\\omega_t\end{bmatrix}\]</span> 同时，另观测向量为距离原点距离的平方、速度、角速度，于是 <span class="math display">\[z_t=\begin{bmatrix}d_t^2\\v_t\\\omega_t\end{bmatrix}\]</span></p>
-<h2 id="加性噪声的形式">加性噪声的形式</h2>
-<p>为了简化计算过程，我们这里将噪声项提到非线性方程外面，变成加性噪声的形式。也就是公式（18-19）</p>
-<h2 id="状态方程观测方程即雅各比矩阵">状态方程、观测方程即雅各比矩阵</h2>
-<h3 id="状态方程及求导">状态方程及求导</h3>
-<p>小车的x坐标等于上一时刻的x坐标以及这个时间段小车行使过的距离在x轴的投影。小车在每个时间段形式的距离为<span class="math inline">\(v*\Delta T\)</span>；距离在x轴的投影相当于乘上<span class="math inline">\(cos(\theta)\)</span>。y坐标同理。角度则是每一时刻的角速度积分。于是，我们可以写出状态方程： <span class="math display">\[f(x_t,u_t)=\begin{bmatrix}a_t+v_t*\Delta T*cos(\theta_t)\\
-b_t+v_t*\Delta T*sin(\theta_t)\\
-\theta_t+\omega_t*\Delta T\\
-v_t\\
-\omega_t\end{bmatrix}\]</span></p>
-<p>将函数<span class="math inline">\(f\)</span>相对于状态向量<span class="math inline">\(x_t\)</span>求偏导数，可以得到 <span class="math display">\[A_t=\begin{bmatrix}1,0,v_t*\Delta T*-sin(\theta_t),\Delta T*cos(\theta_t),0\\
-0,1,v_t*\Delta T*cos(\theta_t),\Delta T*sin(\theta_t),0\\
-0,0,1,0,\Delta T\\
-0,0,0,1,0\\
-0,0,0,0,1\end{bmatrix}\]</span></p>
-<h3 id="观测方程及求导">观测方程及求导</h3>
-<p>我们将小车与原点距离的平方、速度、角速度作为观测向量，即 <span class="math display">\[h(x_t)=\begin{bmatrix}a_t^2+b_t^2\\
-v_t\\
-\omega_t\end{bmatrix}\]</span> 将上述方程对状态方程求偏导数可以得到 <span class="math display">\[H_t=\begin{bmatrix}
-2*a_t, 2*b_t, 0, 0, 0\\
-0, 0, 0, 1, 0\\
-0, 0, 0, 0, 1
-\end{bmatrix}\]</span></p>
-<h2 id="状态初始化">状态初始化</h2>
-<p>系统状态我们可以简单以全0向量作为初始值，即 <span class="math display">\[x_0=[0,0,0,0,0]^T\]</span> 另一个需要初始化的值是状态向量协方差矩阵<span class="math inline">\(P_0\)</span>。经过实验发现在滤波过程对<span class="math inline">\(P_0\)</span>的值似乎有点敏感，主要是不能只有对角线有值。实际上，如果在实际应用中，可以先采集一段数据计算出各个变量的初始值。这里将<span class="math inline">\(P_0\)</span>设为如下值 <span class="math display">\[P_0 = \begin{bmatrix}
-10, 10, 1, 0, 0\\
-10, 10, 1, 0, 0\\
-1, 1, 0.1, 0, 0\\
-0, 0, 0, 1e-8, 0\\
-0, 0, 0, 0, 1e-8\\
-\end{bmatrix}\]</span></p>
-<h2 id="过程噪声和观测噪声">过程噪声和观测噪声</h2>
-<p>过程噪声的协方差和观测噪声的协方差矩阵我们设置为一个较小的值即可。只不过这里的<span class="math inline">\(Q\)</span>矩阵似乎比较敏感。而且由于我们用了速度和角速度做积分，而另外一个观测量距离并不能为角度提供更多的信息。因此，对于角度，这里并不能得到比简单的积分好很多的结果。 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 过程噪声的协方差，需要调整的参数</span></span><br><span class="line">Q = np.array([</span><br><span class="line">    [<span class="number">0.01</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0.01</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0.0001</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0.01</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0.01</span>]</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 观测噪声协方差矩阵</span></span><br><span class="line">R = np.array([</span><br><span class="line">    [<span class="number">0.0001</span>, <span class="number">0</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0.</span>, <span class="number">0.0001</span>, <span class="number">0</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">0</span>, <span class="number">0.0001</span>]</span><br><span class="line">]) <span class="comment"># 观测噪声的协方差，需要调整的参数</span></span><br></pre></td></tr></table></figure></p>
-<h2 id="卡尔曼滤波过程">卡尔曼滤波过程</h2>
-<p>有了上面的雅各比矩阵推导，就可以利用公式（13-17）进行滤波过程。过程只用了到一些矩阵乘法，十分简单。具体可以看代码。</p>
-<h2 id="结果">结果</h2>
-<p>代码里生成了完美的观测量和带噪声的观测量，同时，利用直接的积分算法完美的状态和带噪声的状态，将其与卡尔曼滤波的结果做对比。结果如下 <img src="imgs/all_result.png" alt="所有结果" /></p>
-<p>将完美的轨迹、直接对带噪声信号积分的轨迹和卡尔曼滤波的结果可视化 <img src="imgs/traj_result.png" alt="轨迹结果" /> 可以看出，卡尔曼滤波的轨迹还是要更贴近真实的轨迹很多</p>
-<h1 id="思考">思考</h1>
-<ol type="1">
-<li>卡尔曼滤波的过程很像自动驾驶中多传感器融合的过程。每一个传感器的输出都是带噪声不完美的。同时，每一种传感器的输出形式都不一样。卡尔曼滤波可以将多传感器统一到状态向量的表达，同时求出一个满足各个传感器限制的最优量。比如例子中，实际上将距离原点的距离弥补到直接使用速度和角速度的积分结果中。</li>
-<li>扩展卡尔曼滤波似乎对各个协方差的初始值和观测噪声的协方差更敏感，如何通过已有信息设置初始值目前还没有找到很好的方法。同时，在例子中使用加性噪声的形式，观测噪声协方差和观测噪声协方差均是常量。不知道用完整形式会不会更鲁棒。</li>
-<li>如何设计状态向量和观测向量是门学问，不是简单思考就可以得出，还是得基于别人的公式和形式构造。</li>
-</ol>
-<h1 id="reference">Reference</h1>
-<ol type="1">
-<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/578920168">卡尔曼滤波器的基础知识及公式推导</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.cs.unc.edu/~welch/kalman/media/pdf/Kalman1960.pdf">Kalman Filter的原始论文</a></li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/archives/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/archives/">1</a><span class="page-number current">2</span><a class="page-number" href="/archives/page/3/">3</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/archives/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -4925,7 +5283,7 @@ v_t\\
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2024</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

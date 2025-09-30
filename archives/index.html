@@ -132,7 +132,7 @@
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-count">60</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -165,7 +165,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2024/09/19/thirdparty/eigen/">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2025/09/29/cv/aruco_marker_detection/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -183,7 +183,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/09/19/thirdparty/eigen/" class="post-title-link" itemprop="url">Eigen3 Notes</a>
+          <a href="/2025/09/29/cv/aruco_marker_detection/" class="post-title-link" itemprop="url">ArUco Marker Detection</a>
         </h2>
 
         <div class="post-meta-container">
@@ -193,9 +193,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2024-09-19 14:00:00 / 修改时间：16:38:22" itemprop="dateCreated datePublished" datetime="2024-09-19T14:00:00+08:00">2024-09-19</time>
+      <time title="创建时间：2025-09-29 15:52:14" itemprop="dateCreated datePublished" datetime="2025-09-29T15:52:14+08:00">2025-09-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-09-30 11:16:25" itemprop="dateModified" datetime="2025-09-30T11:16:25+08:00">2025-09-30</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -203,16 +209,16 @@
       </span>
       <span class="post-meta-item-text">分类于</span>
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Thirdparty/" itemprop="url" rel="index"><span itemprop="name">Thirdparty</span></a>
+          <a href="/categories/Algorithms/" itemprop="url" rel="index"><span itemprop="name">Algorithms</span></a>
         </span>
           ，
         <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Thirdparty/Eigen3/" itemprop="url" rel="index"><span itemprop="name">Eigen3</span></a>
+          <a href="/categories/Algorithms/Computor-Vision/" itemprop="url" rel="index"><span itemprop="name">Computor Vision</span></a>
         </span>
     </span>
 
   
-    <span id="/2024/09/19/thirdparty/eigen/" class="post-meta-item leancloud_visitors" data-flag-title="Eigen3 Notes" title="阅读次数">
+    <span id="/2025/09/29/cv/aruco_marker_detection/" class="post-meta-item leancloud_visitors" data-flag-title="ArUco Marker Detection" title="阅读次数">
       <span class="post-meta-item-icon">
         <i class="far fa-eye"></i>
       </span>
@@ -227,8 +233,8 @@
       </span>
       <span class="post-meta-item-text">Changyan：</span>
     
-    <a title="Eigen3 Notes" href="/2024/09/19/thirdparty/eigen/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::3e9dc02f1bd43abeffaff14ddce3917e" class="cy_cmt_count" itemprop="commentCount"></span>
+    <a title="ArUco Marker Detection" href="/2025/09/29/cv/aruco_marker_detection/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::97de853004ab4ad6b1ead4d8d1718374" class="cy_cmt_count" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -242,280 +248,60 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <ul>
-<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
-<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
-<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
-</ul>
-<h2 id="一些undefine问题">一些Undefine问题</h2>
-<p>Eigen3是一个header-only的库，也就是只要在<code>CMakeLists.txt</code>中include头文件即可</p>
-<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># in CMakeLists.txt</span></span><br><span class="line">find<span class="emphasis">_package(Eigen3 REQUIRED)</span></span><br><span class="line"><span class="emphasis">include_</span>directories($&#123;EIGEN3<span class="emphasis">_INCLUDE_</span>DIRS&#125;)</span><br></pre></td></tr></table></figure>
-<p>但是在编译链接时有时候会出现一些符号未定义问题，主要原因是在代码中没有#include合适的头文件</p>
-<h3 id="inverse-undefined">inverse() Undefined</h3>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;Eigen/LU&gt;</span></span></span><br></pre></td></tr></table></figure>
-<h3 id="eulerangleslonglonglong-undefined">eulerAngles(long,long,long) Undefined</h3>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;Eigen/Geometry&gt;</span></span></span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
+          <!-- * ⭐ [Zeal's Blog](https://zeal-up.github.io/categories/)
+* 🛠 [Zeal's 知乎专栏](https://www.zhihu.com/people/kai-shi-dong-liao-ge)
+* 🌀 [Zeal's Github](https://github.com/zeal-up?tab=repositories) -->
+<div style="display: flex; justify-content: space-around; align-items: center; width: 100%; margin: 20px 0;">
+<p><a href="https://zeal-up.github.io/categories/" style="text-decoration: none; flex: 1; text-align: center;">⭐ Zeal's Blog</a> <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge" style="text-decoration: none; flex: 1; text-align: center;">🛠 Zeal's 知乎专栏</a> <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories" style="text-decoration: none; flex: 1; text-align: center;">🌀 Zeal's Github</a></p>
 </div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2024/09/19/thirdparty/stbi_image/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zeal">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zeal's Blog">
-      <meta itemprop="description" content="学习记录及分享">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Zeal's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/09/19/thirdparty/stbi_image/" class="post-title-link" itemprop="url">stbi_image Notes</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2024-09-19 14:00:00 / 修改时间：16:38:22" itemprop="dateCreated datePublished" datetime="2024-09-19T14:00:00+08:00">2024-09-19</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Thirdparty/" itemprop="url" rel="index"><span itemprop="name">Thirdparty</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Thirdparty/stbi-image/" itemprop="url" rel="index"><span itemprop="name">stbi_image</span></a>
-        </span>
-    </span>
-
-  
-    <span id="/2024/09/19/thirdparty/stbi_image/" class="post-meta-item leancloud_visitors" data-flag-title="stbi_image Notes" title="阅读次数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-eye"></i>
-      </span>
-      <span class="post-meta-item-text">阅读次数：</span>
-      <span class="leancloud-visitors-count"></span>
-    </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Changyan：</span>
-    
-    <a title="stbi_image Notes" href="/2024/09/19/thirdparty/stbi_image/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::9926902ef3c5b74b0d8302ab2202ef98" class="cy_cmt_count" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ul>
-<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
-<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
-<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
-</ul>
-<h2 id="stb_image-multiple-definition-of-first-defined-here-多文件包含问题">stb_image multiple definition of first defined here 多文件包含问题</h2>
-<h2 id="问题描述">问题描述</h2>
-<p>公司代码库中stbi_image.h文件，这个库是header-only的库。 由于是只有头文件，所以其函数的声明和定义都是放在一起，所以当多个文件包含该头文件时，就会导致函数重定义的问题。</p>
-<p>这里又分为了几种情况</p>
+<h2 id="相关opencv教程">相关OpenCV教程</h2>
+<p><a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html">Detection of ArUco Markers</a>中介绍了如何使用OpenCV来检测ArUco码。 <a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/db/da9/tutorial_aruco_board_detection.html">Detection of ArUco boards</a></p>
+<h2 id="aruco-marker">ArUco Marker</h2>
+<p>ArUco码可以用来检测物体的位姿。通过识别ArUco码上方的角点像素坐标，以及利用已知的ArUco码的尺寸，利用PnP算法，可以估计出相机和ArUco码之间的位姿关系。 ArUco吗的四周一圈是纯黑色边缘，中间是二维码编码区域，编码区域可能有4x4、5x5、6x6个编码像素。</p>
+<p>一些ArUco码图片：</p>
+<figure>
+<img src="./imgs/markers.jpg" alt="" /><figcaption>aruco_example</figcaption>
+</figure>
+<p>当固定了ArUco的编码数量（6x6）之后，ArUco码就是可数可列的。在OpenCV中，有很多预定义的ArUco码字典。一个字典里就包含了所有可能的ArUco码。</p>
+<figure>
+<img src="./imgs/aruco_dict_type_opencv.png" alt="" /><figcaption>aruco_type</figcaption>
+</figure>
+<p>在字典里，不同的具体的ArUco码用id来指定。这里有一个生成ArUco码的网站 <a target="_blank" rel="noopener" href="https://chev.me/arucogen/">ArUco Marker Generator</a></p>
+<p>比如生成一个6x6的ArUco码，id为23，如下图：</p>
+<figure>
+<img src="./imgs/aruco_generated_by_web.png" alt="" /><figcaption>aruco_example_23</figcaption>
+</figure>
+<p>在OpenCV中，跟aruco相关的函数定义在<code>cv2.aruco</code>模块中。可以通过如下代码获得ArUco码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;opencv2/objdetect/aruco_detector.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line">cv::Mat markerImage;</span><br><span class="line"><span class="comment">// 获得字典</span></span><br><span class="line">cv::aruco::Dictionary dictionary = cv::aruco::<span class="built_in">getPredefinedDictionary</span>(cv::aruco::DICT_6X6_250);</span><br><span class="line"><span class="comment">// 从字典中生成一个id为23的marker</span></span><br><span class="line"><span class="comment">// 200是生成的marker的尺寸，单位是像素，即生成一个200x200像素的marker</span></span><br><span class="line"><span class="comment">// 最后一个参数事黑边的宽度，默认是1</span></span><br><span class="line">cv::aruco::<span class="built_in">generateImageMarker</span>(dictionary, <span class="number">23</span>, <span class="number">200</span>, markerImage, <span class="number">1</span>);</span><br><span class="line">cv::<span class="built_in">imwrite</span>(<span class="string">&quot;marker23.png&quot;</span>, markerImage);</span><br></pre></td></tr></table></figure>
+<p>获得的图片如下（来自<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html">OpenCV教程</a>）</p>
+<figure>
+<img src="./imgs/marker23_by_opencv.png" alt="" /><figcaption>aruco_example_23_cv</figcaption>
+</figure>
+<h2 id="aruco码检测">ArUco码检测</h2>
+<p>在OpenCV中，可以用<code>cv::aruco::ArucoDetector::detectMarkers()</code>来检测ArUco码。这个函数会返回检测到的ArUco码的id，以及每个ArUco码的4个角点像素坐标。角点坐标顺序从左上角开始，顺时针排列。 里面的算法大概步骤分为两步：</p>
 <ol type="1">
-<li>只有一整个大项目进行编译</li>
-<li>比较大型的项目，可能有多个子项目（多个lib）都依赖到stbi_image.h文件</li>
+<li>找到候选区域。找到类正方形的区域，经过一些筛选，得到候选区域。</li>
+<li>对于各个候选区域，尝试检测码中的编码信息，及黑白格子的序列。黑为0，白为1。检测到编码信息后，可以判断这个码是不是在字典中的码。</li>
 </ol>
-<h2 id="基本使用方式">基本使用方式</h2>
-<p>在库的stbi_image.h的文件头的doc中有如下描述：</p>
-<blockquote>
-<p>Do this: #define STB_IMAGE_IMPLEMENTATION before you include this file in <em>one</em> C or C++ file to create the implementation. // i.e. it should look like this: #include ... #include ... #include ... #define STB_IMAGE_IMPLEMENTATION #include "stb_image.h"</p>
-</blockquote>
-<p>也就是说你不能在头文件里使用STB_IMAGE_IMPLEMENTATION宏，只有定义这个这个宏才会包含函数的定义部分。因此你应该在你的源文件，也就是.c,.cpp文件里使用这个宏并包含这个头文件。</p>
-<h2 id="对于有多个子库都需要依赖到stbi_image.h的情况">对于有多个子库都需要依赖到stbi_image.h的情况</h2>
-<p>有两种解决办法：</p>
-<ol type="1">
-<li><p>C语言中为解决多个源文件包含相同的函数提供了解决办法------static关键字，其修饰的函数和全局变量只在本文件中可见，这样就不会和其他文件冲突了，也就是在.cpp中加载（STB_IMAGE_IMPLEMENTATION）时，预先定义 STB_IMAGE_STATIC ，稍微查看源码即可直到，添加该宏定义以后，函数会被static修改（否则为extern），完美的解决了重定义的问题。推荐大家使用。但是编译阶段可能会有比较多的warning（defined but not used），不过不影响编译。</p></li>
-<li><p>如果在其他的子库中（通常是其他人维护的代码）依旧展开了stbi_image.h的定义部分，那么如果你也在你的.cpp中按照正常方式</p></li>
-</ol>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> STB_IMAGE_IMPLEMENTATION</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;stb_image.h&quot;</span></span></span><br></pre></td></tr></table></figure>
-<p>在最后链接可执行文件的时候就会出现多重定义问题。</p>
-<p>这个时候的解决办法是：你只在你的头文件中直接包含stbi_image.h 这样stbi_image的定义部分只被展开了一次，不会出现重定义的问题。</p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2024/09/19/toolchains/docker/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zeal">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zeal's Blog">
-      <meta itemprop="description" content="学习记录及分享">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Zeal's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/09/19/toolchains/docker/" class="post-title-link" itemprop="url">Docker Notes</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2024-09-19 14:00:00 / 修改时间：16:38:22" itemprop="dateCreated datePublished" datetime="2024-09-19T14:00:00+08:00">2024-09-19</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Toolchains/" itemprop="url" rel="index"><span itemprop="name">Toolchains</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Toolchains/docker/" itemprop="url" rel="index"><span itemprop="name">docker</span></a>
-        </span>
-    </span>
-
-  
-    <span id="/2024/09/19/toolchains/docker/" class="post-meta-item leancloud_visitors" data-flag-title="Docker Notes" title="阅读次数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-eye"></i>
-      </span>
-      <span class="post-meta-item-text">阅读次数：</span>
-      <span class="leancloud-visitors-count"></span>
-    </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Changyan：</span>
-    
-    <a title="Docker Notes" href="/2024/09/19/toolchains/docker/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::30062e52a7e8c798292acc91d36a3cf5" class="cy_cmt_count" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ul>
-<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
-<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
-<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
-</ul>
-<h2 id="解决容器与宿主机目录权限问题">解决容器与宿主机目录权限问题</h2>
-<h3 id="问题描述">问题描述</h3>
-<p>直接运行docker容器的默认用户是root,在容器内新建文件会变成root用户的文件,这样在宿主机上就无法操作这些文件,这样就会导致权限问题。</p>
-<h3 id="解决方法">解决方法</h3>
-<ol type="1">
-<li>在运行容器的时候指定用户</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --<span class="built_in">rm</span> -v /home/username:/home/username --user $(<span class="built_in">id</span> -u):$(<span class="built_in">id</span> -g) ubuntu:18.04</span><br></pre></td></tr></table></figure>
-<p>如果这样直接指定用户的话，由于容器内没有这个用户，虽然容器可以正常运行，但是命令行提示符会变成<code>I have no name!@xxxx</code>。 同时，如果直接使用这样的方式创建容器，容器内没有root权限，会导致一些命令无法执行。比如vscode就无法连接进容器中</p>
-<ol start="2" type="1">
-<li>在Dockerfile中指定用户</li>
-</ol>
-<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">RUN</span><span class="language-bash"> useradd --create-home --no-log-init --shell /bin/bash username \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; adduser username sudo \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; usermod -a -G sudo username \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; <span class="built_in">echo</span> <span class="string">&#x27;username:userpasswd&#x27;</span> | chpasswd \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; <span class="built_in">mkdir</span> -p /etc/sudoers.d \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;username ALL=(ALL) NOPASSWD: ALL&quot;</span> &gt; /etc/sudoers.d/username \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; <span class="built_in">chmod</span> 0440 /etc/sudoers.d/username \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; USER=username \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; GROUP=username</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">USER</span> username:username</span><br></pre></td></tr></table></figure>
-<ol start="3" type="1">
-<li>使用fixuid修复容器中的用户名</li>
-</ol>
-<p><a target="_blank" rel="noopener" href="https://www.kuangstudy.com/bbs/1455772174060093441">fixuid</a>可以修复容器中的用户名，使得容器中的用户名和宿主机中的用户名一致，这样就可以避免权限问题。</p>
-<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> debian:latest</span><br><span class="line"><span class="keyword">COPY</span><span class="language-bash"> fixuid-0.5.1-linux-amd64.tar.gz /opt</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> useradd -m docker &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    apt-get -y install nginx</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> USER=docker &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    GROUP=docker &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    tar -xzf fixuid-0.5.1-linux-amd64.tar.gz -C /usr/local/bin &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    <span class="built_in">chown</span> root:root /usr/local/bin/fixuid &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    <span class="built_in">chmod</span> 4755 /usr/local/bin/fixuid &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    <span class="built_in">mkdir</span> -p /etc/fixuid &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    <span class="built_in">printf</span> <span class="string">&quot;user: <span class="variable">$USER</span>\ngroup: <span class="variable">$GROUP</span>\n&quot;</span> &gt; /etc/fixuid/config.yml</span></span><br><span class="line"><span class="keyword">ENTRYPOINT</span><span class="language-bash"> [<span class="string">&quot;fixuid&quot;</span>]</span></span><br><span class="line"><span class="keyword">USER</span> docker:docker</span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> [<span class="string">&quot;nginx&quot;</span>, <span class="string">&quot;-g&quot;</span>, <span class="string">&quot;daemon off;&quot;</span>]</span></span><br></pre></td></tr></table></figure>
-<ol start="4" type="1">
-<li>docker run</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --<span class="built_in">rm</span> -it -u $(<span class="built_in">id</span> -u):$(<span class="built_in">id</span> -g) image_name</span><br></pre></td></tr></table></figure>
+<figure>
+<img src="./imgs/singlemarkersthresh.png" alt="" /><figcaption>thresholed_img</figcaption>
+</figure>
+<figure>
+<img src="./imgs/singlemarkersdetection.jpg" alt="" /><figcaption>filtered_aruco</figcaption>
+</figure>
+<p>代码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cv::<span class="function">aruco::ArucoDetector <span class="title">detector</span><span class="params">(dictionary, detectorParams)</span></span>;</span><br><span class="line">vector&lt;<span class="type">int</span>&gt; ids;</span><br><span class="line">vector&lt;vector&lt;Point2f&gt; &gt; corners, rejected;</span><br><span class="line">detector.<span class="built_in">detectMarkers</span>(image, corners, ids, rejected);</span><br><span class="line">cv::aruco::<span class="built_in">drawDetectedMarkers</span>(imageCopy, corners, ids);</span><br></pre></td></tr></table></figure>
+<h2 id="aruco码位姿检测">ArUco码位姿检测</h2>
+<p>对于单一的一个ArUco码，可以检测出4个角点的像素坐标。同时，我们在ArUco上定义一个坐标系，可以预先定义这4个角点的3d坐标。这样，我们就可以利用PnP算法，来估计相机和ArUco码之间的位姿关系。 在ArUco上的坐标系定义，可以采取不同的方式。比如，可以定义一个以ArUco码中心为原点，x轴指向ArUco码的右方，y轴指向ArUco码的上，z轴根据右手法则定义。也可以定义为，原点以ArUco码的左上角为原点，x轴指向ArUco码的右方，y轴指向ArUco码的下方，z轴根据右手法则定义。按照第二种方式定义的坐标系，经过ArUco码位姿估计之后，利用函数画出来的结果如下：</p>
+<figure>
+<img src="./imgs/singlemarkersaxes.jpg" alt="" /><figcaption>aruco_pose</figcaption>
+</figure>
+<p>检测单个Marker的位姿可以用如下<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d9/d6a/group__aruco.html#gaba7f1e107f93451e2bc43b8ea96eef8c">OpenCV函数</a>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cv::aruco::<span class="built_in">estimatePoseSingleMarkers</span>(corners, marker_size_, cameraMatrix_,</span><br><span class="line">                                           distCoeffs_, rvecs, tvecs);</span><br><span class="line">cv::<span class="built_in">drawFrameAxes</span>(imageCopy, camMatrix, distCoeffs, rvecs[i], tvecs[i], markerLength * <span class="number">1.5f</span>, <span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="aruco板检测">ArUco板检测</h2>
+<p>如果一个板子上有多个ArUco码，那么可以检测出多个ArUco码，每个码有4个角点，所有的ArUco码角点可以联合起来对板子进行位姿求解，获得更好的板子位姿。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> valid = cv::aruco::<span class="built_in">estimatePoseBoard</span>(</span><br><span class="line">          corners, ids, board, cameraMatrix_, distCoeffs_, rvec, tvec, <span class="literal">true</span>);</span><br></pre></td></tr></table></figure>
+<p>也可以用OpenCV的教程<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/db/da9/tutorial_aruco_board_detection.html">Detection of ArUco boards</a>里面提供的方法</p>
 
       
     </div>
@@ -1093,6 +879,398 @@
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// EdgeSE2.h</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EdgeSE2</span> &#123;</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">EdgeSE2</span>() &#123;</span><br><span class="line">      <span class="built_in">resizeParameters</span>(<span class="number">1</span>);</span><br><span class="line">      <span class="built_in">installParameter</span>(parameter, <span class="number">0</span>);    </span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>Main中的代码如下</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  g2o::OptimizableGraph graph;</span><br><span class="line">  ParameterSE2Offset* parameter = <span class="keyword">new</span> <span class="built_in">ParameterSE2Offset</span>();</span><br><span class="line">  parameter-&gt;<span class="built_in">setId</span>(<span class="number">0</span>);</span><br><span class="line">  graph.<span class="built_in">addParameter</span>(parameter);</span><br><span class="line"></span><br><span class="line">  EdgeSE2* edge = <span class="keyword">new</span> <span class="built_in">EdgeSE2</span>();</span><br><span class="line">  edge-&gt;<span class="built_in">resizeParameters</span>(<span class="number">1</span>);</span><br><span class="line">  edge-&gt;<span class="built_in">installParameter</span>(parameter, <span class="number">0</span>);</span><br><span class="line">  edge-&gt;<span class="built_in">setParameterId</span>(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">  graph.<span class="built_in">addEdge</span>(edge);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2024/09/19/thirdparty/eigen/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/09/19/thirdparty/eigen/" class="post-title-link" itemprop="url">Eigen3 Notes</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-09-19 14:00:00" itemprop="dateCreated datePublished" datetime="2024-09-19T14:00:00+08:00">2024-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-02-19 14:00:21" itemprop="dateModified" datetime="2025-02-19T14:00:21+08:00">2025-02-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Thirdparty/" itemprop="url" rel="index"><span itemprop="name">Thirdparty</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Thirdparty/Eigen3/" itemprop="url" rel="index"><span itemprop="name">Eigen3</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2024/09/19/thirdparty/eigen/" class="post-meta-item leancloud_visitors" data-flag-title="Eigen3 Notes" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Eigen3 Notes" href="/2024/09/19/thirdparty/eigen/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::3e9dc02f1bd43abeffaff14ddce3917e" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="一些undefine问题">一些Undefine问题</h2>
+<p>Eigen3是一个header-only的库，也就是只要在<code>CMakeLists.txt</code>中include头文件即可</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># in CMakeLists.txt</span></span><br><span class="line">find<span class="emphasis">_package(Eigen3 REQUIRED)</span></span><br><span class="line"><span class="emphasis">include_</span>directories($&#123;EIGEN3<span class="emphasis">_INCLUDE_</span>DIRS&#125;)</span><br></pre></td></tr></table></figure>
+<p>但是在编译链接时有时候会出现一些符号未定义问题，主要原因是在代码中没有#include合适的头文件</p>
+<h3 id="inverse-undefined">inverse() Undefined</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;Eigen/LU&gt;</span></span></span><br></pre></td></tr></table></figure>
+<h3 id="eulerangleslonglonglong-undefined">eulerAngles(long,long,long) Undefined</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;Eigen/Geometry&gt;</span></span></span><br></pre></td></tr></table></figure>
+<h3 id="向量计算和内存对齐">向量计算和内存对齐</h3>
+<p>这里有一篇文章把前因后果写得非常好：https://blog.csdn.net/shyjhyp11/article/details/123208279</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2024/09/19/thirdparty/stbi_image/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/09/19/thirdparty/stbi_image/" class="post-title-link" itemprop="url">stbi_image Notes</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-09-19 14:00:00" itemprop="dateCreated datePublished" datetime="2024-09-19T14:00:00+08:00">2024-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-01-15 15:03:22" itemprop="dateModified" datetime="2025-01-15T15:03:22+08:00">2025-01-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Thirdparty/" itemprop="url" rel="index"><span itemprop="name">Thirdparty</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Thirdparty/stbi-image/" itemprop="url" rel="index"><span itemprop="name">stbi_image</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2024/09/19/thirdparty/stbi_image/" class="post-meta-item leancloud_visitors" data-flag-title="stbi_image Notes" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="stbi_image Notes" href="/2024/09/19/thirdparty/stbi_image/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::9926902ef3c5b74b0d8302ab2202ef98" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<p>参考链接：https://blog.csdn.net/ouyang_peng/article/details/126528681</p>
+<h2 id="stb_image-multiple-definition-of-first-defined-here-多文件包含问题">stb_image multiple definition of first defined here 多文件包含问题</h2>
+<h2 id="问题描述">问题描述</h2>
+<p>公司代码库中stbi_image.h文件，这个库是header-only的库。 由于是只有头文件，所以其函数的声明和定义都是放在一起，所以当多个文件包含该头文件时，就会导致函数重定义的问题。</p>
+<p>这里又分为了几种情况</p>
+<ol type="1">
+<li>只有一整个大项目进行编译</li>
+<li>比较大型的项目，可能有多个子项目（多个lib）都依赖到stbi_image.h文件</li>
+</ol>
+<h2 id="基本使用方式">基本使用方式</h2>
+<p>在库的stbi_image.h的文件头的doc中有如下描述：</p>
+<blockquote>
+<p>Do this: #define STB_IMAGE_IMPLEMENTATION before you include this file in <em>one</em> C or C++ file to create the implementation. // i.e. it should look like this: #include ... #include ... #include ... #define STB_IMAGE_IMPLEMENTATION #include "stb_image.h"</p>
+</blockquote>
+<p>也就是说你不能在头文件里使用STB_IMAGE_IMPLEMENTATION宏，只有定义这个这个宏才会包含函数的定义部分。因此你应该在你的源文件，也就是.c,.cpp文件里使用这个宏并包含这个头文件。</p>
+<h2 id="对于有多个子库都需要依赖到stbi_image.h的情况">对于有多个子库都需要依赖到stbi_image.h的情况</h2>
+<p>有两种解决办法：</p>
+<ol type="1">
+<li><p>C语言中为解决多个源文件包含相同的函数提供了解决办法------static关键字，其修饰的函数和全局变量只在本文件中可见，这样就不会和其他文件冲突了，也就是在.cpp中加载（STB_IMAGE_IMPLEMENTATION）时，预先定义 STB_IMAGE_STATIC ，稍微查看源码即可直到，添加该宏定义以后，函数会被static修改（否则为extern），完美的解决了重定义的问题。推荐大家使用。但是编译阶段可能会有比较多的warning（defined but not used），不过不影响编译。</p></li>
+<li><p>如果在其他的子库中（通常是其他人维护的代码）依旧展开了stbi_image.h的定义部分，那么如果你也在你的.cpp中按照正常方式</p></li>
+</ol>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> STB_IMAGE_IMPLEMENTATION</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;stb_image.h&quot;</span></span></span><br></pre></td></tr></table></figure>
+<p>在最后链接可执行文件的时候就会出现多重定义问题。</p>
+<p>这个时候的解决办法是：你只在你的头文件中直接包含stbi_image.h 这样stbi_image的定义部分只被展开了一次，不会出现重定义的问题。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2024/09/19/toolchains/docker/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/09/19/toolchains/docker/" class="post-title-link" itemprop="url">Docker Notes</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-09-19 14:00:00 / 修改时间：16:38:22" itemprop="dateCreated datePublished" datetime="2024-09-19T14:00:00+08:00">2024-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Toolchains/" itemprop="url" rel="index"><span itemprop="name">Toolchains</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Toolchains/docker/" itemprop="url" rel="index"><span itemprop="name">docker</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2024/09/19/toolchains/docker/" class="post-meta-item leancloud_visitors" data-flag-title="Docker Notes" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Docker Notes" href="/2024/09/19/toolchains/docker/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::30062e52a7e8c798292acc91d36a3cf5" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="解决容器与宿主机目录权限问题">解决容器与宿主机目录权限问题</h2>
+<h3 id="问题描述">问题描述</h3>
+<p>直接运行docker容器的默认用户是root,在容器内新建文件会变成root用户的文件,这样在宿主机上就无法操作这些文件,这样就会导致权限问题。</p>
+<h3 id="解决方法">解决方法</h3>
+<ol type="1">
+<li>在运行容器的时候指定用户</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --<span class="built_in">rm</span> -v /home/username:/home/username --user $(<span class="built_in">id</span> -u):$(<span class="built_in">id</span> -g) ubuntu:18.04</span><br></pre></td></tr></table></figure>
+<p>如果这样直接指定用户的话，由于容器内没有这个用户，虽然容器可以正常运行，但是命令行提示符会变成<code>I have no name!@xxxx</code>。 同时，如果直接使用这样的方式创建容器，容器内没有root权限，会导致一些命令无法执行。比如vscode就无法连接进容器中</p>
+<ol start="2" type="1">
+<li>在Dockerfile中指定用户</li>
+</ol>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">RUN</span><span class="language-bash"> useradd --create-home --no-log-init --shell /bin/bash username \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; adduser username sudo \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; usermod -a -G sudo username \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; <span class="built_in">echo</span> <span class="string">&#x27;username:userpasswd&#x27;</span> | chpasswd \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; <span class="built_in">mkdir</span> -p /etc/sudoers.d \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;username ALL=(ALL) NOPASSWD: ALL&quot;</span> &gt; /etc/sudoers.d/username \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; <span class="built_in">chmod</span> 0440 /etc/sudoers.d/username \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; USER=username \</span></span><br><span class="line"><span class="language-bash">   &amp;&amp; GROUP=username</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">USER</span> username:username</span><br></pre></td></tr></table></figure>
+<ol start="3" type="1">
+<li>使用fixuid修复容器中的用户名</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="https://www.kuangstudy.com/bbs/1455772174060093441">fixuid</a>可以修复容器中的用户名，使得容器中的用户名和宿主机中的用户名一致，这样就可以避免权限问题。</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> debian:latest</span><br><span class="line"><span class="keyword">COPY</span><span class="language-bash"> fixuid-0.5.1-linux-amd64.tar.gz /opt</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> useradd -m docker &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    apt-get -y install nginx</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> USER=docker &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    GROUP=docker &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    tar -xzf fixuid-0.5.1-linux-amd64.tar.gz -C /usr/local/bin &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    <span class="built_in">chown</span> root:root /usr/local/bin/fixuid &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    <span class="built_in">chmod</span> 4755 /usr/local/bin/fixuid &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    <span class="built_in">mkdir</span> -p /etc/fixuid &amp;&amp; \</span></span><br><span class="line"><span class="language-bash">    <span class="built_in">printf</span> <span class="string">&quot;user: <span class="variable">$USER</span>\ngroup: <span class="variable">$GROUP</span>\n&quot;</span> &gt; /etc/fixuid/config.yml</span></span><br><span class="line"><span class="keyword">ENTRYPOINT</span><span class="language-bash"> [<span class="string">&quot;fixuid&quot;</span>]</span></span><br><span class="line"><span class="keyword">USER</span> docker:docker</span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> [<span class="string">&quot;nginx&quot;</span>, <span class="string">&quot;-g&quot;</span>, <span class="string">&quot;daemon off;&quot;</span>]</span></span><br></pre></td></tr></table></figure>
+<ol start="4" type="1">
+<li>docker run</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --<span class="built_in">rm</span> -it -u $(<span class="built_in">id</span> -u):$(<span class="built_in">id</span> -g) image_name</span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -2916,7 +3094,7 @@ u_1\\v_1\\1
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-09-19 16:28:09" itemprop="dateModified" datetime="2024-09-19T16:28:09+08:00">2024-09-19</time>
+      <time title="修改时间：2025-09-29 15:49:09" itemprop="dateModified" datetime="2025-09-29T15:49:09+08:00">2025-09-29</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -2963,11 +3141,12 @@ u_1\\v_1\\1
     
     
     <div class="post-body" itemprop="articleBody">
-          <ul>
-<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
-<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
-<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
-</ul>
+          <div style="display: flex; justify-content: space-around; align-items: center; width: 100%; margin: 20px 0;">
+<p><a href="https://zeal-up.github.io/categories/" style="text-decoration: none; flex: 1; text-align: center;">⭐ Zeal's Blog</a> <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge" style="text-decoration: none; flex: 1; text-align: center;">🛠 Zeal's 知乎专栏</a> <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories" style="text-decoration: none; flex: 1; text-align: center;">🌀 Zeal's Github</a></p>
+</div>
+<!-- * ⭐ [Zeal's Blog](https://zeal-up.github.io/categories/)
+* 🛠 [Zeal's 知乎专栏](https://www.zhihu.com/people/kai-shi-dong-liao-ge)
+* 🌀 [Zeal's Github](https://github.com/zeal-up?tab=repositories) -->
 <h2 id="otsu算法简介">Otsu算法简介</h2>
 <p>Otsu算法是一种图像二值化的算法，它的主要思想是将图像分成背景和前景两部分，背景和前景之间的差别越大越好，也就是说背景越黑，前景越白越好，这样的话，我们就可以通过阈值来将图像二值化，阈值的选取就是Otsu算法的核心。</p>
 <p><a target="_blank" rel="noopener" href="https://ieeexplore.ieee.org/document/4310076">原始论文1979：A threshold selection method from gray-level histograms</a></p>
@@ -3506,7 +3685,7 @@ w_0\mu_0+w_1\mu_1 = \mu_T\tag{8}
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-09-19 16:20:02" itemprop="dateModified" datetime="2024-09-19T16:20:02+08:00">2024-09-19</time>
+      <time title="修改时间：2025-01-10 11:47:47" itemprop="dateModified" datetime="2025-01-10T11:47:47+08:00">2025-01-10</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -3571,8 +3750,26 @@ w_0\mu_0+w_1\mu_1 = \mu_T\tag{8}
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install tmux</span><br></pre></td></tr></table></figure>
 <p><strong>配置</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Start windows and panes index at 1, not 0.</span></span><br><span class="line"><span class="built_in">set</span> -g base-index 1</span><br><span class="line">setw -g pane-base-index 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># Ensure window index numbers get reordered on delete.</span></span><br><span class="line">set-option -g renumber-windows on</span><br><span class="line"></span><br><span class="line"><span class="comment"># Enable mouse mode (tmux 2.1 and above)</span></span><br><span class="line"><span class="built_in">set</span> -g mouse on</span><br><span class="line"></span><br><span class="line"><span class="comment"># set window index from 1</span></span><br><span class="line"><span class="built_in">set</span> -g base-index 1</span><br><span class="line">setw -g pane-base-index 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># enable vim mode</span></span><br><span class="line"><span class="built_in">set</span> -g status-keys vi</span><br><span class="line"></span><br><span class="line"><span class="comment"># set the status line&#x27;s colors</span></span><br><span class="line"><span class="built_in">set</span> -g status-style <span class="built_in">fg</span>=white,<span class="built_in">bg</span>=blue</span><br><span class="line"></span><br><span class="line"><span class="comment"># Set different background color for active window</span></span><br><span class="line"><span class="built_in">set</span> -g window-status-style <span class="built_in">bg</span>=yellow</span><br><span class="line"><span class="built_in">set</span> -g window-status-current-style <span class="built_in">bg</span>=red,<span class="built_in">fg</span>=white</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">##################################################</span></span><br><span class="line"><span class="comment"># Themes</span></span><br><span class="line"><span class="comment"># List of plugins</span></span><br><span class="line"><span class="built_in">set</span> -g @plugin <span class="string">&#x27;tmux-plugins/tpm&#x27;</span></span><br><span class="line"><span class="built_in">set</span> -g @plugin <span class="string">&#x27;tmux-plugins/tmux-sensible&#x27;</span></span><br><span class="line"><span class="built_in">set</span> -g @plugin <span class="string">&#x27;tmux-plugins/tmux-cpu&#x27;</span></span><br><span class="line"><span class="built_in">set</span> -g @plugin <span class="string">&#x27;xamut/tmux-network-bandwidth&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> -g status-style <span class="string">&quot;fg=#2188ff,bg=#1f2428&quot;</span></span><br><span class="line"><span class="built_in">set</span> -g status-left-length <span class="string">&quot;100&quot;</span></span><br><span class="line"><span class="built_in">set</span> -g status-right-length <span class="string">&quot;100&quot;</span></span><br><span class="line"><span class="built_in">set</span> -g status-left-length 20</span><br><span class="line"><span class="built_in">set</span> -g status-left <span class="string">&quot;#[fg=#1f2428,bg=#2188ff,bold] #S #[fg=#2188ff,bg=#1f2428,nobold,nounderscore,noitalics]&quot;</span></span><br><span class="line"><span class="built_in">set</span> -g status-right <span class="string">&quot;#[fg=#1f2428,bg=#1f2428,nobold,nounderscore,noitalics]#[fg=#1f2428,bg=#1f2428] #&#123;prefix_highlight&#125; #[fg=#e1e4e8,bg=#1f2428,nobold,nounderscore,noitalics]#[fg=#586069,bg=#e1e4e8] %Y-%m-%d  %I:%M %p #[fg=#2188ff,bg=#e1e4e8,nobold,nounderscore,noitalics]#[fg=#1f2428,bg=#2188ff,bold] CPU: #&#123;cpu_percentage&#125;#[fg=#1f2428,bg=#2188ff,bold] MEM: #&#123;ram_percentage&#125;#[fg=#2188ff,bg=#2188ff,bold] &quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#################################################</span></span><br><span class="line"><span class="comment"># SPLIT WINDOW</span></span><br><span class="line">new -s lz -n win1 -c ~   <span class="comment"># ... create new session (1) with new window (0)</span></span><br><span class="line"></span><br><span class="line">select-window -t win1       <span class="comment"># select myWindow (0)</span></span><br><span class="line">splitw -v -p 50 -t win1 -c ~/     <span class="comment"># split myWindow (0) vertically into halves(50 percent)</span></span><br><span class="line"><span class="comment">#send-keys -t lz:win1.1 &quot;conda deactivate &amp;&amp;source ./install/setup.zsh&amp;&amp;source /opt/ros/foxy/setup.zsh&quot; Enter</span></span><br><span class="line"><span class="comment">#send-keys -t lz:win1.2 &quot;conda deactivate &amp;&amp;source ./install/setup.zsh&amp;&amp;source /opt/ros/foxy/setup.zsh&quot; Enter</span></span><br><span class="line"></span><br><span class="line">new-window -n win2 -c ~/</span><br><span class="line">select-window -t win2</span><br><span class="line">splitw -v -p 50 -t win2 -c ~/</span><br><span class="line"></span><br><span class="line">new-window -n sys -c ~/</span><br><span class="line">select-window -t sys</span><br><span class="line">splitw -h -p 50 -t sys</span><br><span class="line">send-keys -t lz:sys.2 <span class="string">&quot;htop&quot;</span> Enter</span><br><span class="line"></span><br><span class="line">select-window -t win1</span><br><span class="line">select-pane -t 1</span><br></pre></td></tr></table></figure>
+<h3 id="tmux-保存多个session布局配置">Tmux 保存多个session布局配置</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">vim ~/.tmux/mylayout1</span><br><span class="line"></span><br><span class="line">selectp -t 0 <span class="comment">#选中第0个窗格</span></span><br><span class="line">splitw -h -p 50 <span class="comment">#将其分成左右两个</span></span><br><span class="line">selectp -t 1 <span class="comment">#选中第一个，也就是右边那个</span></span><br><span class="line">splitw -v -p 50 <span class="comment">#将右边那个分成上下两个</span></span><br><span class="line">selectp -t 0 <span class="comment">#选中第一个</span></span><br></pre></td></tr></table></figure>
+<p>创建一个新session并载入配置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tmux new-session -s mysession</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在session内</span></span><br><span class="line">Ctrl-b ： </span><br><span class="line">输入：<span class="built_in">source</span> ~/.tmux/mylayout1</span><br></pre></td></tr></table></figure>
+<p>也可以在~/.tmux.conf中绑定快捷键</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># ~/.tmux.conf</span><br><span class="line">bind o source-file ~/.tmux/mylayout1</span><br></pre></td></tr></table></figure>
+<p>这样在tmux session里就可以通过<code>ctrl-b o</code>来载入配置了</p>
+<p>比如在~/.tmux目录喜爱保存两个layout</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># ~/.tmux/orin</span><br><span class="line">new-window -n orina -c ~/</span><br><span class="line">splitw -v -p 50 -c ~/ #将其分成上下两个</span><br><span class="line">selectp -t 1</span><br><span class="line"></span><br><span class="line">new-window -n orinb -c ~/</span><br><span class="line">select-window -t orinb</span><br><span class="line">splitw -v -p 50 -c ~/ #分成上下两个</span><br><span class="line">selectp -t 1 #选中第一个</span><br><span class="line"></span><br><span class="line">select-window -t orina</span><br><span class="line">selectp -t 1</span><br><span class="line"></span><br><span class="line">kill-window -t 1</span><br></pre></td></tr></table></figure>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"># ~/.tmux/ros</span><br><span class="line"># SPLIT WINDOW</span><br><span class="line">new-window -n win1 -c ~/ros2_ws/   # ... create new session (1) with new window (0)</span><br><span class="line">select-window -t win1       # select myWindow (0)</span><br><span class="line">splitw -v -p 50 -t win1 -c ~/ros2_ws/     # split myWindow (0) vertically into halves(50 percent)</span><br><span class="line">send-keys -t lz:win1.1 &quot;source ./install/setup.zsh&amp;&amp;source /opt/ros/humble_override/setup.zsh&quot; Enter</span><br><span class="line">send-keys -t lz:win1.2 &quot;source ./install/setup.zsh&amp;&amp;source /opt/ros/humble_override/setup.zsh&quot; Enter</span><br><span class="line"></span><br><span class="line">new-window -n win2 -c ~/ros2_ws/</span><br><span class="line">select-window -t win2</span><br><span class="line">splitw -v -p 50 -t win2 -c ~/ros2_ws/</span><br><span class="line">send-keys -t lz:win2.1 &quot;source ./install/setup.zsh&amp;&amp;source /opt/ros/humble_override/setup.zsh&quot; Enter</span><br><span class="line">send-keys -t lz:win2.2 &quot;source ./install/setup.zsh&amp;&amp;source /opt/ros/humble_override/setup.zsh&quot; Enter</span><br><span class="line"></span><br><span class="line">new-window -n sys -c ~/</span><br><span class="line">select-window -t sys</span><br><span class="line">splitw -h -p 50 -t sys</span><br><span class="line">send-keys -t lz:sys.2 &quot;htop&quot; Enter</span><br><span class="line"></span><br><span class="line">kill-window -t 1</span><br><span class="line"></span><br><span class="line">select-window -t win1</span><br><span class="line">select-pane -t 1</span><br></pre></td></tr></table></figure>
+<p>这样我们启动一个session之后，就可以载入对应的layout数据了</p>
 <h2 id="解决ros2终端无法tab补全">解决ROS2终端无法tab补全</h2>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /opt/ros/humble/setup.zsh</span><br><span class="line"><span class="comment"># 末尾添加下面指令</span></span><br><span class="line">complete -o nospace -o default -F _python_argcomplete <span class="string">&quot;ros2&quot;</span></span><br></pre></td></tr></table></figure>
+<h2 id="时间同步">时间同步</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tzselect</span><br><span class="line"><span class="comment"># --&gt; 选择Asia --&gt; 选择China --&gt; 选择east China - Beijing, Guangdong, Shanghai, etc--&gt;然后输入1。</span></span><br></pre></td></tr></table></figure>
+<p>执行完tzselect命令选择时区后，时区并没有更改，只是在命令最后提示你可以执行 TZ=’Asia/Shanghai’; export TZ 并将这行命令添加到.profile中，然后退出并重新登录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;TZ=&#x27;Asia/Shanghai&#x27;; export TZ&quot;</span> &gt;&gt; ~/.profile</span><br></pre></td></tr></table></figure>
+<p>需要注意，如果你的终端是zsh等其他，需要在终端的配置(rc)文件中添加上面的命令，比如zsh的配置文件是~/.zshrc</p>
+<p>也可以直接通过修改配置文件来修改时区</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo <span class="built_in">echo</span> <span class="string">&quot;ZONE=Asia/Shanghai&quot;</span> &gt;&gt; /etc/sysconfig/clock         </span><br><span class="line">sudo <span class="built_in">rm</span> -f /etc/localtime</span><br><span class="line"><span class="comment">#链接到上海时区文件       </span></span><br><span class="line">sudo <span class="built_in">ln</span> -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime</span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -4213,547 +4410,6 @@ R_j = R_i\prod^{j-1}_{k=i}\operatorname{Exp}\Big(\left(\tilde{\boldsymbol{\omega
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/06/08/cv/surround-view-projection/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zeal">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zeal's Blog">
-      <meta itemprop="description" content="学习记录及分享">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Zeal's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/06/08/cv/surround-view-projection/" class="post-title-link" itemprop="url">超详细！从单应矩阵推导到自动驾驶环视投影应用</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-06-08 09:38:44" itemprop="dateCreated datePublished" datetime="2023-06-08T09:38:44+08:00">2023-06-08</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-09-19 16:28:10" itemprop="dateModified" datetime="2024-09-19T16:28:10+08:00">2024-09-19</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Algorithms/" itemprop="url" rel="index"><span itemprop="name">Algorithms</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Algorithms/Computor-Vision/" itemprop="url" rel="index"><span itemprop="name">Computor Vision</span></a>
-        </span>
-    </span>
-
-  
-    <span id="/2023/06/08/cv/surround-view-projection/" class="post-meta-item leancloud_visitors" data-flag-title="超详细！从单应矩阵推导到自动驾驶环视投影应用" title="阅读次数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-eye"></i>
-      </span>
-      <span class="post-meta-item-text">阅读次数：</span>
-      <span class="leancloud-visitors-count"></span>
-    </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Changyan：</span>
-    
-    <a title="超详细！从单应矩阵推导到自动驾驶环视投影应用" href="/2023/06/08/cv/surround-view-projection/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::f13a6e5ecc3be4fc943645106759d469" class="cy_cmt_count" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ul>
-<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
-<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
-<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
-</ul>
-<h2 id="本文内容">本文内容</h2>
-<p>本文的主要目的在于介绍自动驾驶中环视投影，也就是所谓的俯瞰图/鸟瞰图/BEV图，其背后的计算机视觉原理。环视投影的背后理论基础就是单应矩阵（Homography Matrix）。为了建立从直观到一般形式，本文从以下章节内容展开</p>
-<p>在第一节中先规定相机坐标系和图像坐标系，以及介绍常用的车辆坐标系的规定。同时，对相机投影中常使用的齐次坐标做了简要介绍，顺带回顾相机投影方程。</p>
-<p>第二节先对单应矩阵做介绍。对于一个空间中一个平面，以及两个不同姿态的相机，两个相机的对该平面的成像之间的联系是单应矩阵。但是如何从相机间的关系推导单应矩阵的具体形式？该节从特殊化形式和一般化形式两个角度对单应矩阵的表达进行推导。</p>
-<p>环视投影是多个方向的地面成像结果到一个位于车辆上方，平行于地面往下成像的虚拟相机的成像结果的变换。第三节详细推导这个应用中的投影过程以及相机内外参与单应矩阵的关系。</p>
-<p>第四节介绍如何在不知道相机内外参的情况下通过点对匹配的方法求解单应矩阵。</p>
-<h2 id="基础知识及相关定义">基础知识及相关定义</h2>
-<h3 id="相机坐标系与图像坐标系">相机坐标系与图像坐标系</h3>
-<p>在计算机视觉的一般任务中，我们规定<strong>相机坐标系</strong>为光轴（经过相机原点）往前为<span class="math inline">\(Z\)</span>轴正方向，右为<span class="math inline">\(X\)</span>，下为<span class="math inline">\(Y\)</span> 对空间中的点放缩到归一化平面，归一化平面的坐标系定义也类似相机坐标系。 但是在图像中，我们一般令图片的左上角为坐标原点，横轴往右为<span class="math inline">\(u/X\)</span>正方向，竖轴往下为<span class="math inline">\(v/Y\)</span>正方向，又叫<strong>像素坐标系</strong></p>
-<p>如下图所示</p>
-<figure>
-<img src="./imgs/01-pinhole.png" alt="" /><figcaption>相机及像素坐标系</figcaption>
-</figure>
-<h3 id="车辆坐标系">车辆坐标系</h3>
-<p>我们一般规定车的后轮横轴中心在地面的点为坐标系原点，<span class="math inline">\(X\)</span>正方向指向车头，<span class="math inline">\(Y\)</span>轴正方向指向车左</p>
-<figure>
-<img src="./imgs/02-vehical_coordinate.png" alt="" /><figcaption>车辆坐标系</figcaption>
-</figure>
-<h3 id="齐次坐标homogeneous-coordinate">齐次坐标（Homogeneous Coordinate）</h3>
-<p>当我们对三维空间中一个点<span class="math inline">\(P_1=[X_1,Y_1,Z_1]^T\)</span>做旋转平移变换到另一个点<span class="math inline">\(P_2\)</span>，可以用下面的公式</p>
-<p><span class="math display">\[
-P_2 = RP_1+\boldsymbol{t}
-\]</span></p>
-<p>其中<span class="math inline">\(R\in \mathbb{R}^{3\times3}\)</span>为旋转矩阵，<span class="math inline">\(\boldsymbol{t}\in \mathbb{R}^{3\times 1}\)</span>为平移向量</p>
-<p>上式也可以将点坐标写为<span class="math inline">\(P_1=[X_1,Y_1,Z_1,1]^T\)</span>的形式，然后用变换矩阵对点做坐标变换</p>
-<p><span class="math display">\[
-P_2 = T_{21}P_1
-\]</span></p>
-<p><span class="math display">\[
-T_{21} =
-\begin{bmatrix}
-R&amp;\boldsymbol{t}\\
-\boldsymbol{0}&amp;1
-\end{bmatrix}\in \mathbb{R}^{4\times 4}
-\]</span></p>
-<p><span class="math inline">\(T_{21}\)</span>称为变换矩阵;<span class="math inline">\(P_1=[X_1,Y_1,Z_1,1]^T\)</span>这种形式也叫齐次坐标（Homogeneous Coordinate）</p>
-<p><strong>注意</strong>：齐次坐标其实有严格的定义，具体形式可以参考<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/zh-hans/%E9%BD%90%E6%AC%A1%E5%9D%90%E6%A0%87">Wiki:Homogeneous Coordinate</a></p>
-<p>同理，在做像素坐标的逆变换，也通常将像素坐标<span class="math inline">\([u,v]^T\)</span>后面添加一个1变为齐次坐标<span class="math inline">\(p=[u,v,1]^T\)</span></p>
-<p><span class="math display">\[
-p_n=K^{-1}p
-\]</span></p>
-<h3 id="投影方程">投影方程</h3>
-<p>空间中的一个点<span class="math inline">\(P_W\)</span>投影到图像上的点<span class="math inline">\(\boldsymbol{p}\)</span>，我们直接记这个过程为</p>
-<p><span class="math display">\[
-\begin{split}
-\lambda \boldsymbol{p}
-&amp;=\
-KT_{CW}P_W\\
-&amp;=\
-\begin{bmatrix}
-u&amp;v&amp;1
-\end{bmatrix}^T
-\end{split}
-\]</span></p>
-<p>这里面包含了一次齐次坐标的转换（<span class="math inline">\(T_{CW}P_W \in \mathbb{R}^{4\times 1}\)</span>,<span class="math inline">\(K\in \mathbb{R}^{3\times 1}\)</span>），但是不会对理解有歧义</p>
-<h2 id="单应矩阵homography-matrix">单应矩阵（Homography Matrix）</h2>
-<p>在计算机视觉中，两个相机对于空间中的同一个平面的成像结果可以通过单应矩阵进行映射（相差一个常量系数）</p>
-<p>另<span class="math inline">\([x,y,1]^T\)</span>为图片1的像素齐次坐标，<span class="math inline">\([x^{\prime},y^{\prime},1]^T\)</span>为同一个点在图片2的像素齐次坐标，则上面那句话可以等价为如下关系：</p>
-<p><span class="math display">\[
-\lambda
-\begin{bmatrix}
-x^{\prime}\\
-y^{\prime}\\
-1
-\end{bmatrix}=
-\boldsymbol{H}
-\begin{bmatrix}
-x\\
-y\\
-1
-\end{bmatrix}=
-\begin{bmatrix}
-h_{00} &amp; h_{10} &amp; h_{20}\\
-h_{01} &amp; h_{11} &amp; h_{21}\\
-h_{02} &amp; h_{12} &amp; h_{22}
-\end{bmatrix}
-\begin{bmatrix}
-x\\
-y\\
-1
-\end{bmatrix}\tag{2-1}
-\]</span></p>
-<p>公式（2-1）中的系数<span class="math inline">\(\lambda\)</span>用来将变换后的坐标归一化（将第三个维度的值放缩为1） <strong>同时要注意，单应矩阵虽然有9个元素，但自由度只有8，可以除以<span class="math inline">\(h_{22}\)</span>进行归一化</strong></p>
-<p>下面我们分别从用形象化的解释和一般化的推导来建立单应矩阵与相机内参、外参的关系</p>
-<h3 id="特殊形式推导">特殊形式推导</h3>
-<p>我们假设空间中有一平面，两个相机<span class="math inline">\(C_1,C_2\)</span>在两个不同的姿态下对这个平面进行成像。同时，我们令世界坐标系（<span class="math inline">\(O_G\)</span>)<span class="math inline">\(的\)</span>Z<span class="math inline">\(轴垂直于该平面，并且令该平面刚好位于世界坐标系的\)</span>XY<span class="math inline">\(平面，这样这个平面上的点\)</span>z$坐标等于0。可以用下图帮忙理解</p>
-<figure>
-<img src="./imgs/03-multi_camera.png" alt="" /><figcaption>双相机成像统一平面</figcaption>
-</figure>
-<p>同时，我们记世界坐标系到相机<span class="math inline">\(C_1\)</span>的变换矩阵为<span class="math inline">\(T_{C_1W}\)</span>，到相机<span class="math inline">\(C_2\)</span>的变换矩阵为<span class="math inline">\(T_{C_2W}\)</span>;<span class="math inline">\(K_1,K_2\)</span>为两个相机的内参。</p>
-<p>我们现在对平面上的一个点<span class="math inline">\(P_W=[X_w,Y_w,Z_w=0,1]^T\)</span>进行投影，得到在两个相机成像的图片上对应的像素点<span class="math inline">\(\boldsymbol{p}_1,\boldsymbol{p}_2\)</span>。投影过程具有如下形式</p>
-<p><span class="math display">\[
-\begin{split}
-\lambda_1\boldsymbol{p}_1
-&amp;=\
-\begin{bmatrix}
-u_1\\
-v_1\\
-1
-\end{bmatrix}
-=\
-K_1T_{C_1W}P_W\\
-&amp;=\
-K_1
-\begin{bmatrix}
-r_{00} &amp; r_{01} &amp; r_{02} &amp; t_0\\
-r_{10} &amp; r_{11} &amp; r_{12} &amp; t_1\\
-r_{20} &amp; r_{21} &amp; r_{22} &amp; t_2\\
-0 &amp; 0 &amp; 0 &amp; 1
-\end{bmatrix}
-\begin{bmatrix}
-X_W\\
-Y_W\\
-0\\
-1
-\end{bmatrix}\\
-&amp;=\
-K_1
-\begin{bmatrix}
-r_{00} &amp; r_{01} &amp; t_0\\
-r_{10} &amp; r_{11} &amp; t_1\\
-r_{20} &amp; r_{21} &amp; t_2
-\end{bmatrix}
-\begin{bmatrix}
-X_W\\
-Y_W\\
-1
-\end{bmatrix}\\
-&amp;=\
-K_1T_{C_1W}^{0:3;0:2,3}P_W
-\end{split}
-\]</span></p>
-<p>上式中<span class="math inline">\(T^{0:3;0:2,3}\)</span>表示变换矩阵前3行的0,1,3列。为了方便记号，我们将<span class="math inline">\(T_{C_1W}^{0:3;0:2,3}\)</span>记为<span class="math inline">\(J_{C_1W}\)</span></p>
-<p>同理，我们可以得到图像2的类似投影方程，我们整理如下</p>
-<p><span class="math display">\[
-\begin{split}
-\lambda_1\boldsymbol{p}_1 &amp;= K_1J_{C_1W}P_W\\
-\\
-\lambda_2\boldsymbol{p}_2 &amp;= K_2J_{C_2W}P_W\\
-\end{split}\tag{2-2}
-\]</span></p>
-<p>注意上式中<span class="math inline">\(P_W=[X_W,Y_W,1]\)</span>，且上式中矩阵相乘的行列数量都是对应的</p>
-<p>我们将上式（2-2）重新整理一下，将<span class="math inline">\(P_W\)</span>写为<span class="math inline">\(p_1\)</span>的函数，有</p>
-<p><span class="math display">\[
-P_W=\lambda_1J_{C_1W}^{-1}K_1^{-1}\boldsymbol{p}_1\tag{2-3}
-\]</span></p>
-<p>将（2-3）带入（2-2）中的相机2方程</p>
-<p><span class="math display">\[
-\lambda_2\boldsymbol{p}_2=\lambda_1K_2J_{C_2W}J_{C_1W}^{-1}K_1^{-1}\boldsymbol{p}_1
-\]</span></p>
-<p>其中<span class="math inline">\(\lambda_1,\lambda_2\)</span>只是为了将投影后的值进行放缩，使得第三个元素的值为1,所以两者可以写成一个，最后我们可以得到如下形式</p>
-<p><span class="math display">\[
-\begin{split}
-&amp;\lambda\boldsymbol{p}_2=\boldsymbol{H}_{21}\boldsymbol{p}_1\\
-&amp; \boldsymbol{H}_{21} = K_2J_{C_2W}J_{C_1W}^{-1}K_1^{-1}\\
-&amp;J=T^{0:3,0:2,3}
-\end{split}\tag{2-4}
-\]</span></p>
-<p>可以看到，公式（2-4）的形式和公式（2-1）是一样的，同时将单应矩阵与相机的内参外参联系起来</p>
-<h3 id="单应矩阵与相机内外参关系的一般形式">单应矩阵与相机内外参关系的一般形式</h3>
-<p>上一个小节我们对单应矩阵与相机的内外参之间的关系建立了公式化的联系和直观上的理解。上一小节的推导可以看出，对于空间中的一快平面，存在一个<span class="math inline">\(3 \times 3\)</span>的矩阵（自由度为8）将两个相机对这块平面的成像结果联系起来。</p>
-<p>在上一小节中，我们假设世界坐标系与成像平面对齐。我们在这一小节中继续推导更一般的表达形式，这一小节的内容主要参考<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Homography_(computer_vision)">Wiki:Homography (computer vision)</a></p>
-<p>由于一般情况下，我们都是知道相机的外参（也就是世界坐标系到相机坐标系的变换关系），所以我们这一节不假设平面的坐标系与世界坐标系对齐，我们假设平面在相机<span class="math inline">\(C_1\)</span>下的法向量为<span class="math inline">\(\boldsymbol{n}\)</span>，平面到相机<span class="math inline">\(C_1\)</span>的距离为<span class="math inline">\(d\)</span>，且对于法向量的方向，我们做如下规定：对于平面上的点<span class="math inline">\(P_{C_1}\)</span>，满足<span class="math inline">\(\boldsymbol{n}^TP_{C_1}+d=0\)</span>，其中<span class="math inline">\(\boldsymbol{n}^TP_{C_1}\)</span>为点到法向量的投影</p>
-<figure>
-<img src="./imgs/04-homo_general.png" alt="" /><figcaption>单应矩阵的一般形式推导</figcaption>
-</figure>
-<p>假设相机<span class="math inline">\(C_1\)</span>的外参为<span class="math inline">\(T_{C_1W}=[R_1|\boldsymbol{t}_1]\)</span>，相机<span class="math inline">\(C_2\)</span>的外参为<span class="math inline">\(T_{C_2W}=[R_2|\boldsymbol{t}_2]\)</span>，由变换矩阵的性质，我们可以得到</p>
-<p><span class="math display">\[
-\begin{split}
-T_{WC_1} &amp;= T_{C_1W}^{-1}\\
-&amp;= 
-\begin{bmatrix}
-R_1&amp;\boldsymbol{t}_1\\
-\boldsymbol{0}&amp;1
-\end{bmatrix}^{-1}\\
-&amp;=\
-\begin{bmatrix}
-R_1^{-1}&amp;-R_1^{-1}\boldsymbol{t}_1\\
-\boldsymbol{0}&amp;1
-\end{bmatrix}
-\end{split}\tag{2-5}
-\]</span></p>
-<p>所以相机1到相机2的变换矩阵为</p>
-<p><span class="math display">\[
-\begin{split}
-T_{C_2C_1} &amp;= T_{C_2W}T_{WC_1}\\
-&amp;= 
-\begin{bmatrix}
-R_2&amp;\boldsymbol{t}_2\\
-\boldsymbol{0}&amp;1
-\end{bmatrix}
-\begin{bmatrix}
-R_1^{-1}&amp;-R_1^{-1}\boldsymbol{t}_1\\
-\boldsymbol{0}&amp;1
-\end{bmatrix}\\
-&amp;=\
-\begin{bmatrix}
-R_2R_1^{-1}&amp;-R_2R_1^{-1}\boldsymbol{t}_1+\boldsymbol{t}_2\\
-\boldsymbol{0}&amp;1
-\end{bmatrix}\\
-&amp;=\
-\begin{bmatrix}
-R_{21}&amp;\boldsymbol{t}_{21}\\
-\boldsymbol{0}&amp;1
-\end{bmatrix}
-\end{split}\tag{2-6}
-\]</span></p>
-<p>根据相机投影关系，我们有</p>
-<p><span class="math display">\[
-\begin{split}
-&amp;\boldsymbol{p}_1=\frac{1}{Z_{C_1}}K_1P_1\\
-&amp;\boldsymbol{p}_2=\frac{1}{Z_{C_2}}K_2P_2\\
-\end{split}\tag{2-7}
-\]</span></p>
-<p><span class="math display">\[
-P_1 = Z_{C_1}K_1^{-1}\boldsymbol{p}_1\tag{2-8}
-\]</span></p>
-<p>又<span class="math inline">\(P_1,P_2\)</span>为点<span class="math inline">\(P_W\)</span>在两个相机坐标系下的坐标，这两个点又可以通过下面的变换联系</p>
-<p><span class="math display">\[
-P_2 = R_{21}P_1 + \boldsymbol{t}_{21}\tag{2-9}
-\]</span></p>
-<p>联合（2-7）到（2-9），我们可以得出</p>
-<p><span class="math display">\[
-\boldsymbol{p}_2=\frac{1}{Z_{C_2}}K_2(R_{21}Z_{C_1}K_1^{-1}\boldsymbol{p}_1+\boldsymbol{t}_{21})\tag{2-10}
-\]</span></p>
-<p>对于平面，我们已经做了如下规定： 在相机<span class="math inline">\(C_1\)</span>坐标系下，对于平面上的点<span class="math inline">\(P_{1}\)</span>，满足<span class="math inline">\(\boldsymbol{n}^TP_{1}+d=0\)</span>，其中<span class="math inline">\(\boldsymbol{n}^TP_{1}\)</span>为点到法向量的投影。即</p>
-<p><span class="math display">\[
-\frac{\boldsymbol{n}^TP_1}{-d}=1\tag{2-11}
-\]</span></p>
-<p>将（2-11）带入公式（2-10）中的<span class="math inline">\(\boldsymbol{t}_{21}\)</span>可以得到</p>
-<p><span class="math display">\[
-\begin{split}
-\boldsymbol{t}_{21}
-&amp;=\
-\boldsymbol{t}_{21}\frac{\boldsymbol{n}^TP_1}{-d}\\
-&amp;=\
-\frac{\boldsymbol{t}_{21}\boldsymbol{n}^T}{-d}P_1\\
-&amp;\overset{2-8}{=}\
--\frac{\boldsymbol{t}_{21}\boldsymbol{n}^T}{d}Z_{C_1}K_1^{-1}\boldsymbol{p}_1
-\end{split}\tag{2-12}
-\]</span></p>
-<p>将（2-12）代入公式（2-10）中，我们可以得到</p>
-<p><span class="math display">\[
-\begin{split}
-\boldsymbol{p}_2&amp;=\frac{1}{Z_{C_2}}K_2\left(R_{21}-\frac{\boldsymbol{t}_{21}\boldsymbol{n}^T}{d}\right)Z_{C_1}K_1^{-1}\boldsymbol{p}_1\\
-&amp;=\
-\frac{Z_{C_1}}{Z_{C_2}}K_2H_{21}K_1^{-1}\boldsymbol{p_1}
-\end{split}\tag{2-13}
-\]</span></p>
-<p>于是，我们可以得到单应矩阵的表达形式</p>
-<p><span class="math display">\[
-H_{21} = R_{21}-\frac{\boldsymbol{t}_{21}\boldsymbol{n}^T}{d}\tag{2-14}
-\]</span></p>
-<p>如果我们将<span class="math inline">\(R_{21}\)</span>与<span class="math inline">\(t_{21}\)</span>的展开形式，即公式（2-6），则我们可以得到</p>
-<p><span class="math display">\[
-H_{21} = R_2R_1^{-1} - \frac{\left(-R_2R_1^{-1}\boldsymbol{t}_1+\boldsymbol{t}_2\right)\boldsymbol{n}^T}{d}\tag{2-15}
-\]</span></p>
-<hr />
-<p>这篇论文<a target="_blank" rel="noopener" href="https://sci-hub.st/10.1145/3343031.3350885">Online Camera Pose Optimization for the Surround-viewSystem</a>，中关于环视图的地平面投影一章的公式推导很详细，作为基础理论学习很不错。</p>
-<h2 id="环视投影bev">环视投影/BEV</h2>
-<h3 id="基础概念">基础概念</h3>
-<p>从前文中我们可以得出，对于空间中的一个平面，不同位姿的相机成像的图片可以通过单应矩阵在不同的图片中进行变换。对于自动驾驶车辆来说，环绕车周的多个摄像头(一般是4个及以上)会同时拍摄到地面。同时，我们可以假设有一个虚拟相机位于车辆正上方往下拍摄。这样，车周的摄像头可以根据地平面对应的单应矩阵投影到虚拟相机，得到所谓的俯瞰图/鸟瞰图，也就是 <strong>BEV(Bird Eye View)</strong></p>
-<h3 id="图示说明">图示说明</h3>
-<hr />
-<figure>
-<img src="./imgs/05-ground_coor.png" alt="" /><figcaption>地面坐标系与环视图片坐标系的联系</figcaption>
-</figure>
-<p>上图中<span class="math inline">\(O_G\)</span>是地面坐标系，这里与第一节中说明的车辆坐标系有一点不同，主要是为了方便后文进行公式推导。实际中只需要把图中的地面坐标系与车辆坐标系根据车身参数简单计算出变换矩阵即可。</p>
-<p>上图中<span class="math inline">\(O_I\)</span>是图像坐标系，以左上角为坐标原点，<span class="math inline">\(u,v\)</span>为像素的横轴、纵轴坐标值。<span class="math inline">\(H,W\)</span>为我们希望得到的地平面投影图像的投影范围，单位是<span class="math inline">\(米\)</span>。同时，我们令<span class="math inline">\(d_W,d_H\)</span>为图像每个像素对应的实际中方格的大小，单位也是<span class="math inline">\(米\)</span></p>
-<hr />
-<h3 id="地平面点到相机投影">地平面点到相机投影</h3>
-<p>假设车周有4个相机<span class="math inline">\(C_1,C_2,C_3,C_4\)</span>，4个相机的与地面坐标系的位姿关系为<span class="math inline">\(T_{C_1G}, T_{C_2G}, T_{C_3G}, T_{C_4G}\)</span></p>
-<p>对于一个地面坐标系下的点<span class="math inline">\(P_{G}=[X_G,Y_G,Z_G,1]^T\)</span>，在通过投影方程投影在相机<span class="math inline">\(C_i\)</span>上的图像像素坐标<span class="math inline">\(\boldsymbol{p}_i\)</span>有如下关系：</p>
-<p><span class="math display">\[
-\begin{split}
-P_{C_i}&amp;=T_{C_iG}P_G\\
-&amp;=
-\begin{bmatrix}
-X_{C_i} &amp; Y_{C_i} &amp; Z_{C_i} &amp; 1
-\end{bmatrix}^T
-\end{split}
-\]</span></p>
-<p>则<span class="math inline">\(P_G\)</span>在相机<span class="math inline">\(C_i\)</span>中对应的像素坐标为</p>
-<p><span class="math display">\[
-\begin{split}
-\lambda_{C_i} \boldsymbol{p}_{C_i} 
-&amp;=\
-K_{C_i}P_{C_{i}}\\
-&amp;=\
-K_{C_i}T_{C_iG}P_G
-\end{split}\tag{3-1}
-\]</span></p>
-<p><span class="math inline">\(K_{C_i}\)</span>是相机<span class="math inline">\(C_i\)</span>的内参，<span class="math inline">\(\lambda_{C_i}\)</span>是放缩系数，确保最后<span class="math inline">\(\boldsymbol{p}_{C_i}\)</span>的第三个维度值为1,也就是具有如下形式：<span class="math inline">\(\boldsymbol{p}_{C_i}=[u,v,1]^T\)</span>。另外，要注意（3-1）中包含一个齐次坐标的变换。</p>
-<p>现在假设点<span class="math inline">\(P_G\)</span>的<span class="math inline">\(Z\)</span>轴坐标是0,也就是点位于地面，则 <span class="math inline">\(P_{G}=[X_G,Y_G,0,1]^T\)</span>，上面<span class="math inline">\(P_{C_i}=T_{C_iG}P_G\)</span>展开会变成</p>
-<p><span class="math display">\[
-\begin{split}
-P_{C_i}&amp;=T_{C_iG}P_G\\
-&amp;=
-\begin{bmatrix}
-r_{00} &amp; r_{01} &amp; r_{02} &amp; t_0\\
-r_{10} &amp; r_{11} &amp; r_{12} &amp; t_1\\
-r_{20} &amp; r_{21} &amp; r_{22} &amp; t_2\\
-0 &amp; 0 &amp; 0 &amp; 1
-\end{bmatrix}
-\begin{bmatrix}
-X_{G_i}\\
-Y_{G_i}\\
-0\\
-1
-\end{bmatrix}\\
-&amp;=
-\begin{bmatrix}
-r_{00} &amp; r_{01} &amp; t_0\\
-r_{10} &amp; r_{11} &amp; t_1\\
-r_{20} &amp; r_{21} &amp; t_2\\
-0 &amp; 0 &amp; 1
-\end{bmatrix}
-\begin{bmatrix}
-X_{G_i}\\
-Y_{G_i}\\
-1
-\end{bmatrix}
-\end{split}
-\]</span></p>
-<p>我们可以重新记公式（3-1）为</p>
-<p><span class="math display">\[
-\begin{split}
-\lambda_{C_i}\boldsymbol{p}_{C_i}=K_{C_i}T_{C_iG}^{0:3;0:2,3}P_G
-\end{split}\tag{3-3}
-\]</span></p>
-<p>其中</p>
-<p><span class="math display">\[
-T_{C_iG}^{0:3;0:2,3} =
-\begin{bmatrix}
-r_{00} &amp; r_{01} &amp; t_0\\
-r_{10} &amp; r_{11} &amp; t_1\\
-r_{20} &amp; r_{21} &amp; t_2
-\end{bmatrix}
-\]</span></p>
-<p>表示变换矩阵的前三行，第0,1,3列</p>
-<p>公式（3-3）实际就是第二节中推导出的公式（2-2）</p>
-<h3 id="地平面点虚拟相机投影">地平面点虚拟相机投影</h3>
-<p>根据上图，假设我们想要投影以地面坐标系原点为中心，<span class="math inline">\(H\times W\)</span>的地面区域。同时，我们希望投影后的像素分辨率为一个像素对应横轴、长轴为<span class="math inline">\(d_W,d_H\)</span>长度的地面方格。<strong>（PS:实际上相机的焦距的定义就是每个像素对应的实际尺寸，焦距的单位为<span class="math inline">\(pixel/meter\)</span>）</strong>。对于地平面投影，我们可以假设有一个虚拟相机位于地面上1米，这样<span class="math inline">\(u=f_xX_G+c_x\)</span>，<span class="math inline">\(f_x=\frac{1}{d_W}\)</span>，<span class="math inline">\(c_x=\frac{W}{2d_W}\)</span>。我们可以写成如下的形式</p>
-<p><span class="math display">\[
-\begin{bmatrix}
-u_G\\
-v_G\\
-1
-\end{bmatrix}=
-\begin{bmatrix}
-\frac{1}{d_W} &amp; 0 &amp; \frac{W}{2d_W}\\
-0 &amp; \frac{1}{d_H} &amp; \frac{H}{2d_H}\\
-0 &amp; 0 &amp; 1
-\end{bmatrix}
-\begin{bmatrix}
-X_G\\
-Y_G\\
-1
-\end{bmatrix}\tag{3-4}
-\]</span></p>
-<p>上式可以写成矩阵形式，我们记<span class="math inline">\(K_G\)</span>为上式中的矩阵（虚拟相机的内参）</p>
-<p><span class="math display">\[
-\boldsymbol{p}_G = K_GP_G\tag{3-5}
-\]</span></p>
-<p>联立公式（3-3）和公式（3-5）可以写为如下形式</p>
-<p><span class="math display">\[
-\lambda \boldsymbol{p}_G=K_G\left(T_{C_iG}^{0:3;0:2,3}\right)^{-1}K_{C_i}^{-1}\boldsymbol{p}_{C_i}\tag{3-6}
-\]</span></p>
-<p>其中，<span class="math inline">\(\lambda\)</span>系数只是为了将<span class="math inline">\(\boldsymbol{p}_G\)</span>的最后一个维度归一化，不需要具体形式。</p>
-<h2 id="直接估计环视投影的单应矩阵">直接估计环视投影的单应矩阵</h2>
-<p>除了根据第三节的推导，从相机内外参直接推导出车周相机到地平面的投影矩阵，还可以直接人工选点估计单应矩阵。这一点跟透视矫正（Perspective Correction）任务基本类似。所谓的透视矫正，就是对于同一个平面的不同成像结果（两张图片），我们选择两张图片上的对应点构建对应点集，根据单应矩阵的定义</p>
-<p><span class="math display">\[
-\boldsymbol{p}_2 = H_{21}\boldsymbol{p}_1
-\]</span></p>
-<p>我们可以从对应的点集中求解出单应矩阵。由于前面第二节我们知道单应矩阵的实际自由度为8，而一个对应点对可以构建两个约束方程（<span class="math inline">\(x,y\)</span>），所以我们一共最少需要4个点对来求解单应矩阵。</p>
-<h3 id="示例图">示例图</h3>
-<p>还是以上文的简笔图来说明</p>
-<figure>
-<img src="./imgs/06-perspective_correction.png" alt="" /><figcaption>透视矫正示意图</figcaption>
-</figure>
-<p>上图中两个相机对同一个平面成像，得到两张图片。两张图片中<span class="math inline">\(A,B,C,D\)</span>四个点是一一对应的关系，记这些点对为<span class="math inline">\(\boldsymbol{p}_i,\boldsymbol{p}_i^{\prime}\)</span>，则我们可以建立方程</p>
-<p><span class="math display">\[
-\begin{split}
-\lambda \boldsymbol{p}_i^{\prime}&amp;=H\boldsymbol{p}_i
-\end{split}
-\]</span></p>
-<p>即 <span class="math display">\[
-\lambda
-\begin{bmatrix}
-u_i^{\prime}\\
-v_i^{\prime}\\
-1
-\end{bmatrix}
-=\
-\begin{bmatrix}
-h_{00}&amp;h_{01}&amp;h_{02}\\
-h_{10}&amp;h_{11}&amp;h_{21}\\
-h_{20}&amp;h_{21}&amp;h_{22}\\
-\end{bmatrix}
-\begin{bmatrix}
-u_i\\
-v_i\\
-1
-\end{bmatrix}\tag{4-1}
-\]</span></p>
-<h3 id="单应矩阵求解">单应矩阵求解</h3>
-<p>公式（4-1）的求解可以用最小二乘法，或者最小二乘法+RANSAC等算法，优化目标为：</p>
-<p><span class="math display">\[
-J = \sum_{i}\left(u_i^{\prime}-\frac{h_{00}u_i+h_{01}v_i+h_{02}}{h_{20}u_i+h_{21}v_i+h_{22}}\right)^2+\left(v_i^{\prime}-\frac{h_{10}u_i+h_{11}v_i+h_{21}}{h_{20}u_i+h_{21}v_i+h_{22}}\right)^2
-\]</span></p>
-<p>这部分的求解可以使用OpenCV的函数<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.7.0/d9/d0c/group__calib3d.html#ga4abc2ece9fab9398f2e560d53c8c9780">OpenCV:findHomography</a></p>
-<h3 id="环视投影单应矩阵求解">环视投影单应矩阵求解</h3>
-<p>在环视投影中，我们需要一些额外的标定物要求解单应矩阵。主要的原理就是我们将地面上的坐标和图像中的坐标联立写成如公式（4-1）的形式，然后调用接口计算单应矩阵。图像中的坐标可以通过手工选点，也可以通过一些角点检测程序。</p>
-<figure>
-<img src="./imgs/07-compute-homo.png" alt="" /><figcaption>环视单应矩阵求解</figcaption>
-</figure>
-<p>上图引用自：https://www.guyuehome.com/39649</p>
-<p>上图中0,1,2,3四个点是在图片上选择的点，因此知道像素值。同时，我们又可以通过标定布的几何属性以及我们提前设定的投影图的分辨率，得出这四个点在BEV上的等效像素值，于是我们就可以求解方程（4-1）得出单应矩阵</p>
-<h2 id="单应矩阵的其他应用">单应矩阵的其他应用</h2>
-<p>单应矩阵还可以用在求解平面标定板的位姿、全景图拼接等应用，<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d9/dab/tutorial_homography.html">OpenCV的这一篇教程</a>写得十分详细，这里就不再赘述。</p>
-<h2 id="参考资料">参考资料</h2>
-<ol type="1">
-<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Homography_(computer_vision)">Wiki:Homography_(computer_vision)</a></li>
-<li><a target="_blank" rel="noopener" href="https://docs.opencv.org/4.7.0/d9/d0c/group__calib3d.html#ga4abc2ece9fab9398f2e560d53c8c9780">OpenCV:findHomography</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.guyuehome.com/39649">古月居:AVM 环视拼接方法介绍</a></li>
-<li><a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d9/dab/tutorial_homography.html">OpenCV：Basic concepts of the homography explained with code</a></li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/archives/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -4767,7 +4423,7 @@ J = \sum_{i}\left(u_i^{\prime}-\frac{h_{00}u_i+h_{01}v_i+h_{02}}{h_{20}u_i+h_{21
 
 <div class="copyright">
   &copy; 
-  <span itemprop="copyrightYear">2024</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
