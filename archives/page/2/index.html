@@ -127,12 +127,12 @@
   <nav class="site-state">
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">23</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">60</span>
+        <span class="site-state-item-count">63</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -156,6 +156,1152 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/09/05/toolchains/bazel_notes/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/09/05/toolchains/bazel_notes/" class="post-title-link" itemprop="url">Bazel笔记及调试时编译选项</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-09-05 14:06:49" itemprop="dateCreated datePublished" datetime="2023-09-05T14:06:49+08:00">2023-09-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-09-19 16:38:22" itemprop="dateModified" datetime="2024-09-19T16:38:22+08:00">2024-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Toolchains/" itemprop="url" rel="index"><span itemprop="name">Toolchains</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Toolchains/bazel/" itemprop="url" rel="index"><span itemprop="name">bazel</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/09/05/toolchains/bazel_notes/" class="post-meta-item leancloud_visitors" data-flag-title="Bazel笔记及调试时编译选项" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Bazel笔记及调试时编译选项" href="/2023/09/05/toolchains/bazel_notes/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::06f155b09959d28809461e0e2d48695c" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="一些链接">一些链接</h2>
+<p>ubuntu安装Bazel直接参考：<a target="_blank" rel="noopener" href="https://bazel.build/install/ubuntu?hl=zh-cn">Bazel Install</a></p>
+<p>官方教程：<a target="_blank" rel="noopener" href="https://bazel.build/start/cpp?hl=en">Bazel Tutorial</a></p>
+<h2 id="build文件中rule的路径">BUILD文件中rule的路径</h2>
+<p>BUILD文件中，在加入source或者headers的时候，文件路径都是在BUILD文件所在目录下的文件，跟CMake文件一样</p>
+<h2 id="关于target的label规则需要先看一下">关于target的label规则需要先看一下</h2>
+<p>很简单，但描述得很清晰</p>
+<p><a target="_blank" rel="noopener" href="https://bazel.build/tutorials/cpp-labels?hl=en">Use labels to reference targets</a></p>
+<h2 id="依赖图可视化dependency-graph">依赖图可视化Dependency Graph</h2>
+<p><a target="_blank" rel="noopener" href="https://bazel.build/tutorials/cpp-dependency?hl=en">Review the dependency graph</a></p>
+<p>之前不知道用指令输出的依赖图可以用在线工具<a target="_blank" rel="noopener" href="http://www.webgraphviz.com/">GraphViz</a>可视化</p>
+<h2 id="include的一些规则">Include的一些规则</h2>
+<h3 id="指明include目录">指明include目录</h3>
+<p>如果在source文件中include的文件不是相对于package的根目录，则需要使用<code>copts=[-Ipath/to/include/dir"]</code>来指明include的目录</p>
+<p>假设工作空间如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">└── my-project</span><br><span class="line">    ├── legacy</span><br><span class="line">    │   └── some_lib</span><br><span class="line">    │       ├── BUILD</span><br><span class="line">    │       ├── include</span><br><span class="line">    │       │   └── some_lib.h</span><br><span class="line">    │       └── some_lib.cc</span><br><span class="line">    └── WORKSPACE</span><br></pre></td></tr></table></figure>
+<ol type="1">
+<li>直接引用</li>
+</ol>
+<p>如果<code>some_lib.cc</code>在引用头文件的时候是<code>#include "legacy/some_lib/include/some_lib.h"</code>,则bazel rule可以直接这样写</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cc_library(</span><br><span class="line">    name = &quot;some_lib&quot;,</span><br><span class="line">    srcs = [&quot;some_lib.cc&quot;],</span><br><span class="line">    hdrs = [&quot;include/some_lib.h&quot;]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<ol start="2" type="1">
+<li>否则需要加入include的目录</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cc_library(</span><br><span class="line">    name = &quot;some_lib&quot;,</span><br><span class="line">    srcs = [&quot;some_lib.cc&quot;],</span><br><span class="line">    hdrs = [&quot;include/some_lib.h&quot;],</span><br><span class="line">    copts = [&quot;-Ilegacy/some_lib/include&quot;],</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<h2 id="debug选项">Debug选项</h2>
+<p>调试程序的时候需要在编译时关闭编译器优化选项，这样在gdb调试的时候才能有较丰富的调试信息。</p>
+<hr />
+<h3 id="gccg-选项">gcc/g++ 选项</h3>
+<p>说bazel的选项之前先说一下编译器的选项</p>
+<p><a target="_blank" rel="noopener" href="https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Invoking-GCC.html">gnc-gcc: Command Line Options</a></p>
+<h4 id="o0o1o2o3og">-O0/O1/O2/O3/Og</h4>
+<p>编译器的4个优化级别，-O0表示没有优化，默认为-O1,-O3优化级别最高</p>
+<p><a target="_blank" rel="noopener" href="https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Optimize-Options.html">gcc - 3.11 Options That Control Optimization</a></p>
+<ul>
+<li>-O0选项或者没有指定-O选项 - 完全不进行优化，可以提供准确的行号，程序打断点也是准确的，但是运行速度慢</li>
+<li>-O1/-O选项 - 由于进行优化，错误信息的行号可能不准确，但是相比O0速度会有显著提高</li>
+<li>-Og选项 - 进行适当的优化，但是为调试尽可能保存必要的信息。在官方文档中，建议调试时使用-Og选项而不是-O0选项</li>
+</ul>
+<h4 id="g-ggdb">-g/-ggdb</h4>
+<p><a target="_blank" rel="noopener" href="https://gcc.gnu.org/onlinedocs/gcc-13.2.0/gcc/Debugging-Options.html">gcc - 3.10 Options for Debugging Your Program</a></p>
+<p>调试信息。可以和-O选项同时使用，更建议和-Og选项配合使用</p>
+<ul>
+<li>-g/-gdb选项 - 使得编译器在编译时会加入调试信息。并且调试信息可供gdb使用。这两者的具体区别不是很清楚</li>
+</ul>
+<hr />
+<h3 id="linker-选项">linker 选项</h3>
+<p><a target="_blank" rel="noopener" href="https://sourceware.org/binutils/docs/ld/Options.html">gnu-linker - Command Line Options</a></p>
+<p>除了编译器需要使用选项来指定是否保存调试信息之外，链接器也有选项来选择是否要保留调试符号</p>
+<h4 id="strip">strip</h4>
+<ul>
+<li>-s/--strip-all 选项 - 去除所有符号信息</li>
+<li>-S/--strip-debug 选项 - 只去除调试器的符号信息</li>
+</ul>
+<p><strong>不过有一点没有搞清楚的是，-S似乎不会去除gcc -g生成的所有调试符号。也就是说，编译是用<code>gcc -g -Wl,-S</code>并不是没有意义的，依旧会保留部分的调试符号。如果不加<code>-Wl,-S</code>，则生成的文件会非常大</strong></p>
+<p><em>PS：使用<code>strip --strip-debug bin</code>命令可以对二进制文件去除调试符号</em></p>
+<h4 id="wl">-Wl</h4>
+<p>如果链接器不是单独调用，而是通过编译器驱动（比如gcc/g++），则链接器的选项需要在前面加上<code>-Wl，</code>，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -Wl,--start-group foo.o bar.o -Wl, --end-group</span><br></pre></td></tr></table></figure>
+<p>如果不加<code>-Wl,</code>，则编译器驱动会直接忽略掉链接器选项，导致错误的链接 <a target="_blank" rel="noopener" href="https://sourceware.org/binutils/docs/ld/Options.html#:~:text=Note%E2%80%94if%20the,Map%3Da.map">原文说明</a></p>
+<hr />
+<h3 id="bazel选项">bazel选项</h3>
+<h4 id="stripalways-never-sometimes">--strip(always | never | sometimes)</h4>
+<p><a target="_blank" rel="noopener" href="https://bazel.build/docs/user-manual#strip">bazel-UserGuide-Options : strip</a></p>
+<p>这一个选项对应链接器的<code>-s/--strip-debug</code>选项。</p>
+<ul>
+<li><p>默认值<code>--strip=sometimes</code> - 表示当<code>--compilation_mode=fastbuild</code>的时候才会去除调试符号。也就是在不指定任何<code>--strip</code>选项的时候，除非<code>--compilation_mode=fastbuild</code>，否则不会去除调试信息</p></li>
+<li><p><code>--strip=always</code> - 相当于在编译时加上<code>-Wl,--strip-debug</code>选项（<code>-Wl</code>指明这个选项是链接器选项）</p></li>
+<li><p><code>--strip=never</code> - 指明不去除调试符号。<code>--strip=sometimes</code>选项使得当<code>--compilation_mode=fastbuild</code>的时候才会去除调试符号</p></li>
+</ul>
+<p>注意这个选项只对应链接器的<code>--strip-debug</code>选项，如果想要在链接时去掉所有符号，也就是链接器的<code>--strip-all</code>选项，需要单独指定<code>--linkopt=-Wl,--strip-all</code>。</p>
+<p><strong>--strip选项会覆盖--linkopt=-Wl,--strip-all`</strong></p>
+<p><code>--strip</code>只是指明链接阶段是否保留调试符号。但是编译阶段是否生成调试信息也需要单独指定。可以通过<code>-c dbg</code>或者<code>--copt -g</code>指定</p>
+<h4 id="compilation_mode-c-fastbuild-opt-dbg">--compilation_mode/-c (fastbuild | opt | dbg)</h4>
+<p>这个选项其实大概对应了编译器的几个优化等级，但又不完全一样</p>
+<ul>
+<li><code>fastbuild</code> - 表示最快编译，不进行优化（-O0），并在链接阶段去掉调试符号（-Wl,--strip-debug/-S）</li>
+<li><code>dbg</code> - 表示开启编译时的<code>-g</code>选项（看上文中编译器选项），生成调试信息</li>
+<li><code>opt</code> - 表示使用<code>-O2</code>等级的编译器优化。与是否打开调试信息无关，调试信息可以另外指定<code>--copt -g</code>开启（实际测试中好像会开启）。不仅如此，<code>opt</code>模式还会在加入<code>-DNDEBUG</code>选项定义一个<code>NDEBUG</code>的宏。</li>
+</ul>
+<hr />
+<h3 id="bazel几种编译模式对应的编译器链接器选项">bazel几种编译模式对应的编译器链接器选项</h3>
+<p><strong>上述的关于<code>--compilation_mode</code>的官方说明似乎跟实际中的不太一样</strong>。通过</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bazel aquery //target</span><br></pre></td></tr></table></figure>
+<p>指令可以查看bazel执行的过程执行和参数。下面整理一下三种编译模式对应的编译器和链接器部分选项</p>
+<ol type="1">
+<li>--compilation_mode=fastbuild - <strong>文件大小65.36M</strong></li>
+</ol>
+<p>此时相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-Wl,-S</span><br><span class="line"></span><br><span class="line"># gcc在没有指定优化级别的时候应该相当于-O0,因此也相当于</span><br><span class="line">-O0 -Wl,-S</span><br></pre></td></tr></table></figure>
+<ol start="2" type="1">
+<li>--compilation_mode=dbg - <strong>文件大小20.4M</strong></li>
+</ol>
+<p>此时相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-g -O2 -Wl,-S</span><br></pre></td></tr></table></figure>
+<p>可以看到，当使用<code>dbg</code>编译模式的时候，相当于编译器开启调试符号（-g），二级优化（-O2），链接器去除调试信息（-Wl,-S） <strong>但是要注意-S似乎不会去除gcc -g生成的所有调试符号。也就是说，编译是用<code>gcc -g -Wl,-S</code>并不是没有意义的，依旧会保留部分的调试符号。如果不加<code>-Wl,-S</code>，则生成的文件会非常大</strong></p>
+<ol start="3" type="1">
+<li>--compilation_mode=opt - <strong>文件大小3.56M</strong></li>
+</ol>
+<p>此时相当于（其实还有很多其他选项）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-g -O2 -DNDEBUG -Wl,-S -Wl,--gc-sections</span><br></pre></td></tr></table></figure>
+<p>虽然还是用<code>-S/--strip-debug</code>，但是加上其他选项后，实际上相当于去掉了所有调试符号（但还没有去掉所有符号）。使用<code>strip</code>工具再进行<code>--strip-debug</code>已经没有作用了。</p>
+<ol start="4" type="1">
+<li>--compilation_mode=dbg --strip=never - <strong>文件大小1.07</strong></li>
+</ol>
+<p>此时相当于</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-g -O2 </span><br></pre></td></tr></table></figure>
+<p>此时由于保留了所有调试符号，所以文件非常大</p>
+<ol start="5" type="1">
+<li>--compilation_mode=opt --strip=never - <strong>文件大小1.05G</strong></li>
+</ol>
+<p>此时相当于<code>opt</code>模式下，但是保留所有调试符号。文件也很大</p>
+<hr />
+<h3 id="总结">总结</h3>
+<p>当需要进行调试的时候，可以选择几种模式</p>
+<ol type="1">
+<li>fastbuild + -g</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bazel build -c fastbuild --copt -g //target</span><br></pre></td></tr></table></figure>
+<p><strong>优点</strong>：编译快，没有进行优化所以出错位置的行号绝对准确;开始调试信息并保留部分调试信息 <strong>缺点</strong>：由于没有进行优化，程序运行可能会慢很多。文件大小会稍大一点</p>
+<ol start="2" type="1">
+<li>dbg</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bazel build -c dbg //target</span><br></pre></td></tr></table></figure>
+<p><strong>优点</strong>：开始二级优化，程序运行快，文件稍小。保留部分调试信息 <strong>缺点</strong>：二级优化（-O2）可能导致报错位置的行号会稍微不准确。</p>
+<ol start="3" type="1">
+<li>dbg + strip=never</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bazel build -c dbg --strip=never</span><br></pre></td></tr></table></figure>
+<p><strong>优点</strong>：二级优化。保留所有调试信息！ <strong>缺点</strong>：编译过程可能较慢。最终的文件大小会非常大。</p>
+<ol start="4" type="1">
+<li>其他注意要点</li>
+</ol>
+<p>在使用bazel的时候尽量还是用bazel推荐的方式，也就是上面的几个方式。bazel的几种编译模式除了指定上面的优化等级、是否开启调试信息、删除调试符号之外还加了很多其他的选项。这样也导致虽然默认都加了<code>-Wl,-S</code>选项，但是不会完全删除掉调试符号。但是如果是自己手工指定<code>--copt=-g</code>，则bazel会提示一下信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">WARNING: Stripping enabled, but &#x27;--copt=-g&#x27; (or --per_file_copt=...@-g) specified. Debug information will be generated and then stripped away. This is probably not what you want! Use &#x27;</span><br><span class="line">-c dbg&#x27; for debug mode, or use &#x27;--strip=never&#x27; to disable stripping</span><br></pre></td></tr></table></figure>
+<p>并且编译出的二进制文件完全删除了调试符号。</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/09/05/toolchains/vscode/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/09/05/toolchains/vscode/" class="post-title-link" itemprop="url">Vscode配置</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-09-05 14:06:49" itemprop="dateCreated datePublished" datetime="2023-09-05T14:06:49+08:00">2023-09-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-09-19 16:38:22" itemprop="dateModified" datetime="2024-09-19T16:38:22+08:00">2024-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Toolchains/" itemprop="url" rel="index"><span itemprop="name">Toolchains</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Toolchains/vscode/" itemprop="url" rel="index"><span itemprop="name">vscode</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/09/05/toolchains/vscode/" class="post-meta-item leancloud_visitors" data-flag-title="Vscode配置" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="Vscode配置" href="/2023/09/05/toolchains/vscode/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::cdd57cd9fb314784f185a55f07daea8f" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="配置项">配置项</h2>
+<h3 id="使用代码格式化formating时修改column-length">使用代码格式化（formating）时修改column length</h3>
+<p>谷歌的代码格式化标准是80列，但是对于现在的电脑屏幕太窄了。这个选项的修改有点隐秘，似乎必须通过<code>settings.json</code>来修改。 在<code>settings.json</code>或者<code>xxx.code-workspace</code>中添加如下内容：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;C_Cpp.clang_format_fallbackStyle&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&#123; BasedOnStyle: Google, ColumnLimit: 120 &#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;black-formatter.args&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="string">&quot;--line-length=100&quot;</span></span><br><span class="line">	<span class="punctuation">]</span>	<span class="comment">// for python</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="intellisense定义宏ifdef">intellisense定义宏（#ifdef）</h3>
+<p>如果一些宏定义是通过编译时指定，比如<code>gcc/cmake -DDEBUG</code>，那么在vscode中就无法识别这些宏定义，从而导致一些代码提示无法正常工作。需要在<code>vscode_workspace</code>中加入如下配置</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">	<span class="attr">&quot;folders&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">		<span class="punctuation">&#123;</span></span><br><span class="line">			<span class="attr">&quot;path&quot;</span><span class="punctuation">:</span> <span class="string">&quot;../project&quot;</span></span><br><span class="line">		<span class="punctuation">&#125;</span></span><br><span class="line">	<span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">	<span class="attr">&quot;settings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;C_Cpp.default.includePath&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">		<span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;C_Cpp.files.exclude&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">			<span class="attr">&quot;**/.vscode&quot;</span> <span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">		<span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;C_Cpp.default.defines&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">			<span class="string">&quot;DEBUG=True&quot;</span></span><br><span class="line">		<span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">	<span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="设置默认缩进数量">设置默认缩进数量</h3>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">	<span class="attr">&quot;settings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;editor.tabSize&quot;</span><span class="punctuation">:</span> <span class="number">4</span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;editor.detectIndentation&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">		<span class="attr">&quot;editor.insertSpaces&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">	<span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h3 id="python-debug设置进入文件目录">python debug设置进入文件目录</h3>
+<p>在<code>.code-workspace</code>中加入如下配置</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;launch&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.2.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;configurations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Python: Current File (Integrated Terminal)&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;debugpy&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;request&quot;</span><span class="punctuation">:</span> <span class="string">&quot;launch&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;program&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;file&#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;console&quot;</span><span class="punctuation">:</span> <span class="string">&quot;integratedTerminal&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;cwd&quot;</span><span class="punctuation">:</span> <span class="string">&quot;$&#123;fileDirname&#125;&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;purpose&quot;</span><span class="punctuation">:</span><span class="punctuation">[</span><span class="string">&quot;debug-in-terminal&quot;</span><span class="punctuation">]</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>如果是在<code>.launch</code>文件，则去掉<code>"launch"</code>层级即可</p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/07/11/linux/dev_env_setting/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/07/11/linux/dev_env_setting/" class="post-title-link" itemprop="url">开发环境配置</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-07-11 22:40:33" itemprop="dateCreated datePublished" datetime="2023-07-11T22:40:33+08:00">2023-07-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-01-10 11:47:47" itemprop="dateModified" datetime="2025-01-10T11:47:47+08:00">2025-01-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/07/11/linux/dev_env_setting/" class="post-meta-item leancloud_visitors" data-flag-title="开发环境配置" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="开发环境配置" href="/2023/07/11/linux/dev_env_setting/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::ce410fb8cb2a2ba6481538d47672b8c3" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="开发环境配置">开发环境配置</h2>
+<h3 id="ohmyzsh安装">ohmyzsh安装</h3>
+<p><strong>安装</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install zsh</span><br><span class="line">wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | sh</span><br></pre></td></tr></table></figure>
+<p><strong>字体安装解决乱码</strong>（https://github.com/powerline/fonts）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install fonts-powerline</span><br></pre></td></tr></table></figure>
+<p><strong>插件安装</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install autojump</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/zsh-users/zsh-autosuggestions <span class="variable">$&#123;ZSH_CUSTOM:-~/.oh-my-zsh/custom&#125;</span>/plugins/zsh-autosuggestions</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/zsh-users/zsh-syntax-highlighting.git <span class="variable">$&#123;ZSH_CUSTOM:-~/.oh-my-zsh/custom&#125;</span>/plugins/zsh-syntax-highlighting</span><br><span class="line">git <span class="built_in">clone</span> --depth=1 https://gitee.com/romkatv/powerlevel10k.git <span class="variable">$&#123;ZSH_CUSTOM:-<span class="variable">$HOME</span>/.oh-my-zsh/custom&#125;</span>/themes/powerlevel10k</span><br></pre></td></tr></table></figure>
+<p><strong>设置默认终端</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chsh -s /bin/zsh</span><br></pre></td></tr></table></figure>
+<h3 id="zshrc配置">.zshrc配置</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># If you come from bash you might have to change your $PATH.</span></span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$HOME</span>/bin:/usr/local/bin:<span class="variable">$PATH</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># enable glob</span></span><br><span class="line"><span class="built_in">setopt</span> nonomatch</span><br><span class="line"><span class="built_in">setopt</span> EXTENDED_GLOB</span><br><span class="line"><span class="comment"># If you come from bash you might have to change your $PATH.</span></span><br><span class="line"><span class="comment"># export PATH=$HOME/bin:/usr/local/bin:$PATH</span></span><br><span class="line"><span class="built_in">export</span> LC_ALL=C.UTF-8</span><br><span class="line"><span class="built_in">export</span> LANG=C.UTF-8</span><br><span class="line"><span class="comment"># Path to your oh-my-zsh installation.</span></span><br><span class="line"><span class="built_in">export</span> ZSH=<span class="string">&quot;<span class="variable">$HOME</span>/.oh-my-zsh&quot;</span></span><br><span class="line"></span><br><span class="line">ZSH_THEME=<span class="string">&quot;powerlevel10k/powerlevel10k&quot;</span></span><br><span class="line"></span><br><span class="line">plugins=(git autojump zsh-autosuggestions zsh-syntax-highlighting)</span><br><span class="line"></span><br><span class="line"><span class="built_in">source</span> <span class="variable">$ZSH</span>/oh-my-zsh.sh</span><br></pre></td></tr></table></figure>
+<h3 id="tmux-安装及配置">Tmux 安装及配置</h3>
+<p><strong>安装</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install tmux</span><br></pre></td></tr></table></figure>
+<p><strong>配置</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Start windows and panes index at 1, not 0.</span></span><br><span class="line"><span class="built_in">set</span> -g base-index 1</span><br><span class="line">setw -g pane-base-index 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># Ensure window index numbers get reordered on delete.</span></span><br><span class="line">set-option -g renumber-windows on</span><br><span class="line"></span><br><span class="line"><span class="comment"># Enable mouse mode (tmux 2.1 and above)</span></span><br><span class="line"><span class="built_in">set</span> -g mouse on</span><br><span class="line"></span><br><span class="line"><span class="comment"># set window index from 1</span></span><br><span class="line"><span class="built_in">set</span> -g base-index 1</span><br><span class="line">setw -g pane-base-index 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># enable vim mode</span></span><br><span class="line"><span class="built_in">set</span> -g status-keys vi</span><br><span class="line"></span><br><span class="line"><span class="comment"># set the status line&#x27;s colors</span></span><br><span class="line"><span class="built_in">set</span> -g status-style <span class="built_in">fg</span>=white,<span class="built_in">bg</span>=blue</span><br><span class="line"></span><br><span class="line"><span class="comment"># Set different background color for active window</span></span><br><span class="line"><span class="built_in">set</span> -g window-status-style <span class="built_in">bg</span>=yellow</span><br><span class="line"><span class="built_in">set</span> -g window-status-current-style <span class="built_in">bg</span>=red,<span class="built_in">fg</span>=white</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">##################################################</span></span><br><span class="line"><span class="comment"># Themes</span></span><br><span class="line"><span class="comment"># List of plugins</span></span><br><span class="line"><span class="built_in">set</span> -g @plugin <span class="string">&#x27;tmux-plugins/tpm&#x27;</span></span><br><span class="line"><span class="built_in">set</span> -g @plugin <span class="string">&#x27;tmux-plugins/tmux-sensible&#x27;</span></span><br><span class="line"><span class="built_in">set</span> -g @plugin <span class="string">&#x27;tmux-plugins/tmux-cpu&#x27;</span></span><br><span class="line"><span class="built_in">set</span> -g @plugin <span class="string">&#x27;xamut/tmux-network-bandwidth&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> -g status-style <span class="string">&quot;fg=#2188ff,bg=#1f2428&quot;</span></span><br><span class="line"><span class="built_in">set</span> -g status-left-length <span class="string">&quot;100&quot;</span></span><br><span class="line"><span class="built_in">set</span> -g status-right-length <span class="string">&quot;100&quot;</span></span><br><span class="line"><span class="built_in">set</span> -g status-left-length 20</span><br><span class="line"><span class="built_in">set</span> -g status-left <span class="string">&quot;#[fg=#1f2428,bg=#2188ff,bold] #S #[fg=#2188ff,bg=#1f2428,nobold,nounderscore,noitalics]&quot;</span></span><br><span class="line"><span class="built_in">set</span> -g status-right <span class="string">&quot;#[fg=#1f2428,bg=#1f2428,nobold,nounderscore,noitalics]#[fg=#1f2428,bg=#1f2428] #&#123;prefix_highlight&#125; #[fg=#e1e4e8,bg=#1f2428,nobold,nounderscore,noitalics]#[fg=#586069,bg=#e1e4e8] %Y-%m-%d  %I:%M %p #[fg=#2188ff,bg=#e1e4e8,nobold,nounderscore,noitalics]#[fg=#1f2428,bg=#2188ff,bold] CPU: #&#123;cpu_percentage&#125;#[fg=#1f2428,bg=#2188ff,bold] MEM: #&#123;ram_percentage&#125;#[fg=#2188ff,bg=#2188ff,bold] &quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#################################################</span></span><br><span class="line"><span class="comment"># SPLIT WINDOW</span></span><br><span class="line">new -s lz -n win1 -c ~   <span class="comment"># ... create new session (1) with new window (0)</span></span><br><span class="line"></span><br><span class="line">select-window -t win1       <span class="comment"># select myWindow (0)</span></span><br><span class="line">splitw -v -p 50 -t win1 -c ~/     <span class="comment"># split myWindow (0) vertically into halves(50 percent)</span></span><br><span class="line"><span class="comment">#send-keys -t lz:win1.1 &quot;conda deactivate &amp;&amp;source ./install/setup.zsh&amp;&amp;source /opt/ros/foxy/setup.zsh&quot; Enter</span></span><br><span class="line"><span class="comment">#send-keys -t lz:win1.2 &quot;conda deactivate &amp;&amp;source ./install/setup.zsh&amp;&amp;source /opt/ros/foxy/setup.zsh&quot; Enter</span></span><br><span class="line"></span><br><span class="line">new-window -n win2 -c ~/</span><br><span class="line">select-window -t win2</span><br><span class="line">splitw -v -p 50 -t win2 -c ~/</span><br><span class="line"></span><br><span class="line">new-window -n sys -c ~/</span><br><span class="line">select-window -t sys</span><br><span class="line">splitw -h -p 50 -t sys</span><br><span class="line">send-keys -t lz:sys.2 <span class="string">&quot;htop&quot;</span> Enter</span><br><span class="line"></span><br><span class="line">select-window -t win1</span><br><span class="line">select-pane -t 1</span><br></pre></td></tr></table></figure>
+<h3 id="tmux-保存多个session布局配置">Tmux 保存多个session布局配置</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">vim ~/.tmux/mylayout1</span><br><span class="line"></span><br><span class="line">selectp -t 0 <span class="comment">#选中第0个窗格</span></span><br><span class="line">splitw -h -p 50 <span class="comment">#将其分成左右两个</span></span><br><span class="line">selectp -t 1 <span class="comment">#选中第一个，也就是右边那个</span></span><br><span class="line">splitw -v -p 50 <span class="comment">#将右边那个分成上下两个</span></span><br><span class="line">selectp -t 0 <span class="comment">#选中第一个</span></span><br></pre></td></tr></table></figure>
+<p>创建一个新session并载入配置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tmux new-session -s mysession</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在session内</span></span><br><span class="line">Ctrl-b ： </span><br><span class="line">输入：<span class="built_in">source</span> ~/.tmux/mylayout1</span><br></pre></td></tr></table></figure>
+<p>也可以在~/.tmux.conf中绑定快捷键</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># ~/.tmux.conf</span><br><span class="line">bind o source-file ~/.tmux/mylayout1</span><br></pre></td></tr></table></figure>
+<p>这样在tmux session里就可以通过<code>ctrl-b o</code>来载入配置了</p>
+<p>比如在~/.tmux目录喜爱保存两个layout</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># ~/.tmux/orin</span><br><span class="line">new-window -n orina -c ~/</span><br><span class="line">splitw -v -p 50 -c ~/ #将其分成上下两个</span><br><span class="line">selectp -t 1</span><br><span class="line"></span><br><span class="line">new-window -n orinb -c ~/</span><br><span class="line">select-window -t orinb</span><br><span class="line">splitw -v -p 50 -c ~/ #分成上下两个</span><br><span class="line">selectp -t 1 #选中第一个</span><br><span class="line"></span><br><span class="line">select-window -t orina</span><br><span class="line">selectp -t 1</span><br><span class="line"></span><br><span class="line">kill-window -t 1</span><br></pre></td></tr></table></figure>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"># ~/.tmux/ros</span><br><span class="line"># SPLIT WINDOW</span><br><span class="line">new-window -n win1 -c ~/ros2_ws/   # ... create new session (1) with new window (0)</span><br><span class="line">select-window -t win1       # select myWindow (0)</span><br><span class="line">splitw -v -p 50 -t win1 -c ~/ros2_ws/     # split myWindow (0) vertically into halves(50 percent)</span><br><span class="line">send-keys -t lz:win1.1 &quot;source ./install/setup.zsh&amp;&amp;source /opt/ros/humble_override/setup.zsh&quot; Enter</span><br><span class="line">send-keys -t lz:win1.2 &quot;source ./install/setup.zsh&amp;&amp;source /opt/ros/humble_override/setup.zsh&quot; Enter</span><br><span class="line"></span><br><span class="line">new-window -n win2 -c ~/ros2_ws/</span><br><span class="line">select-window -t win2</span><br><span class="line">splitw -v -p 50 -t win2 -c ~/ros2_ws/</span><br><span class="line">send-keys -t lz:win2.1 &quot;source ./install/setup.zsh&amp;&amp;source /opt/ros/humble_override/setup.zsh&quot; Enter</span><br><span class="line">send-keys -t lz:win2.2 &quot;source ./install/setup.zsh&amp;&amp;source /opt/ros/humble_override/setup.zsh&quot; Enter</span><br><span class="line"></span><br><span class="line">new-window -n sys -c ~/</span><br><span class="line">select-window -t sys</span><br><span class="line">splitw -h -p 50 -t sys</span><br><span class="line">send-keys -t lz:sys.2 &quot;htop&quot; Enter</span><br><span class="line"></span><br><span class="line">kill-window -t 1</span><br><span class="line"></span><br><span class="line">select-window -t win1</span><br><span class="line">select-pane -t 1</span><br></pre></td></tr></table></figure>
+<p>这样我们启动一个session之后，就可以载入对应的layout数据了</p>
+<h2 id="解决ros2终端无法tab补全">解决ROS2终端无法tab补全</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /opt/ros/humble/setup.zsh</span><br><span class="line"><span class="comment"># 末尾添加下面指令</span></span><br><span class="line">complete -o nospace -o default -F _python_argcomplete <span class="string">&quot;ros2&quot;</span></span><br></pre></td></tr></table></figure>
+<h2 id="时间同步">时间同步</h2>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tzselect</span><br><span class="line"><span class="comment"># --&gt; 选择Asia --&gt; 选择China --&gt; 选择east China - Beijing, Guangdong, Shanghai, etc--&gt;然后输入1。</span></span><br></pre></td></tr></table></figure>
+<p>执行完tzselect命令选择时区后，时区并没有更改，只是在命令最后提示你可以执行 TZ=’Asia/Shanghai’; export TZ 并将这行命令添加到.profile中，然后退出并重新登录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;TZ=&#x27;Asia/Shanghai&#x27;; export TZ&quot;</span> &gt;&gt; ~/.profile</span><br></pre></td></tr></table></figure>
+<p>需要注意，如果你的终端是zsh等其他，需要在终端的配置(rc)文件中添加上面的命令，比如zsh的配置文件是~/.zshrc</p>
+<p>也可以直接通过修改配置文件来修改时区</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo <span class="built_in">echo</span> <span class="string">&quot;ZONE=Asia/Shanghai&quot;</span> &gt;&gt; /etc/sysconfig/clock         </span><br><span class="line">sudo <span class="built_in">rm</span> -f /etc/localtime</span><br><span class="line"><span class="comment">#链接到上海时区文件       </span></span><br><span class="line">sudo <span class="built_in">ln</span> -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/06/12/slam-theory/manifold-integration/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/06/12/slam-theory/manifold-integration/" class="post-title-link" itemprop="url">从IMU预积分理解最大后验概率问题及李代数应用</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-06-12 17:36:16" itemprop="dateCreated datePublished" datetime="2023-06-12T17:36:16+08:00">2023-06-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-09-19 16:23:09" itemprop="dateModified" datetime="2024-09-19T16:23:09+08:00">2024-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/SLAM/Theory/" itemprop="url" rel="index"><span itemprop="name">Theory</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2023/06/12/slam-theory/manifold-integration/" class="post-meta-item leancloud_visitors" data-flag-title="从IMU预积分理解最大后验概率问题及李代数应用" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="从IMU预积分理解最大后验概率问题及李代数应用" href="/2023/06/12/slam-theory/manifold-integration/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::6de792b20332fd968c280dccbaee3292" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <ul>
+<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
+<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge">Zeal's 知乎专栏</a></li>
+<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories">Zeal's Github</a></li>
+</ul>
+<h2 id="本文内容">本文内容</h2>
+<p>为了能够更深刻地理解</p>
+<ol type="1">
+<li>后端优化中的最小二乘问题</li>
+<li>李代数在定位后端的应用</li>
+</ol>
+<p>这两个问题，本文使用IMU预积分作为一个实际问题来联系上面两个内容。IMU预积分可以在欧拉角表达下进行，但是更优的方法是在流形（特殊正交群<span class="math inline">\(SO(3)\)</span>是一种流形）上进行。因此，本文使用论文<a target="_blank" rel="noopener" href="https://arxiv.org/abs/1512.02363">《On-Manifold Preintegration for Real-TimeVisual-Inertial Odometry》</a>提出的IMU预积分方法作为应用实例，在讲述方法的同时将上面两个问题结合其中，使得读者不止对理论基础能够有所了解，也能够明白最小二乘和李代数是如何被用来解决实际问题的。</p>
+<h2 id="一基础理论知识">一、基础理论知识</h2>
+<p>关于定位后端优化是如何从最大后验概率形式变成最小二乘问题，可以阅读笔者的两篇文章：《后端优化如何从最大后验概率到最小二乘（理论篇）/（应用篇）》</p>
+<p>关于李代数基础知识可以阅读笔者这篇文章：《SLAM/定位中李代数基础概念及公式》（李代数基础知识也可以阅读SLAM十四讲的相应内容）</p>
+<h3 id="重要定理性质备忘">重要定理/性质备忘</h3>
+<p>PS:这部分直接跳过，后文推导过程中使用到这些性质再回头看即可</p>
+<p><strong>斜对称矩阵性质</strong></p>
+<p><span class="math display">\[
+\begin{array}{lcl}
+\boldsymbol{a}^{\wedge}\boldsymbol{b} = -\boldsymbol{b}^{\wedge}\boldsymbol{a} &amp;&amp; \forall \boldsymbol{a,b} \in \mathbb{R}^3
+\end{array}\tag{1-1}
+\]</span></p>
+<p><strong>指数映射公式</strong></p>
+<p><span class="math display">\[
+\exp(\boldsymbol{\phi}^{\wedge}) = \mathbf{I}+\frac{\sin{(||\boldsymbol{\phi}||)}}{||\boldsymbol{\phi}||}\boldsymbol{\phi}^{\wedge}+\frac{1-\cos{(||\boldsymbol{\phi}||)}}{||\boldsymbol{\phi}||^2}(\boldsymbol{\phi}^{\wedge})^2\tag{1-2}
+\]</span></p>
+<p><strong>指数映射一阶近似</strong></p>
+<p><span class="math display">\[
+\exp(\boldsymbol{\phi}^{\wedge})\approx \mathbf{I}+\boldsymbol{\phi}^{\wedge}\tag{1-3}
+\]</span></p>
+<p><strong>向量形式的指数/对数映射</strong></p>
+<p>为了方便，我们记<span class="math inline">\(\operatorname{Exp}(\cdot)\)</span>和<span class="math inline">\(\operatorname{Log}(\cdot)\)</span>为向量形式的对数和指数映射</p>
+<p><span class="math display">\[
+\begin{array}{}
+\operatorname{Exp}:&amp;\mathbb{R}^3 \rightarrow SO(3)\\
+\operatorname{Log}:&amp;SO(3)\rightarrow \mathbb{R}^3
+\end{array}\tag{1-4}
+\]</span></p>
+<p><strong>BCH一阶近似</strong></p>
+<p><span class="math display">\[
+\operatorname{Exp}(\phi+\delta{\phi})\approx \operatorname{Exp}(\phi)\operatorname{Exp}(J_r(\phi)\delta{\phi})\tag{1-5}
+\]</span></p>
+<p>其中，<span class="math inline">\(J_r(\phi)\)</span>称为右雅可比矩阵</p>
+<p>BCH一阶近似还有另一种写法</p>
+<p><span class="math display">\[
+\operatorname{Log}\left(\operatorname{Exp}(\phi)\operatorname{Exp}(\delta{\phi})\right)\approx 
+\phi + J_r^{-1}(\phi)\delta{\phi}\tag{1-6}
+\]</span></p>
+<p><strong>指数映射性质</strong></p>
+<p><span class="math display">\[
+R\operatorname{Exp}(\phi)R^T=\operatorname{Exp}(R\phi^{\wedge}R^T)=\operatorname{Exp}(R\phi)\tag{1-7}
+\]</span></p>
+<p>上式也可得</p>
+<p><span class="math display">\[
+\operatorname{Exp}(\phi)R = R\operatorname{Exp}(R^T\phi)\tag{1-8}
+\]</span></p>
+<p>另有，当<span class="math inline">\(\delta{\phi}\)</span>为微小量</p>
+<p><span class="math display">\[
+\operatorname{Exp}(-\delta{\phi})^T=\operatorname{Exp}(\delta{\phi})\tag{1-9}
+\]</span></p>
+<p><strong>右雅可比矩阵性质</strong></p>
+<p>在公式（1-5）中的<span class="math inline">\(J_r(\phi)\)</span>，如果<span class="math inline">\(\phi\)</span>是微小量，则其近似为单位矩阵。记为</p>
+<p><span class="math display">\[
+J_r(\delta{\phi})\approx\mathbf{I},\quad \text{when }\delta{\phi}\text{ is small}\tag{1-10}
+\]</span></p>
+<p><strong>旋转矩阵的扰动模型</strong></p>
+<p>当旋转矩阵的分布具有如下形式：</p>
+<p><span class="math display">\[
+\tilde{R}=R\operatorname{Exp}(\epsilon),\quad \epsilon \sim \mathcal{N}(0,\Sigma)\tag{1-11}
+\]</span></p>
+<p>其负对数似然（negative log-likelihood）有如下形式</p>
+<p><span class="math display">\[
+\begin{split}
+\mathcal{L}(R)&amp;=\frac{1}{2}||\operatorname{Log}(R^{-1}\tilde{R})||^2_{\Sigma}+const\\
+&amp;=\
+\frac{1}{2}||\operatorname{Log}(\tilde{R}^{-1}R)||^2_{\Sigma}+const
+\end{split}\tag{1-12}
+\]</span></p>
+<h2 id="二问题引出">二、问题引出</h2>
+<p>目前SLAM方案包含前端和后端。前端使用视觉/激光，融合IMU数据输出一个里程计;后端尝试从历史轨迹和回环检测中优化出更准确的历史位姿。IMU在前后端都承担一个比较重要的角色。IMU数据进行积分，可以的到旋转和位置的估计，这个估计可以用来做视觉/点云匹配的初始位姿。IMU积分需要以某一帧的状态作为基础往下持续累加，但是SLAM后端的优化会改变历史轨迹位姿，导致IMU积分需要重新计算。为了避免重复积分的问题，可以将IMU的积分形式变化为对两个关键帧之间数据进行累积，获得两帧之间的相对状态变化，此称为<strong>IMU预积分</strong></p>
+<figure>
+<img src="./imgs/01-keyframes_imu_pre.png" alt="" /><figcaption>IMU预积分</figcaption>
+</figure>
+<h3 id="imu预积分积分">IMU预积分/积分</h3>
+<p><strong>IMU积分</strong> : 以某一时刻的状态为基础（位姿、速度），对后续的IMU输出（角速度、加速度）进行积分（累加），得到后续时刻的状态（位姿、速度）</p>
+<p><strong>IMU预积分</strong> ： 将两帧之间的IMU输出（角速度、加速度）进行积分（累加），得到两帧之间的相对状态（相对旋转、相对速度、相对位置）</p>
+<h3 id="坐标系">坐标系</h3>
+<figure>
+<img src="./imgs/02-coordinate_system.png" alt="" /><figcaption>坐标系定义</figcaption>
+</figure>
+<p>本文以视觉惯性SLAM为应用场景。IMU坐标系又称作Body坐标系，相机坐标系（Cam）与Body坐标系有一个固定位姿变换<span class="math inline">\(T_{BC}\)</span>。车辆位姿为车辆在世界（World）坐标系下的姿态<span class="math inline">\(T_{WB}=(R_{WB},_W\boldsymbol{p})\)</span></p>
+<h3 id="推导的最终目的重要">推导的最终目的（重要！！）</h3>
+<p><strong>推导最终目的是为了能够将预积分后的结果（状态State）构造成最小二乘形式，也就是误差的平方</strong></p>
+<p>为了能够获得最小二乘形式，需要将状态构造成真值+高斯噪声的形式，也就是测量值的似然函数，这样，只需要对似然函数取负对数即可。注意，还需要获得噪声的协方差表达，因为协方差的倒数，即信息矩阵，需要用来对二次项加权</p>
+<p><span class="math display">\[
+\begin{array}{lcl}
+\tilde{\mathcal{X}} = \mathcal{X} \oplus \epsilon, &amp;&amp; \epsilon \sim \mathcal{N}\left(0,\Sigma\right)\tag{2-1}
+\end{array}
+\]</span></p>
+<p>上述中<span class="math inline">\(\mathcal{X}\)</span>表示状态，通常是旋转、平移、速度、IMU偏差等。上面公式之所以用复合符号<span class="math inline">\(\oplus\)</span>是因为有些状态变量，比如旋转是不能直接相加的，对于旋转矩阵，<span class="math inline">\(\oplus\)</span>是矩阵乘法</p>
+<p>只要我们推导出公式（2-1），就可以将高斯分布用负对数的形式变化为最小二乘形式</p>
+<p><span class="math display">\[
+\underset{\mathcal{X}}{\operatorname{argmin}}||\tilde{\mathcal{X}}\ominus\mathcal{X}||^2_{\Sigma}\tag{2-2}
+\]</span></p>
+<p><strong>重申，我们需要推导出以下内容</strong></p>
+<ol type="1">
+<li>状态向量的高斯分布形式（真值+高斯噪声）</li>
+<li>噪声的协方差表达</li>
+</ol>
+<h3 id="方法要点重要">方法要点（重要！！）</h3>
+<ol type="1">
+<li>所有的推导都在流形（李群）上推导。本文的推导只用到了特殊正交群<span class="math inline">\(SO(3)\)</span>。这样，优化过程可以在李代数空间上进行，不用考虑旋转矩阵的约束</li>
+<li>为了避免优化的时候每一个IMU测量就需要增加一个优化因素，将两个关键帧之间的的所有IMU数据积分作为一个约束加入后端优化。（常见做法）</li>
+<li>将IMU的积分公式重新推导成IMU预积分形式，使得当后端优化改变历史位姿时，不需要重新执行积分过程</li>
+</ol>
+<h3 id="推导过程总述">推导过程总述</h3>
+<ol type="1">
+<li>根据IMU模型，构造IMU积分形式（在流形上进行推导，使得优化可以在李代数空间上进行，不需要考虑旋转的约束）</li>
+<li>将IMU积分公式变化为在两个关键帧之间所有IMU测量的积分</li>
+<li>构造状态变化的预积分形式，使得积分过程在历史位姿由于后端优化变化之后不需要重新执行。此时还依赖历史时刻的IMU偏差</li>
+<li>将噪声从预积分公式从预积分公式中剥离出来，构造（2-1）的标准形式</li>
+<li>推导协方差的递推形式</li>
+<li>将历史时刻的Bias从预积分公式中剥离，使得预积分公式完全不依赖历史时刻的状态</li>
+<li>推导当IMU偏差更新的时候，如何更新预积分结果，避免重复计算</li>
+</ol>
+<h2 id="三状态向量及优化目标">三、状态向量及优化目标</h2>
+<p>状态向量（State）描述<span class="math inline">\(i\)</span>时刻车辆的旋转、位置、速度、IMU偏差</p>
+<p><span class="math display">\[
+\textbf{x}_i\overset{\cdot}{=}[\text{R}_i,\textbf{p}_i,\textbf{v}_i,\textbf{b}_i]\tag{3-1}
+\]</span></p>
+<p>车辆（Body）坐标系与IMU坐标系假设为相同坐标系，因此上式也是<span class="math inline">\(i\)</span>时刻的IMU状态</p>
+<p>其中</p>
+<ul>
+<li><span class="math inline">\(\textbf{v}_i \in \mathbb{R}^3\)</span></li>
+<li><span class="math inline">\(\textbf{b}_i = [\textbf{b}_i^g \quad \textbf{b}_i^a] \in \mathbb{R}^6\)</span>是角速度（gyroscope）和加速度（accelerometer）的偏差</li>
+</ul>
+<hr />
+<p><strong>记下列符号</strong></p>
+<ul>
+<li><p><span class="math inline">\(\mathcal{K}_k\)</span>为<span class="math inline">\(k\)</span>时刻之前的所有关键帧</p></li>
+<li><p>并记状态集合为</p></li>
+</ul>
+<p><span class="math display">\[
+\mathcal{X}_k \overset{\cdot}{=}\{\textbf{x}_i\}_{i\in \mathcal{K}_k}\tag{3-2}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\mathcal{I}_{ij},(i,j)\in \mathcal{K}_k\)</span>为关键帧<span class="math inline">\(i,j\)</span>之间的所有IMU测量</li>
+</ul>
+<hr />
+<p>似然函数</p>
+<p><span class="math display">\[
+\begin{split}
+p(\mathcal{X}_k|\mathcal{I}_k) &amp; \propto p(\mathcal{X}_0)p(\mathcal{I}_k|\mathcal{X}_k)\\
+&amp;=\
+p(\mathcal{X}_0)\prod_{(i,j)\in \mathcal{K}_k}p(\mathcal{I}_{ij}|\textbf{x}_i, \textbf{x}_j)
+\end{split}\tag{3-3}
+\]</span></p>
+<p>其中用到了独立同分布性质和马尔可夫假设</p>
+<hr />
+<p>优化的最小二乘形式</p>
+<p><span class="math display">\[
+\begin{split}
+\mathcal{X}^{*}_k
+&amp;=\
+\underset{\mathcal{K}_k}{\operatorname{argmin}} -\log_ep(\mathcal{X}_k|\mathcal{I}_k)\\
+&amp;=\
+\underset{\mathcal{K}_k}{\operatorname{argmin}}\sum_{(i,j)\in \mathcal{K}_k}||\mathbf{r}_{\mathcal{I}_{ij}}||^2_{\Sigma_{ij}} + ||\textbf{r}_0||^2_{\Sigma_0}
+\end{split}\tag{3-4}
+\]</span></p>
+<h2 id="四imu模型">四、IMU模型</h2>
+<p><span class="math display">\[
+_\text{B}\tilde{\boldsymbol{\omega}}(t)= {_\text{B}\boldsymbol{\omega(t)}} + \textbf{b}^g(t)+ \boldsymbol{\eta}^g(t)\tag{4-1}
+\]</span></p>
+<p><span class="math display">\[
+_\text{B}\tilde{\textbf{a}}(t)=R^T_{\text{WB}}(t)\left({_\text{W}\textbf{a}(t)} - {_\text{W}\textbf{g}}\right) + \textbf{b}^a(t) + \boldsymbol{\eta}^a(t)\tag{4-2}
+\]</span></p>
+<p>其中</p>
+<ul>
+<li><span class="math inline">\(_\text{B}\)</span> 前下标意味着该量是在Body坐标系下。如 <span class="math inline">\(_\text{B}\tilde{\boldsymbol{\omega}}(t)\)</span>是在Body坐标系下的角速度，也就是IMU陀螺仪的输出</li>
+<li><span class="math inline">\(\textbf{b}^g,\textbf{b}^a\)</span>是IMU角速度和加速度的偏差，这两者也是一个随着时间缓慢变化的量</li>
+<li><span class="math inline">\(\boldsymbol{\eta}^g, \boldsymbol{\eta}^a\)</span>是角速度和加速度的噪声。均值为0的高斯噪声</li>
+</ul>
+<p>对于离散（discret）形式的高斯噪声<span class="math inline">\(\boldsymbol{\eta}^{gd}, \boldsymbol{\eta}^{ad}\)</span>，他们的协方差与连续形式高斯噪声的功率谱强度具有如下关系</p>
+<p><span class="math display">\[
+\text{Cov}(\boldsymbol{\eta}^{gd}) = \frac{1}{\Delta{t}}\text{Cov}(\boldsymbol{\eta}^{g})\tag{4-3}
+\]</span></p>
+<p>其中<span class="math inline">\(\Delta{t}\)</span>是采样时间周期</p>
+<h2 id="五运动模型及积分">五、运动模型及积分</h2>
+<p><strong><em>为了使得整体思路清晰，简化推导过程，后文都会重点放在状态向量中的旋转部分</em></strong></p>
+<h3 id="运动模型">运动模型</h3>
+<p><span class="math display">\[
+\begin{split}
+&amp;\dot{R}_{\text{WB}}=R_{\text{WB}}\ {_{\text{B}}\boldsymbol{\omega}^{\wedge}}\\
+\end{split}\tag{5-1}
+\]</span></p>
+<p>上式中<span class="math inline">\(\dot{R}_{\text{WB}}\)</span>表示<span class="math inline">\({R}_{\text{WB}}\)</span>的导数。上式是旋转矩阵角运动方程，具体推导过程读者可以查找旋转矩阵求导相关资料</p>
+<h3 id="运动模型的积分">运动模型的积分</h3>
+<p>假设<span class="math inline">\(_{\text{B}}\boldsymbol{\omega}\)</span>在时间间隔<span class="math inline">\([t,t+\Delta{t}]\)</span>内保持不变，则公式（5-1）的<strong>离散形式积分</strong> 为</p>
+<p><span class="math display">\[
+R_{\text{WB}}(t+\Delta{t})=R_{\text{WB}}(t)\operatorname{Exp}\Big({_{\text{B}}\boldsymbol{\omega}}(t)\Delta{t}\Big)\tag{5-2}
+\]</span></p>
+<p>公式（5-2）是微分方程（5-1）的解。如果这里思维卡住了，不要深究，记住（5-2）的结论即可</p>
+<p>将IMU模型——公式（4-1）带入公式（5-1），可得</p>
+<p><span class="math display">\[
+R(t+\Delta{t})=R(t)\operatorname{Exp}\Big(\left(\tilde{\boldsymbol{\omega}}(t)-\textbf{b}^g(t)-\boldsymbol{\eta}^{gd}(t)\right)\Delta{t}\Big) \tag{5-3}
+\]</span></p>
+<p>上式中<span class="math inline">\(\boldsymbol{\eta}^{gd}(t)\)</span>是高斯噪声的离散形式，且协方差与连续形式的功率谱强度有公式（4-3）的联系</p>
+<p>公式（5-3）去掉了上下标，不过现在应该不会引起歧义了</p>
+<p><strong><em>要注意的是</em></strong> ，公式（5-3）是假设在IMU的采样周期<span class="math inline">\(\Delta{t}\)</span>内角速度是不变的，这一点虽然不是事实，但是可以通过较高频率的IMU避免由于这一点引起的误差。（常见的IMU频率为200-500Hz）</p>
+<h3 id="运动模型积分的累积形式">运动模型积分的累积形式</h3>
+<p>公式（5-3）是对一个IMU的测量数据做积分，为了得到两个关键帧之间的积分，我们将关键帧<span class="math inline">\((i,j)\)</span>之间的所有IMU测量都累计起来，可以得到如下形式</p>
+<p><span class="math display">\[
+R_j = R_i\prod^{j-1}_{k=i}\operatorname{Exp}\Big(\left(\tilde{\boldsymbol{\omega}}_k-\textbf{b}^g_k-\boldsymbol{\eta}^{gd}_k\right)\Delta{t}\Big)\tag{5-4}
+\]</span></p>
+<p>由于偏差是缓慢变化的（所谓的布朗运动，也就是白噪声的积分），所以在本文中，我们令关键帧<span class="math inline">\((i,j)\)</span>之间的偏差保持不变</p>
+<p><span class="math display">\[
+\boldsymbol{\eta}^{gd}_i=\boldsymbol{\eta}^{gd}_{i+1}=...=\boldsymbol{\eta}^{gd}_{j-1}\tag{5-5}
+\]</span></p>
+<h2 id="六预积分相对增量形式">六、预积分/相对增量形式</h2>
+<p>公式（5-4）让我们根据IMU的输出得到了两帧之间旋转的约束，但是公式（5-4）等号的右侧与<span class="math inline">\(i\)</span>时刻的旋转和 <strong>偏差</strong> 相关，也就是与<span class="math inline">\(i\)</span>时刻的状态 <span class="math inline">\(\textbf{x}_i\)</span>相关。这里的缺憾在于，当我们在后端优化对历史轨迹优化之后，<span class="math inline">\(\textbf{x}_i\)</span>会改变，这样公式（5-4）就需要重新计算。为了避免重复计算，我们将公式（5-4）进行调整为相对增量形式</p>
+<p><span class="math display">\[
+\Delta{R_{ij}}\overset{\cdot}{=}\prod^{j-1}_{k=i}\operatorname{Exp}\Big(\left(\tilde{\boldsymbol{\omega}}_k-\textbf{b}^g_k-\boldsymbol{\eta}^{gd}_k\right)\Delta{t}\Big)\tag{6-1}
+\]</span></p>
+<p><strong><em>要注意的是</em></strong> ，公式（6-1）依旧与<span class="math inline">\(i\)</span>时刻的偏差<span class="math inline">\(\boldsymbol{\eta}^{gd}_i\)</span>。我们暂时忽略这一点。在第九节，我们推导当偏差改变的时候，如何避免重复计算公式（6-1）</p>
+<h2 id="七将噪声项独立构造高斯分布形式">七、将噪声项独立构造高斯分布形式</h2>
+<p>公式（6-1）已经使用IMU的输出将<span class="math inline">\(i,j\)</span>时刻的旋转联系起来。但是公式（6-1）之中将噪声项杂糅在各个累积项之中，这导致了我们无法简单地写出<span class="math inline">\(\Delta{R_{ij}}\)</span>的概率分布函数。回顾第二节，我们的目标是构造标准的测量方程形式（2-1），这样我们才可以将MAP问题改写为最小二乘问题。为了达到这一个目的，我们进一步将噪声项独立出来</p>
+<p>我们首先利用BCH一阶近似公式，即公式（1-5），将噪声项独立。公式（6-1）可以写成</p>
+<p><span class="math display">\[
+\Delta{R_{ij}}\overset{eq(1-5)}{\approx}\
+\prod^{j-1}_{k=i}\
+\operatorname{Exp}\Big(\left(\tilde{\boldsymbol{\omega}}_k-\textbf{b}^g_i\right) \Delta{t} \Big)\
+\operatorname{Exp}\left(-J_r^k\boldsymbol{\eta}^{gd}_k\Delta{t}\right)\tag{7-1}
+\]</span></p>
+<p>其中</p>
+<p><span class="math display">\[
+J_r^k \overset{\cdot}{=}J_r^k\left(\left(\tilde{\boldsymbol{\omega}}_k-\textbf{b}^g_i\right)\Delta{t}\right)\tag{7-2}
+\]</span></p>
+<p>我们记</p>
+<p><span class="math display">\[
+\Delta{\tilde{R}_{ij}} \overset{\cdot}{=}\
+\prod^{j-1}_{k=i}\operatorname{Exp}\Big(\left(\tilde{\boldsymbol{\omega}}_k-\textbf{b}^g_i\right)\Delta{t}\Big)\tag{7-3}
+\]</span></p>
+<p>观察公式（7-1），我们将累积中的最后两项抽出来</p>
+<p><span class="math display">\[
+\operatorname{Exp}\Big(\left(\tilde{\boldsymbol{\omega}}_{j \text{-} 2}-\textbf{b}^g_i\right) \Delta{t} \Big)\
+\Bigg[\
+\operatorname{Exp}\left(-J_r^{j \text{-} 2}\boldsymbol{\eta}^{gd}_{j \text{-} 2}\Delta{t}\right)\
+\operatorname{Exp}\Big(\left(\tilde{\boldsymbol{\omega}}_{j \text{-} 1}-\textbf{b}^g_i\right) \Delta{t} \Big)\
+\Bigg]\
+\operatorname{Exp}\left(-J_r^{j \text{-} 1}\boldsymbol{\eta}^{gd}_{j \text{-} 1}\Delta{t}\right)\tag{7-3}
+\]</span></p>
+<p>利用公式（1-8）<span class="math inline">\(\operatorname{Exp}(\phi)R = R\operatorname{Exp}(R^T\phi)\)</span>，我们可以将中间两项改写如下</p>
+<p><span class="math display">\[
+\begin{split}
+&amp;\operatorname{Exp}\left(-J_r^{j \text{-} 2}\boldsymbol{\eta}^{gd}_{j \text{-} 2}\Delta{t}\right)\
+\operatorname{Exp}\Big(\left(\tilde{\boldsymbol{\omega}}_{j \text{-} 1}-\textbf{b}^g_i\right) \Delta{t} \Big)\\
+=&amp;\
+\operatorname{Exp}\Big(\left(\tilde{\boldsymbol{\omega}}_{j \text{-} 1}-\textbf{b}^g_i\right) \Delta{t} \Big)\
+\operatorname{Exp}\Big(-\Delta{\tilde{R}^T_{j\text{-}1j}}J_r^{j \text{-} 2}\boldsymbol{\eta}^{gd}_{j \text{-} 2}\Delta{t}\Big)
+\end{split}\tag{7-4}
+\]</span></p>
+<p>对公式（7-1）从后往前应用公式（7-4），我们可以将噪声项独立出来</p>
+<p><span class="math display">\[
+\begin{split}
+\Delta{R_{ij}}\
+&amp;=\
+\Delta{\tilde{R}_{ij}}\
+\prod^{j-1}_{k=i}\
+\operatorname{Exp}\Big(-\Delta{\tilde{R}^T_{k\text{+}1j}}J_r^{k}\boldsymbol{\eta}^{gd}_{k}\Delta{t}\Big)\\
+&amp;\overset{\cdot}{=}\
+\Delta{\tilde{R}_{ij}}\
+\operatorname{Exp}(-\delta\phi_{ij})
+\end{split}\tag{7-5}
+\]</span></p>
+<p>于是，我们可以将<span class="math inline">\(\Delta{\tilde{R}_{ij}}\)</span>写为如公式（2-1）的标准形式，回顾公式（1-9）<span class="math inline">\(\operatorname{Exp}(-\delta{\phi})^T=\operatorname{Exp}(\delta{\phi})\)</span></p>
+<p><span class="math display">\[
+\begin{split}
+\Delta{\tilde{R}_{ij}}\
+=\
+\Delta{R_{ij}}\
+\operatorname{Exp}(\delta\phi_{ij})\
+\end{split}\tag{7-6}
+\]</span></p>
+<h2 id="八协方差矩阵的递归形式">八、协方差矩阵的递归形式</h2>
+<p>公式（7-6）推导出了如公式（2-1）的标准形式，但是还差一点，就是噪声项<span class="math inline">\(\operatorname{Exp}(-\delta\phi_{ij})\)</span>是否符合0均值的高斯分布，以及它的协方差是怎么样的。</p>
+<p>这一节的目的是推导噪声项的分布以及协方差的增量形式</p>
+<p>让我们从公式（7-5）摘录噪声项</p>
+<p><span class="math display">\[
+\operatorname{Exp}(-\delta\phi_{ij})\
+=\
+\prod^{j-1}_{k=i}\
+\operatorname{Exp}\Big(-\Delta{\tilde{R}^T_{k\text{+}1j}}J_r^{k}\boldsymbol{\eta}^{gd}_{k}\Delta{t}\Big)\tag{8-1}
+\]</span></p>
+<p>记</p>
+<p><span class="math display">\[
+\xi_k=\Delta{\tilde{R}^T_{k\text{+}1j}}J_r^{k}\boldsymbol{\eta}^{gd}_{k}\Delta{t}\tag{8-2}
+\]</span></p>
+<p>由于<span class="math inline">\(\boldsymbol{\eta}^{gd}_{k}\)</span>是个极微小量，而且<span class="math inline">\(\delta{\phi}_{ij}\)</span>也是个微小量，所以<span class="math inline">\(\xi_k\)</span>整体也是微小量，因此，根据性质（1-9）</p>
+<p><span class="math display">\[
+J_r(\xi_k)\approx \mathbf{I}\tag{8-3}
+\]</span></p>
+<p>因此，我们根据公式（1-6），将（8-1）可以写成</p>
+<p><span class="math display">\[
+\operatorname{Exp}(-\delta\phi_{ij})\
+=\
+\operatorname{Exp}\left(-\sum^{j-1}_{k=i}\Delta{\tilde{R}^T_{k\text{+}1j}}J_r^{k}\boldsymbol{\eta}^{gd}_{k}\Delta{t}\right)\tag{8-4}
+\]</span></p>
+<p>即</p>
+<p><span class="math display">\[
+\delta\phi_{ij}\
+\approx\
+\sum^{j-1}_{k=i}\Delta{\tilde{R}^T_{k\text{+}1j}}J_r^{k}\boldsymbol{\eta}^{gd}_{k}\Delta{t}\tag{8-5}
+\]</span></p>
+<hr />
+<p>从公式（8-5）我们可以看到，公式（7-6）的噪声项是高斯噪声<span class="math inline">\(\boldsymbol{\eta}^{gd}\)</span>的线性组合，因此其本身也是高斯噪声</p>
+<p>我们接下来进一步推导这个噪声的协方差的表达形式</p>
+<p><span class="math display">\[
+\begin{split}
+\delta\phi_{ij}\
+&amp;\approx\
+\sum^{j-1}_{k=i}\Delta{\tilde{R}^T_{k\text{+}1j}}J_r^{k}\boldsymbol{\eta}^{gd}_{k}\Delta{t}\\
+&amp;=\
+\sum^{j-1}_{k=i}\Delta{\tilde{R}^T_{k+1,j}}J_r^k\boldsymbol{\eta}^{gd}_k\Delta{t}\
++\
+\overset{=\mathbf{I}_{3\times 3}}{\overbrace{\Delta{\tilde{R}^T_{j,j}}}}\
+J_r^{j-1}\boldsymbol{\eta}^{gd}_{j-1}\Delta{t}\\
+&amp;=\
+\sum^{j-1}_{k=i}(\overset{=\Delta{\tilde{R}_{k+1,j}}}{\overbrace{\Delta{\tilde{R}_{k+1,j-1}}\Delta{\tilde{R}_{j-1,j}}}})\
++\
+J_r^{j-1}\boldsymbol{\eta}^{gd}_{j-1}\Delta{t}\\
+&amp;=\
+\Delta{\tilde{R}^T_{j-1,j}}\sum^{j-2}_{k=i}\Delta{\tilde{R}^T_{k+1,j-1}}J_r^k\boldsymbol{\eta}^{gd}_k\Delta{t}\
++\
+J_r^{j-1}\boldsymbol{\eta}^{gd}_{j-1}\Delta{t}\\
+&amp;=\
+\Delta{\tilde{R}^T_{j-1,j}}\delta{\phi}_{ij-1}+J_r^{j-1}\boldsymbol{\eta}^{gd}_{j-1}\Delta{t}
+\end{split}\tag{8-6}
+\]</span></p>
+<p>根据高斯分布协方差的性质</p>
+<p><span class="math display">\[
+\Sigma_{ij}\
+=\
+\Delta{\tilde{R}^T_{j-1,j}}\
+\Sigma_{ij-1}\
+\Delta{\tilde{R}_{j-1,j}}\
++\
+(J_r^{j-1}\Delta{t})\
+\Sigma_{\boldsymbol{\eta}}\
+(J_r^{j-1}\Delta{t})^T\tag{8-7}
+\]</span></p>
+<p>同时我们可以令协方差的初始值<span class="math inline">\(\Sigma_{ii}=\textbf{0}_{9\times 9}\)</span></p>
+<p>于是，我们就得出了协方差的递归形式</p>
+<h2 id="九偏差项bias更新">九、偏差项Bias更新</h2>
+<h3 id="暂时性总结">暂时性总结</h3>
+<p>到目前位置，我们已经推导出了如下内容</p>
+<ol type="1">
+<li>测量方程的标准表达形式，即公式（7-6）</li>
+<li>测量方程噪声协方差的递归表达形式，即公式（8-7）</li>
+</ol>
+<p>但是要注意，公式（7-6）里面还偏差项<span class="math inline">\(\textbf{b}_i^g\)</span>。也就是其依旧依赖<span class="math inline">\(i\)</span>时刻的系统状态。那么如何在偏差更新的时候，避免测量方程的重复计算？这就是本节要推导的内容</p>
+<h3 id="纳入偏差更新">纳入偏差更新</h3>
+<p>当偏差项更新</p>
+<p><span class="math display">\[
+\hat{\textbf{b}} \leftarrow \bar{\textbf{b}}+\delta{\textbf{b}}\tag{9-1}
+\]</span></p>
+<p>我们希望计算更新后的测量<span class="math inline">\(\Delta{\tilde{R}_{ij}(\hat{\textbf{b}}^g_i)}\)</span>，相比与原先的值<span class="math inline">\(\Delta{\tilde{R}_{ij}(\bar{\textbf{b}}^g_i)}\)</span>的更新量</p>
+<p>这样我们就不需要重复计算<span class="math inline">\(\Delta{\tilde{R}_{ij}}\)</span></p>
+<p>把<span class="math inline">\(\hat{\textbf{b}}^g_i\)</span>代入<span class="math inline">\(\Delta{\tilde{R}_{ij}}\)</span>的表达式（7-3）</p>
+<p><span class="math display">\[
+\Delta{\tilde{R}}_{ij}(\hat{\textbf{b}}^g_i)\
+=\
+\prod^{j-1}_{k=i}\
+\operatorname{Exp}\Big(
+    \left(
+        \tilde{\boldsymbol{\omega}}_k-\hat{\textbf{b}}^g_i
+    \right)\Delta{t}
+    \Big)\tag{9-2}
+\]</span></p>
+<p>将公式（9-1）代入（9-2），并利用BCH一阶近似公式（1-5）展开</p>
+<p><span class="math display">\[
+\begin{split}
+    \Delta{\tilde{R}}_{ij}(\hat{\textbf{b}}^g_i)\
+        &amp; = \prod^{j-1}_{k=i}\
+            \operatorname{Exp}\Big(
+                \left(
+                    \tilde{\boldsymbol{\omega}}_k-(\bar{\textbf{b}}^g_i+\delta{\textbf{b}}^g_i)
+                \right)\Delta{t}
+            \Big)\\
+        &amp; = \prod^{j-1}_{k=i}\
+            \operatorname{Exp}\Big(
+                \left(\tilde{\boldsymbol{\omega}}_k-\bar{\textbf{b}}^g_i\right)\Delta{t}
+            \Big)\
+            \operatorname{Exp}\Big(
+                -J_r^k\delta{\textbf{b}}^g_i\Delta{t}
+            \Big)
+\end{split}\tag{9-3}
+\]</span></p>
+<p>采用推导公式（7-1）到（7-5）的方式，从后往前推，并利用公式（1-8），上式可以写为</p>
+<p><span class="math display">\[
+\begin{split}
+  \Delta{\tilde{R}}_{ij}(\hat{\textbf{b}}^g_i)\
+    =\Delta{\bar{R}_{ij}}\prod^{j-1}_{k=i}\
+      \operatorname{Exp}\Big(
+        -\Delta{\bar{R}}_{k+1,j}^TJ_r^k\delta{\textbf{b}^g_i}\Delta{t}
+      \Big)
+\end{split}\tag{9-4}
+\]</span></p>
+<p>我们再采用类似（8-1）到（8-5）的推导方法，（<span class="math inline">\(\delta{\textbf{b}}\)</span>是一个极小量，所以展开时的右雅可比接近单位矩阵）</p>
+<p>公式（9-4）可以写为</p>
+<p><span class="math display">\[
+\begin{split}
+  \Delta{\tilde{R}}_{ij}(\hat{\textbf{b}}^g_i)\
+    &amp; \approx \Delta{\bar{R}_{ij}}\
+      \operatorname{Exp}\Big(
+        \sum^{j-1}_{k=i}-\Delta{\bar{R}}_{k+1,j}^TJ_r^k\delta{\textbf{b}^g_i}\Delta{t}
+      \Big)\\
+    &amp; \overset{\cdot}{=} \Delta{\bar{R}_{ij}}\
+      \operatorname{Exp}\Big(
+        \frac{\partial{\Delta{\bar{R}^{\vee}_{ij}}}}{\partial{\textbf{b}^g}}\
+        \delta{\textbf{b}^g_i}
+      \Big)
+\end{split}\tag{9-5}
+\]</span></p>
+<h2 id="十最小二乘形式误差">十、最小二乘形式/误差</h2>
+<p>从公式（1-12）我们提前构造好了旋转的最大似然的负对数形式</p>
+<p><span class="math display">\[
+\begin{split}
+  \mathcal{L}(R) &amp; =
+    \frac{1}{2}||\operatorname{Log}(\tilde{R}^{-1}R)||^2_{\Sigma}+const
+\end{split}
+\]</span></p>
+<p>我们已经构造了相对旋转的表达形式（9-5），因此我们可以进一步得出了旋转的误差模型</p>
+<p><span class="math display">\[
+\begin{split}
+  \textbf{r}_{\Delta{R}_{ij}} = 
+    \operatorname{Log}\left(
+        \bigg(
+          \Delta{\bar{R}_{ij}}\
+            \operatorname{Exp}\big(
+                \frac{\partial{\Delta{\bar{R}^{\vee}_{ij}}}}{\partial{\textbf{b}^g}}\
+                \delta{\textbf{b}^g_i}
+            \big)
+        \bigg)^T
+        R_i^TR_j
+    \right)
+\end{split}\tag{10-1}
+\]</span></p>
+<h2 id="总结">总结</h2>
+<p>本文主要从论文<a target="_blank" rel="noopener" href="https://arxiv.org/abs/1512.02363">《On-Manifold Preintegration for Real-TimeVisual-Inertial Odometry》</a>出发，挑选其中的旋转矩阵相关内容，目的是为了能够从实际应用出发，联系后端优化的非线性最小二乘优化问题和李群李代数知识，加深理论知识的印象。</p>
+<p>再次强调，本文需要拥有一定的李群李代数基础知识，以及后端优化中如何将最大后验概率问题转化到最小二乘问题，没有这两个部分的知识可以参考笔者整理的两篇笔记。</p>
+<p><strong>本文只挑选了系统状态中的旋转分量相关的内容。实际上原论文对位置、速度的推导也十分详细。但是太过杂乱的内容不仅对理解整个推导过程思路是如何来的没有帮助，还会让读者一头雾水。</strong></p>
+<p>本文首先给出一些基础知识和后续推导用的性质（第一节）</p>
+<p>第二节的重点是让读者要明白这么长篇大论的推导过程的线索是什么，最终目的是什么？我们的最终目的是将测量与真实值能够写成如公式（2-1）的标准形式，这样可以直接根据高斯分布的性质将最大似然问题通过负对数转化为最小二乘问题。</p>
+<p><span class="math display">\[
+\begin{array}{lcl}
+\tilde{\mathcal{X}} = \mathcal{X} \oplus \epsilon, &amp;&amp; \epsilon \sim \mathcal{N}\left(0,\Sigma\right)\tag{2-1}
+\end{array}
+\]</span></p>
+<p>第三节到第五节，我们推导了如何根据IMU的输出数据，将关键帧<span class="math inline">\((i,j)\)</span>的位姿中的旋转分量联系起来，即通过公式（5-4）</p>
+<p><span class="math display">\[
+R_j = R_i\prod^{j-1}_{k=i}\operatorname{Exp}\Big(\left(\tilde{\boldsymbol{\omega}}_k-\textbf{b}^g_k-\boldsymbol{\eta}^{gd}_k\right)\Delta{t}\Big)\tag{5-4}
+\]</span></p>
+<p>为了避免优化过后关键帧<span class="math inline">\(i\)</span>的状态改变，积分需要重复计算的问题，我们在第六节推导了IMU预积分形式，也就是两帧之间的相对运动形式，即公式（6-1）</p>
+<p><span class="math display">\[
+\Delta{R_{ij}}\overset{\cdot}{=}\prod^{j-1}_{k=i}\operatorname{Exp}\Big(\left(\tilde{\boldsymbol{\omega}}_k-\textbf{b}^g_k-\boldsymbol{\eta}^{gd}_k\right)\Delta{t}\Big)\tag{6-1}
+\]</span></p>
+<p>为了构造标准形式（2-1），我们在第七节中将噪声项独立出来，成功构造标准形式，即公式（7-6）</p>
+<p><span class="math display">\[
+\begin{split}
+\Delta{\tilde{R}_{ij}}\
+=\
+\Delta{R_{ij}}\
+\operatorname{Exp}(\delta\phi_{ij})\
+\end{split}\tag{7-6}
+\]</span></p>
+<p>为了在最小二乘问题中使用噪声的协方差矩阵加权，我们在第八节推导了噪声的分布及方差的递归形式，即公式（8-5）</p>
+<p><span class="math display">\[
+\delta\phi_{ij}\
+\approx\
+\sum^{j-1}_{k=i}\Delta{\tilde{R}^T_{k\text{+}1j}}J_r^{k}\boldsymbol{\eta}^{gd}_{k}\Delta{t}\tag{8-5}
+\]</span></p>
+<p>最后，我们来解决如何在IMU偏差更新的时候，避免积分过程需要重复计算的问题，即公式（9-5）</p>
+<p><span class="math display">\[
+\begin{split}
+  \Delta{\tilde{R}}_{ij}(\hat{\textbf{b}}^g_i)\
+    &amp; \approx \Delta{\bar{R}_{ij}}\
+      \operatorname{Exp}\Big(
+        \sum^{j-1}_{k=i}-\Delta{\bar{R}}_{k+1,j}^TJ_r^k\delta{\textbf{b}^g_i}\Delta{t}
+      \Big)\\
+    &amp; \overset{\cdot}{=} \Delta{\bar{R}_{ij}}\
+      \operatorname{Exp}\Big(
+        \frac{\partial{\Delta{\bar{R}^{\vee}_{ij}}}}{\partial{\textbf{b}^g}}\
+        \delta{\textbf{b}^g_i}
+      \Big)
+\end{split}\tag{9-5}
+\]</span></p>
+<p>剩下的问题也就自然解决，我们可以根据标准形式构造误差函数的表达，即公式（10-1）</p>
+<p><span class="math display">\[
+\begin{split}
+  \textbf{r}_{\Delta{R}_{ij}} = 
+    \operatorname{Log}\left(
+        \bigg(
+          \Delta{\bar{R}_{ij}}\
+            \operatorname{Exp}\big(
+                \frac{\partial{\Delta{\bar{R}^{\vee}_{ij}}}}{\partial{\textbf{b}^g}}\
+                \delta{\textbf{b}^g_i}
+            \big)
+        \bigg)^T
+        R_i^TR_j
+    \right)
+\end{split}\tag{10-1}
+\]</span></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -4540,718 +5686,6 @@ p_i^0 = T_ip_i
 </ol>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># In CMakeLists.txt</span></span><br><span class="line">SET(CMAKE_CXX_FLAGS_DEBUG <span class="string">&quot;<span class="variable">$ENV</span>&#123;CXXFLAGS&#125; -O0 -Wall -g -ggdb -Wno-unused-parameter&quot;</span>)  </span><br></pre></td></tr></table></figure>
 <p>注意在编译<code>ROS2</code>包的时候要指明<code>Debug</code> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">colcon build --packages-select package_name --cmake-args -DCMAKE_BUILD_TYPE=Debug</span><br></pre></td></tr></table></figure></p>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zeal">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zeal's Blog">
-      <meta itemprop="description" content="学习记录及分享">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Zeal's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/" class="post-title-link" itemprop="url">Simple-LIO-SAM——（二）环境搭建与运行</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-03-14 19:49:06" itemprop="dateCreated datePublished" datetime="2023-03-14T19:49:06+08:00">2023-03-14</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-09-19 16:22:13" itemprop="dateModified" datetime="2024-09-19T16:22:13+08:00">2024-09-19</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
-        </span>
-    </span>
-
-  
-    <span id="/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——（二）环境搭建与运行" title="阅读次数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-eye"></i>
-      </span>
-      <span class="post-meta-item-text">阅读次数：</span>
-      <span class="leancloud-visitors-count"></span>
-    </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Changyan：</span>
-    
-    <a title="Simple-LIO-SAM——（二）环境搭建与运行" href="/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::b824fa070f036b85c958cacd75daa48f" class="cy_cmt_count" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ul>
-<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
-<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
-<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
-</ul>
-<h2 id="运行环境搭建">运行环境搭建</h2>
-<p>本项目提供基于<code>ROS2-humble</code>的镜像，并提供脚本可直接在镜像中启动可视化程序。 docker镜像部署见下文。</p>
-<h3 id="数据">数据</h3>
-<p>本项目同时提供转为<code>rosbag2</code>格式的数据包，<a href="">下载地址:暂时未上传</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> DATA_DIR=/path/to/download/ros2bag/dir</span><br></pre></td></tr></table></figure>
-<p>本项目中默认的配置文件<code>params_default.yaml</code>可以直接运行下面的数据： - park_dataset - walking_dataset - garden_dataset</p>
-<h3 id="环境部署">环境部署</h3>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> git@github.com:zeal-up/Simple-LIO-SAM.git</span><br><span class="line"><span class="built_in">cd</span> Simple-LIO-SAM</span><br><span class="line">./docker_run.sh -h  <span class="comment"># show help message</span></span><br><span class="line">./docker_run.sh -c /path/to/code/repo -d <span class="variable">$DATA_DIR</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ./docker_into.sh  # enter the container next time</span></span><br></pre></td></tr></table></figure>
-<h3 id="编译">编译</h3>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> Simple-LIO-SAM</span><br><span class="line">./docker_into.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下面命令在镜像中执行</span></span><br><span class="line"><span class="built_in">cd</span> ~/ros_ws/</span><br><span class="line"><span class="built_in">mkdir</span> src &amp;&amp; <span class="built_in">cd</span> src &amp;&amp;<span class="built_in">ln</span> -s /home/splsam/codes ./</span><br><span class="line"><span class="built_in">cd</span> ..</span><br><span class="line"><span class="built_in">source</span> /opt/ros/humble/setup.bash</span><br><span class="line">colcon build --packages-select spl_lio_sam</span><br></pre></td></tr></table></figure>
-<h3 id="运行">运行</h3>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker镜像下运行</span></span><br><span class="line"><span class="built_in">cd</span> ~/ros_ws</span><br><span class="line"><span class="built_in">source</span> ./install/setup.bash</span><br><span class="line">ros2 launch spl_lio_sam run.launch.py </span><br><span class="line"></span><br><span class="line"><span class="comment"># 新开终端</span></span><br><span class="line"><span class="built_in">cd</span> Simple-LIO-SAM</span><br><span class="line">./docker_into.sh</span><br><span class="line"><span class="built_in">cd</span> data/ros2/</span><br><span class="line">ros2 bag play ./park_dataset/ --topics /points_raw /imu_raw</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p>运行时画面：</p>
-<img src="./imgs/runtime.gif" title="fig:" alt="Simple-LIO-SAM运行时画面" />
-<center>
-Simple-LIO-SAM运行时画面
-</center>
-<h2 id="开发环境搭建">开发环境搭建</h2>
-<p>由于本项目作者在使用<code>vscode</code>开发<code>c++</code>时经常会遇到无法快捷跳转问题（其实笔者发现有很多人在使用vscode开发时都会有这个问题）， 因此一并把解决方案写入项目中。</p>
-<h3 id="vscode-cpp函数快捷跳转">vscode Cpp函数快捷跳转</h3>
-<ol type="1">
-<li>安装cpp扩展 vscode侧边栏进入扩展选项（ctrl+shift+x)，搜索<code>c++</code>，安装<code>C/C++ Extension Pack</code></li>
-<li>打开项目 &gt; File-&gt;Open Folder</li>
-<li>保存为工作区 &gt; File-&gt;Save Workspace as 选择目标目录及文件（默认以<code>.code-workspace</code>结尾）</li>
-<li>打开刚才保存的工作区文件 &gt; File-&gt;Open File 选择刚才打开的工作区文件</li>
-<li>对工作区添加<code>c++</code>库检索路径 在刚才打开的工作区文件中，参考以下格式编辑</li>
-</ol>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="attr">&quot;folders&quot;:</span> [</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="attr">&quot;path&quot;:</span> <span class="string">&quot;../Simple-LIO-SAM&quot;</span></span><br><span class="line">		&#125;,</span><br><span class="line">	],</span><br><span class="line">	<span class="attr">&quot;settings&quot;:</span> &#123;</span><br><span class="line">		<span class="attr">&quot;C_Cpp.default.includePath&quot;:</span> [</span><br><span class="line">			<span class="string">&quot;$&#123;default&#125;&quot;</span>,</span><br><span class="line">			<span class="string">&quot;/usr/include/**&quot;</span>,</span><br><span class="line">			<span class="string">&quot;/usr/include/c++/9/&quot;</span>,</span><br><span class="line">			<span class="string">&quot;/usr/lib/gcc/x86_64-linux-gnu/8/include/&quot;</span>,</span><br><span class="line">			<span class="string">&quot;/opt/ros/humble/include/**&quot;</span>,</span><br><span class="line"></span><br><span class="line">			<span class="string">&quot;$&#123;workspaceFolder&#125;/include&quot;</span>,</span><br><span class="line"></span><br><span class="line">            <span class="string">//</span> <span class="string">重点！！这里的路径要设置为ros2工作空间下spl_lio_sam编译出来的头文件</span></span><br><span class="line">			<span class="string">&quot;/path/to/ros2_ws/install/spl_lio_sam/include/spl_lio_sam&quot;</span></span><br><span class="line"></span><br><span class="line">		],</span><br><span class="line">		<span class="attr">&quot;C_Cpp.files.exclude&quot;:</span> &#123;</span><br><span class="line">			<span class="string">&quot;**/.vscode&quot;</span><span class="string">:</span> <span class="literal">true</span>,</span><br><span class="line">			<span class="string">&quot;**/.vs&quot;</span><span class="string">:</span> <span class="literal">true</span></span><br><span class="line">		&#125;,</span><br><span class="line">		<span class="attr">&quot;C_Cpp.default.cStandard&quot;:</span> <span class="string">&quot;c17&quot;</span>,</span><br><span class="line">		<span class="attr">&quot;C_Cpp.default.cppStandard&quot;:</span> <span class="string">&quot;c++17&quot;</span>,</span><br><span class="line">		<span class="attr">&quot;python.analysis.include&quot;:</span> [</span><br><span class="line">			<span class="string">&quot;/opt/ros/humble/lib/python3.10/site-packages&quot;</span>,</span><br><span class="line">		],</span><br><span class="line">		<span class="attr">&quot;python.autoComplete.extraPaths&quot;:</span> [</span><br><span class="line">			<span class="string">&quot;/opt/ros/humble/lib/python3.10/site-packages&quot;</span>,</span><br><span class="line">		],</span><br><span class="line">		<span class="attr">&quot;python.analysis.extraPaths&quot;:</span> [</span><br><span class="line">			<span class="string">&quot;/opt/ros/humble/lib/python3.10/site-packages&quot;</span>,</span><br><span class="line">		],</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="对工作区文件的解释">对工作区文件的解释</h3>
-<p>其实主要起作用的是工作区文件中<code>settings-&gt;C_Cpp.default.includePath</code>字段内容，vscode的cpp扩展会读取该工作空间文件下 的这个字段，并将里面的路径进行解析加到头文件解析路径中。</p>
-<p>这里有两个路径要注意的</p>
-<ol type="1">
-<li><code>"$&#123;workspaceFolder&#125;/include"</code>，也就是Simple-LIO-SAM仓库下的include路径</li>
-<li><code>"/path/to/ros2_ws/install/spl_lio_sam/include/spl_lio_sam"</code>，这个要设置成你的ros工作空间对应的路径</li>
-</ol>
-<p>另外，如果发现自己路径设置完成，但是有些函数还提示下划线，要看看是不是那些函数是<code>c++17</code>或者更高的标准才支持的特性，在上面的配置文件中 设置c++/c标准为17</p>
-<h3 id="其余注意">其余注意</h3>
-<ol type="1">
-<li>尽量不要用<code>/path/**</code>的格式添加include路径，虽然看起来很省事，但会影响检索效率</li>
-<li>刚设置完路径需要等待vscode检索构建数据库，在vscode右下方状态条会提示正在进行检索</li>
-<li>上面配置文件中<code>"python.analysis.extraPaths","python.autoComplete.extraPaths","python.analysis.include"</code>是设置python语法提示器的 库检索路径，不同的python提示器插件会使用不同的路径。</li>
-</ol>
-<h2 id="reference">Reference</h2>
-<ol type="1">
-<li><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIO-SAM</a></li>
-<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2007.00258">LIO-SAM paper</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">This Project</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/chennuo0125-HIT/LIO-SAM-note">LIO-SAM-note</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/smilefacehh/LIO-SAM-DetailedNote">LIO-SAM-DetailedNote</a></li>
-</ol>
-<h2 id="本项目所有章节">本项目所有章节</h2>
-<ol type="1">
-<li><a href="https://zeal-up.github.io/2023/03/13/lio_sam/intro/">Simple-LIO-SAM——（一）项目简介</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/">Simple-LIO-SAM——（二）环境搭建与运行</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/">Simple-LIO-SAM——（三）总体流程认识</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/">Simple-LIO-SAM——（四）utility文件解读</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/">Simple-LIO-SAM——（五）点云去畸变模块</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/">Simple-LIO-SAM——（六）特征提取模块</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/">Simple-LIO-SAM——（七）GTSAM快速入门</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/">Simple-LIO-SAM——（八）IMU预积分模块</a></li>
-<li><a href="https://zeal-up.github.io/2023/04/06/lio_sam/pcdRegistration-doc/">Simple-LIO-SAM——（九）点云匹配算法详解</a></li>
-<li><a href="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/">Simple-LIO-SAM——（十）后端优化模块详解</a></li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/lio_sam/intro/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zeal">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zeal's Blog">
-      <meta itemprop="description" content="学习记录及分享">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Zeal's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/03/13/lio_sam/intro/" class="post-title-link" itemprop="url">Simple-LIO-SAM——（一）项目简介</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-03-13 19:45:58" itemprop="dateCreated datePublished" datetime="2023-03-13T19:45:58+08:00">2023-03-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-09-19 16:20:40" itemprop="dateModified" datetime="2024-09-19T16:20:40+08:00">2024-09-19</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/SLAM/LIOSAM/" itemprop="url" rel="index"><span itemprop="name">LIOSAM</span></a>
-        </span>
-    </span>
-
-  
-    <span id="/2023/03/13/lio_sam/intro/" class="post-meta-item leancloud_visitors" data-flag-title="Simple-LIO-SAM——（一）项目简介" title="阅读次数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-eye"></i>
-      </span>
-      <span class="post-meta-item-text">阅读次数：</span>
-      <span class="leancloud-visitors-count"></span>
-    </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Changyan：</span>
-    
-    <a title="Simple-LIO-SAM——（一）项目简介" href="/2023/03/13/lio_sam/intro/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::d227db67a0df8ebb129db6bbfad2da40" class="cy_cmt_count" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <ul>
-<li>⭐ <a href="https://zeal-up.github.io/categories/">Zeal's Blog</a></li>
-<li>🛠 <a target="_blank" rel="noopener" href="https://www.zhihu.com/column/c_1619085291536433152">知乎专栏</a></li>
-<li>🌀 <a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">项目仓库</a></li>
-</ul>
-<h2 id="liosam介绍">LIOSAM介绍</h2>
-<p><a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>（Tightly-coupled Lidar Inertial Odometry via Smoothing and Mapping），紧耦合激光惯性里程计方法。 作者<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan">TixiaoShan</a>是SLAM届大神，在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>之前发表过<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM">LeGO-LOAM</a>，在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>之后发布了<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2104.10831">LVI-SAM</a>——在<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>基础上又加入了语义定位因子。 网上关于<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>的解读已经有很多，这里不会进行太过详细的复述，具体的内容解析会放在后面系列文章慢慢仔细阐述。</p>
-<p>简单来说，<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>整体的框架与其他方法区别在与：</p>
-<ol type="1">
-<li>使用因子图作为后端优化框架，将IMU预积分与雷达点云匹配及回环检测等紧耦合</li>
-<li>使用当前帧-局部地图匹配而不是对全局地图匹配来加速点云匹配速度</li>
-<li>基于位置关系选择回环帧，并使用点云匹配计算回环因子</li>
-<li>使用高频IMU并进行简单积分对点云做运动畸变校正</li>
-</ol>
-<p>另外，LIOSAM作者的工程功底很好，LIOSAM代码库被github上很多SLAM开源项目作为code base</p>
-<h2 id="本项目目的">本项目目的</h2>
-<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>源代码虽然不能说庞大，甚至可以说简单，因为整个代码库主要只要5个文件。 <img src="./imgs/org_files.png" alt="LIOSAM原代码src目录" />
-<center>
-LIOSAM原代码src目录
-</center>
-<p>但是原代码里面每个模块都通过ROS的topic与其他模块有紧密的联系，且非常多的冗余代码和topic，这导致了 整个的流程对新手十分不友好，下图是LIOSAM原本运行时的<code>rqt_graph</code></p>
-<img src="./imgs/org_rqtgraph.png" title="fig:" alt="原始LIOSAM运行时rqt_graph" />
-<center>
-原始LIOSAM运行时rqt_graph
-</center>
-<p>第二个复杂之处在于<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>框架涉及到的知识点和工具较多，至少要熟悉<code>ROS,gtsam,pcl</code>几个库，算法层面需要熟悉<code>点云匹配、IMU积分、因子图、三维转换</code>等。 对于熟悉SLAM的人来说可能较为简单上手，但是对于新入门的人来说则一开始会一头雾水。</p>
-<p>基于上述这些原因，笔者基于<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>改进，完成了<a href="Simple-LIO-SAM">SPL-LIO-SAM</a>项目，希望能够以最大幅度帮助初学者理解<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>框架及里面的算法细节。</p>
-<h2 id="适用人群">适用人群</h2>
-<p>如果你是SLAM大牛，那本项目可能对你没有用处。如果你是以下人群之一，笔者相信本项目可以让你受益匪浅。</p>
-<ol type="1">
-<li>SLAM初学者。本项目对代码注释和讲解可以说细致到令人发指，因此十分适合初学者学习。</li>
-<li>接触过SLAM，希望将SLAM算法工程化，并加以实现。</li>
-<li>SLAM学习者或工程师，但是希望对<a target="_blank" rel="noopener" href="http://www.roboticsproceedings.org/rss10/p07.pdf">LOAM</a>,<a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM">LeGO-LOAM</a>,<a target="_blank" rel="noopener" href="https://arxiv.org/abs/2104.10831">LVI-SAM</a>,<a target="_blank" rel="noopener" href="https://github.com/laboshinl/loam_velodyne">loam_velodyne</a>其中任何一种算法进行精细学习</li>
-</ol>
-<h2 id="simple-lio-sam项目特点与liosam区别">Simple-LIO-SAM项目特点/与LIOSAM区别</h2>
-<h3 id="基于最新的ros2发行版humble实现">基于最新的ROS2发行版humble实现</h3>
-<p>虽然<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>源码中有一个ros2分支，但该分支的维护者并不是原作者，而且已经长时间没有人维护，且该分支存在一些bug没有被修复。为了能够在进行本项目的学习过程中 熟悉最新的ROS2框架，笔者在LIOSAM的ros2分支基础上，修复了存在的bug，同时将功能较为独立的<code>Transformfusion</code>类抽取成独立的类。</p>
-<h3 id="开箱即用docker开发环境">开箱即用docker开发环境</h3>
-<p>为了便于上手及部署，笔者同时准备了适配的docker镜像供学习者使用。</p>
-<h3 id="简化">简化</h3>
-<h4 id="话题发布的简化">话题发布的简化</h4>
-<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>原始代码中有很多中间结果的发布，这些中间结果可以用来可视化及调试程序，但是对于学习者和开发者而言不仅意义不大，而且会在初始学习源码阶段误导学习者。 本项目在话题发布上进行<code>大幅度简化</code>，简化后的设计如下： <img src="./imgs/Design-Node%26%26Topics.png" alt="Simple-LIO-SAM节点及话题设计" />
-<center>
-Simple-LIO-SAM节点及话题设计
-</center>
-简化后运行时的<code>rqt_graph</code>: <img src="./imgs/spl_liosam_rosgraph.png" alt="Simple-LIO-SAM的rqt_grpah" />
-<center>
-Simple-LIO-SAM的rqt_grpah
-</center>
-<h4 id="坐标系简化">坐标系简化</h4>
-<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>中实用的坐标系并不复杂，但是作者提供的<code>urdf</code>包含了太多为了兼容性考虑的坐标系，这些坐标系对于实际运行和理解并没有用。因此，本项目基于ROS对坐标系的约束，将 坐标系关系树简化为如下： <img src="./imgs/Design-CoordinateSystem.png" alt="Simple-LIO-SAM的坐标系关系" />
-<center>
-Simple-LIO-SAM的坐标系关系
-</center>
-<h3 id="保留算法及定义完整性">保留算法及定义完整性</h3>
-<p>虽然本项目去除了很多非必要topic，同时对于一些非必要代码也进行了简化，但对一些学习算法有帮助的细节依旧保留。比如激光里程计在发布的时候有<code>mapping/odometry</code>和<code>mapping/odometry_incremental</code>两个话题，这两个话题虽然类似但是背后却有很不同的含义，但同时两者合一又不影响算法的运行。因此采取的做法时在代码中保留这部分代码，同时加以解释，但发布时只发布其中一个话题。</p>
-<h3 id="完善的注释及流程图">完善的注释及流程图</h3>
-网上对<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>源码的注释其实并不少，比如<a target="_blank" rel="noopener" href="https://github.com/chennuo0125-HIT/LIO-SAM-note">LIO-SAM-note</a>和<a target="_blank" rel="noopener" href="https://github.com/smilefacehh/LIO-SAM-DetailedNote">LIO-SAM-DetailedNote</a>，还有一些blog也对源码做了解释，但是都不太完美，同时缺少项目性的组织。本项目借鉴了一些开源项目的注释，并加以完善，可以说，本项目是目前对<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>注释最完善的开源项目。<a target="_blank" rel="noopener" href="https://github.com/zeal-up/Simple-LIO-SAM">Simple-LIO-SAM代码</a> <img src="./imgs/comments.png" alt="Simple-LIO-SAM部分注释图" />
-<center>
-Simple-LIO-SAM部分注释图
-</center>
-为了最为清晰的展示<a target="_blank" rel="noopener" href="https://github.com/TixiaoShan/LIO-SAM">LIOSAM</a>算法不同模块的流程，该项目还对各个模块流程进行梳理，建立了完善的流程图设计 <img src="./imgs/Design-Pipelines.png" alt="算法Pipeline梳理" />
-<center>
-算法Pipeline梳理
-</center>
-<img src="./imgs/Design-imageProjection_top0.png" title="fig:" alt="点云去畸变流程图-top" />
-<center>
-点云去畸变流程图-top
-</center>
-<img src="./imgs/Design-imageProjection_top1.png" title="fig:" alt="点云去畸变流程图-细节示例1" />
-<center>
-点云去畸变流程图-细节示例
-</center>
-<h2 id="本项目所有章节">本项目所有章节</h2>
-<ol type="1">
-<li><a href="https://zeal-up.github.io/2023/03/13/lio_sam/intro/">Simple-LIO-SAM——（一）项目简介</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/14/lio_sam/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E8%BF%90%E8%A1%8C/">Simple-LIO-SAM——（二）环境搭建与运行</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/16/lio_sam/%E6%80%BB%E4%BD%93%E6%B5%81%E7%A8%8B%E8%AE%A4%E8%AF%86/">Simple-LIO-SAM——（三）总体流程认识</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/utility%E6%96%87%E4%BB%B6%E8%A7%A3%E8%AF%BB/">Simple-LIO-SAM——（四）utility文件解读</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/imageProjection-doc/">Simple-LIO-SAM——（五）点云去畸变模块</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/22/lio_sam/featureExtraction-doc/">Simple-LIO-SAM——（六）特征提取模块</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/27/lio_sam/gtsam-quickstart/">Simple-LIO-SAM——（七）GTSAM快速入门</a></li>
-<li><a href="https://zeal-up.github.io/2023/03/30/lio_sam/imuPreintegration-doc/">Simple-LIO-SAM——（八）IMU预积分模块</a></li>
-<li><a href="https://zeal-up.github.io/2023/04/06/lio_sam/pcdRegistration-doc/">Simple-LIO-SAM——（九）点云匹配算法详解</a></li>
-<li><a href="https://zeal-up.github.io/2023/04/11/lio_sam/mapOptimization-doc/">Simple-LIO-SAM——（十）后端优化模块详解</a></li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zeal">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zeal's Blog">
-      <meta itemprop="description" content="学习记录及分享">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Zeal's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/" class="post-title-link" itemprop="url">FastDDS关键概念</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-03-13 18:02:43" itemprop="dateCreated datePublished" datetime="2023-03-13T18:02:43+08:00">2023-03-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-09-19 16:19:19" itemprop="dateModified" datetime="2024-09-19T16:19:19+08:00">2024-09-19</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Toolchains/" itemprop="url" rel="index"><span itemprop="name">Toolchains</span></a>
-        </span>
-    </span>
-
-  
-    <span id="/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/" class="post-meta-item leancloud_visitors" data-flag-title="FastDDS关键概念" title="阅读次数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-eye"></i>
-      </span>
-      <span class="post-meta-item-text">阅读次数：</span>
-      <span class="leancloud-visitors-count"></span>
-    </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Changyan：</span>
-    
-    <a title="FastDDS关键概念" href="/2023/03/13/dds/FastDDS%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::73f7a0f706535d55ad531611b3af6c03" class="cy_cmt_count" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="架构">架构</h1>
-<p>架构图 <img src="./imgs/fast-dds-architecture.svg" alt="架构图" /></p>
-<p>域（Domain）的概念 <img src="imgs/domain_concept.jpg" alt="Domain" /> <img src="imgs/dds_domain.svg" alt="Domain" /></p>
-<p>数据中心收发模型（DCPS:Data Centric Publisher and Subscriber) <img src="imgs/DataCentricModel.png" alt="DCPS" /></p>
-<h1 id="why-need-a-publisher-and-subscriber">Why need a publisher and subscriber</h1>
-<blockquote>
-<p>These publishers and subscribers don’t need to know about each other ahead of time; they discover each other dynamically at runtime. The data they share is described by a “topic,” and publishers and subscribers send and receive data only for the topics they are interested in. In this pattern, many publishers may publish the same topic, and many subscribers may subscribe to the same topic. Subscribers receive data from all of the publishers that they share a topic with. Publishers send data directly to subscribers, with no need for a broker or centralized application to mediate communications. (https://community.rti.com/static/documentation/connext-dds/6.0.1/doc/manuals/connext_dds/getting_started/cpp11/intro_pubsub_cpp.html)</p>
-</blockquote>
-<h1 id="notes">Notes</h1>
-<p>Publisher 和 Subscriber 负责生成DataWriter&amp;&amp;DataReader，一个Publisher[Subscriber]可以绑定多个DataWriter[DataReader]。每一个DataWriter[DataReader]都会绑定到一个topic，同时可以指定对应的回调函数DataWriterListener[DataReaderListener]</p>
-<h1 id="数据监控fastdds-monitor">数据监控——FastDDS Monitor</h1>
-<p><a target="_blank" rel="noopener" href="https://fast-dds-monitor.readthedocs.io/en/latest/rst/getting_started/tutorial.html">FastDDS Monitor Tutorial</a> ## 原理 FastDDS库有一个内嵌的Participant，叫做Statistic Participant，包含在FastDDS的Statistic Module中。该模块不是默认编译的，因此需要在编译FastDDS的时候指明CMake选项。 实际上是用户开发应用时，在构建<strong>DomainParticipants</strong>阶段，如果通过某种方式指明了要将数据统计信息往外发送，则Statistic Module模块就会自动收集信息，然后往固定的topic发送监控数据。FastDDS Monitor通过这些内嵌的topic，可以监控数据的收发情况。</p>
-<p><a target="_blank" rel="noopener" href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/statistics/statistics.html">如何打开Statistics DataWriters</a> <a target="_blank" rel="noopener" href="https://fast-dds-monitor.readthedocs.io/en/latest/rst/getting_started/tutorial.html">如何使用FastDDS Monitor</a></p>
-<p><strong>注意，如果编译FastDDS的时候打开Statistics Module模块，由于会发送额外的信息，所以会损失性能</strong> &gt; Consequently, by default, Fast DDS does not compile this module because it may entail affecting the application’s performance.(https://fast-dds.docs.eprosima.com/en/latest/fastdds/statistics/statistics.html)</p>
-<figure>
-<img src="imgs/monitor.jpg" alt="" /><figcaption>数据监控窗口</figcaption>
-</figure>
-<h1 id="record-replay">Record &amp;&amp; Replay</h1>
-<blockquote>
-<p>rosbag2 is a ROS 2 application that can be used to capture DDS messages and store them on an SQLite database which allows inspecting and replaying said messages at a later time.</p>
-</blockquote>
-<ol type="1">
-<li>rosbag2可以将在Topic中传送的数据以SQLite的形式保存</li>
-<li>FastDDS没有自己的数据保存和回放工具，官方说明用的是ROS2的<a target="_blank" rel="noopener" href="https://github.com/ros2/rosbag2">rosbag2</a>包。要使用该包来记录和回放FastDDS的数据需要安装ROS2环境和rosbag2</li>
-<li>由于rosbag2是用来保存ros2的message的，并不是FastDDS的官方工具，因此如果要用rosbag2回放，需要做较多的配置</li>
-</ol>
-<p><a target="_blank" rel="noopener" href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/use_cases/rosbag_capture/rosbag_capture.html#rosbag-capture">使用rosbag-capture</a></p>
-<h1 id="limitations">Limitations</h1>
-<ol type="1">
-<li>没有进程管理和启动工具。ROS/Apollo/XPilot都有属于自己的进程调度系统，可以直接按指定顺序启动多个进程并执行相关调度。</li>
-<li>似乎无法实现像ROS的Service这种类似RPC的功能</li>
-</ol>
-<h1 id="reference-resources-link">Reference &amp;&amp; Resources link</h1>
-<ol type="1">
-<li><a target="_blank" rel="noopener" href="https://github.com/eProsima/Fast-DDS">FastDDS Github</a></li>
-<li><a target="_blank" rel="noopener" href="https://fast-dds-monitor.readthedocs.io/en/latest/rst/installation/linux.html">FastDDS Monitor Documentation</a></li>
-<li><a target="_blank" rel="noopener" href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/use_cases/rosbag_capture/rosbag_capture.html#rosbag-capture">使用rosbag-capture</a></li>
-<li><a target="_blank" rel="noopener" href="https://github.com/eProsima/Fast-DDS-python.git">Fast-DDS-Python</a></li>
-</ol>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Zeal">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zeal's Blog">
-      <meta itemprop="description" content="学习记录及分享">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Zeal's Blog">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/" class="post-title-link" itemprop="url">经久不衰的卡尔曼滤波器-基础知识及公式推导</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-03-13 17:59:59" itemprop="dateCreated datePublished" datetime="2023-03-13T17:59:59+08:00">2023-03-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-09-19 16:29:19" itemprop="dateModified" datetime="2024-09-19T16:29:19+08:00">2024-09-19</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Algorithms/" itemprop="url" rel="index"><span itemprop="name">Algorithms</span></a>
-        </span>
-          ，
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/Algorithms/Kalman-Filter/" itemprop="url" rel="index"><span itemprop="name">Kalman Filter</span></a>
-        </span>
-    </span>
-
-  
-    <span id="/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/" class="post-meta-item leancloud_visitors" data-flag-title="经久不衰的卡尔曼滤波器-基础知识及公式推导" title="阅读次数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-eye"></i>
-      </span>
-      <span class="post-meta-item-text">阅读次数：</span>
-      <span class="leancloud-visitors-count"></span>
-    </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Changyan：</span>
-    
-    <a title="经久不衰的卡尔曼滤波器-基础知识及公式推导" href="/2023/03/13/kalman_filter/%E7%BB%8F%E4%B9%85%E4%B8%8D%E8%A1%B0%E7%9A%84%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E5%85%AC%E5%BC%8F%E6%8E%A8%E5%AF%BC/#SOHUCS" itemprop="discussionUrl">
-      <span id="sourceId::485da1f1f8066e1c77d786731c1e5117" class="cy_cmt_count" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="一卡尔曼滤波器的应用场景">一、卡尔曼滤波器的应用场景</h1>
-<p>卡尔曼滤波器之前被广泛用来做动态系统的状态估计、预测。主要的目的就是用来从带噪声的观测量，比如各种传感器的观测（IMU、GPS、里程计等）估计出最优的系统状态（state）。不过要明确强调的是，由于测量都带有噪声，也就是随机性，所以真正准确的状态是无法获知的。</p>
-<p>最小二乘法可以从一长串的测量值回归出一个最为匹配的模型。卡尔曼滤波相比于最小二乘法，采用了一种递归的计算方式，也就是每一时刻只需要保存上一时刻的状态。因此可以被用来处理实时任务。</p>
-<p>虽然卡尔曼滤波器从美国阿波罗登月计划到如今已有几十年，且目前有更先进的因子图（Factor Graph）算法，但是在很多领域依旧可以看到卡尔曼滤波器的身影，特别是在自动驾驶的各个模块，比如：从IMU的数据（三轴加速度，三轴角速度）计算出运动物体的当前位置。</p>
-<h1 id="二卡尔曼滤波器的两个步骤宏观认识">二、卡尔曼滤波器的两个步骤——宏观认识</h1>
-<p>卡尔曼滤波包含两个步骤</p>
-<ol type="1">
-<li>预测（prediction）—— Dynamic model</li>
-<li>更新（correction/measurment update）—— Observation model</li>
-</ol>
-<p>所谓<strong>预测</strong>，就是用一个数学模型，根据当前的传感器输入，直接计算此时系统的状态。可以理解为一个方程的计算就行。</p>
-<p>所谓的<strong>更新</strong>，就是在某些时刻或者每一时刻，获取一些系统的状态输入（可以同样是传感器的值），甚至是<strong>预测</strong>阶段中同样的传感器的值，将其当作真值，我们将这个值叫做<strong>测量值</strong>。比较此刻<strong>预测</strong>的系统状态和<strong>测量</strong>的系统状态，对<strong>预测</strong>出的系统状态进行修正，因此也叫<strong>测量更新</strong>（measurment update）。</p>
-<figure>
-<img src="./imgs/framework.png" alt="" /><figcaption>framework</figcaption>
-</figure>
-<h1 id="三卡尔曼滤波的几大概念">三、卡尔曼滤波的几大概念</h1>
-<h2 id="状态向量state-vector">1、状态向量State Vector</h2>
-<p>系统的状态向量包含了系统中我们关心的状态变量，比如速度<span class="math inline">\(\textbf{v}=[v_x, v_y,v_z]\)</span>，距离<span class="math inline">\(\textbf{d}=[d_x, d_y,d_z]\)</span>，加速度<span class="math inline">\(\textbf{a}=[a_x,a_y,a_z]\)</span>等。我们用<span class="math inline">\(\textbf{x}\)</span>表示系统向量 <span class="math display">\[ \textbf{x} = \begin{bmatrix} \textbf{d}\\ \textbf{v}\\ \textbf{a} \end{bmatrix}\\\]</span></p>
-<p>因为卡尔曼滤波有两个步骤，我们先以每个时刻都进行测量和修正这两个步骤作为讲解。那么，每一时刻的两个步骤的输出对应两个系统向量，一个是预测的系统向量<span class="math inline">\(\textbf{x}^-\)</span>，一个是修正后的系统向量<span class="math inline">\(\textbf{x}^+\)</span>。</p>
-<p><strong><em><strong>ps</strong>:大写字母表示矩阵；小写加粗字母表示向量；小写字母表示变量</em></strong></p>
-<h2 id="状态方程预测方程">2、状态方程&amp;&amp;预测方程</h2>
-<h3 id="状态方程">状态方程</h3>
-<p><strong>状态方程</strong>描述了将上一时刻的状态向量<span class="math inline">\(\textbf{x}_{t-1}\)</span>映射到当前的系统状态<span class="math inline">\(\textbf{x}_t\)</span> <span class="math display">\[ \textbf{x}_t = A_t\textbf{x}_{t-1}+ B_t\textbf{u}_t+\textbf{w}_t \tag{1}\]</span></p>
-<p>其中，矩阵<span class="math inline">\(A\)</span>称为转换矩阵（Transition Matrix），<span class="math inline">\(\textbf{u}_t\)</span>是当前时刻的系统输入，矩阵<span class="math inline">\(B\)</span>称为控制矩阵（Control Matrix）反映了系统输入到系统状态的映射关系，<span class="math inline">\(\textbf{w}_t\)</span>是过程噪声，我们假定其符合均值为0，协方差矩阵为<span class="math inline">\(Q_t\)</span>的高斯噪声。这里要注意的有几点：</p>
-<ol type="1">
-<li>矩阵<span class="math inline">\(A、B\)</span>都随着时间演进进行更新</li>
-<li>从公式1的形式可以看出，卡尔曼滤波的数学建模形式是线性方程，这也是卡尔曼滤波的限制之一。扩展卡尔曼滤波器（Extended Kalman Filter）支持非线性模型。</li>
-<li>这里的状态方程是一个“准确”的表达，因为不准确的部分已经放在噪声项中，要跟下面的预测方程区分开来。这个“准确”的表达由于有噪声（随机向量），所以我们没办法使用它作为输出，只能用它来分析、推导。</li>
-</ol>
-<h3 id="预测方程">预测方程</h3>
-<p><strong>预测方程</strong>跟状态方程基本一样，要强调的一点是，噪声<span class="math inline">\(\textbf{w}_t\)</span>是均值为0的高斯噪声，因此最大概率对应的值为0，因此我们在预测状态向量的时候其实不用管最后一项 <span class="math display">\[ \hat{\textbf{x}}^-_t = \textbf{A}_t\hat{\textbf{x}}^+_{t-1} + \textbf{B}_t\textbf{u}_t\tag{2}\]</span></p>
-<p>这里对系统状态向量上面加上一个帽子表示这是一个估计量，也就是我们实际输出的量。其中<span class="math inline">\(\hat{\textbf{x}}^+ _{t-1}\)</span>表示上一时刻执行完步骤二<strong>更新</strong>后的状态向量，<span class="math inline">\(\hat{\textbf{x}}^- _{t}\)</span>表示当前时候只执行了步骤1<strong>预测</strong>的状态向量。</p>
-<h3 id="理解预测方程">理解预测方程</h3>
-<p>预测方程（公式2）从形式上看只是把状态方程（公式1）去掉了噪声项，但其中包含了很多含义。其中，要时刻记得的是我们把系统状态当作一个随机向量处理，严格的表述需要引入随机过程的相关知识，但其实没太大必要。由于公式（1）中状态向量是一个随机向量，且噪声项是均值为0的高斯噪声，那么状态向量<span class="math inline">\(\textbf{x}_t\)</span>也满足高斯分布，其最大概率的地方就对应这噪声为0的地方，因此我们有理由将这个概率最大处对应的值当作我们的<strong>预测</strong>。</p>
-<figure>
-<img src="./imgs/gaussian.png" alt="" /><figcaption>gaussian</figcaption>
-</figure>
-<h2 id="测量方程测量估计方程">3、测量方程&amp;&amp;测量估计方程</h2>
-<h3 id="测量方程">测量方程</h3>
-<p><strong>测量方程</strong>反映了系统的测量值和系统状态向量之间的关系 <span class="math display">\[ \textbf{z}_t=H_t\textbf{x}_t+v_t\tag{3}\]</span></p>
-<p>其中，<span class="math inline">\(\textbf{z}_t\)</span>是当前时刻的测量值，<span class="math inline">\(H_t\)</span>称为测量矩阵（Measurement Matrix），描述了从系统状态到测量值的转换关系（举一个最简单的关系，系统状态是物体的直线距离，测量值是使用激光笔测出来的光从原点到物体的时间，那么<span class="math inline">\(H\)</span>就是光速的倒数）, <span class="math inline">\(\textbf{v}_t\)</span>是测量噪声，我们假定其符合均值为0，协方差为<span class="math inline">\(R_t\)</span>的高斯噪声。注意这里无论是状态向量还是测量向量都没有加帽子（<span class="math inline">\(\hat{.}\)</span>），表示这是个"准确"的表达式。</p>
-<h3 id="测量估计方程">测量估计方程</h3>
-<p>同样，我们如果忽略噪声项，就变成了对此时测量量的估计（注意状态向量的上标和角标）：</p>
-<p><span class="math display">\[ \hat{\textbf{z}}_t=H_t\hat{\textbf{x}}^-_t\tag{4}\]</span></p>
-<h2 id="测量更新方程">4、测量更新方程</h2>
-<p>上面给出了对测量量的估计，但是现在的情况是，我们有了一个测量值（通过某些测量方式或者传感器数据），这是一个不需要计算得到的量，我们如何用这个测量得出的量来更新我们对状态向量的估计？这就涉及到测量更新方程，这也是卡尔曼滤波里最难的部分，这里先给出更新方程的形式。</p>
-<p><span class="math display">\[ \hat{\textbf{x}}^+_t=\hat{\textbf{x}}^-_t+K_t(z_t-H_t\hat{\textbf{x}}^-_t)\tag{5}\]</span> <span class="math display">\[ K_t=\frac{P^-_tH_t^T}{H_tP^-_tH_t^T+R_t}\tag{6}\]</span></p>
-<p>其中，<span class="math inline">\(K_t\)</span>叫做卡尔曼增益；<span class="math inline">\(P^-_t\)</span>是系统测量值<span class="math inline">\(\hat{\textbf{x}}^-_t\)</span>的误差协方差矩阵。</p>
-<h1 id="四误差和协方差矩阵">四、误差和协方差矩阵</h1>
-<p>根据公式（1）减去公式（2），我们可以得出误差的协方差矩阵的表达形式</p>
-<p><span class="math display">\[ e^-_t \triangleq \textbf{x}_t - \hat{\textbf{x}}^-_t\\\]</span> <span class="math display">\[ P^-_t = \mathbb{E}[\textbf{e}^-_t {\textbf{e}^{-}_{t}}^T]\\\]</span></p>
-<p>把公式（1）和（2）带入误差表达式，可以推导出系统状态的协方差矩阵的递归表达形式</p>
-<p><span class="math display">\[
-\begin{split}
-P^-_t&amp;=\mathbb{E}[\big((A_tx_{t-1}+w_t)-A_tx_{t-1}^+\big)\big((A_tx_{t-1}+w_t)-A_tx_{t-1}^+\big)^T]\\&amp;=\mathbb{E}[\big(A_t(x_{t-1}-x_{t-1}^+)+w_t\big)\big(A_t(x_{t-1}-x_{t-1}^+)+w_t\big)^T]\\ &amp;=\mathbb{E}[A_t(x_{t-1}-x_{t-1}^+)(x_{t-1}-x_{t-1}^+)^TA_t^T]+\mathbb{E}[w_tw_t^T]\\ &amp;=A_tP_{t-1}^+A_t^T+Q_t
-\end{split}\\\]</span></p>
-<p>其中，从第二个等号到第三个等号利用了状态向量和随机噪声 的无关性（协方差为0）。因此我们可以得到下面的公式（7）</p>
-<p><span class="math display">\[P^-_t=A_tP^+_{t-1}A^T_t+Q_t\tag{7}\]</span></p>
-<h1 id="五更新方程的推导">五、更新方程的推导</h1>
-<p>现在我们进行到了这样的情况，我们使用预测方程公式（2）得到了<span class="math inline">\(t\)</span>时刻的系统状态预测量<span class="math inline">\(\textbf{x}_t^-\)</span>；同时，我们在这个时刻得到了一个测量值，且根据测量方程，我们认为它与此时的状态向量满足公式（3）：<span class="math inline">\(\textbf{z}_t=H_t\textbf{x}_t+v_t\)</span> 。那么其实我们可以从公式（3）也得到此时系统状态的另一个估计，由公式（3）将 移动到等式左侧，可以得到：</p>
-<p><span class="math display">\[\textbf{x}^2_t = \textbf{H}_t^{-1}\textbf{z}_t\\\]</span></p>
-<p>这里之所以没有把噪声<span class="math inline">\(\textbf{v}_t\)</span>表示出来，是因为这里将 当作一个随机向量处理，其均值为<span class="math inline">\(\bar{z}_t\)</span>，也就是当前时刻测量得出的量；其方差为<span class="math inline">\(R_t\)</span>（在公式3中给出）</p>
-<p>我们的状态方程也给出了状态向量的一个等式 <span class="math display">\[ \textbf{x}^1_t = \textbf{A}_t\textbf{x}_{t-1}+ \textbf{B}_t\textbf{u}_t+w_t\]</span></p>
-<p>这里用<strong>上标1和2</strong>表示状态向量的两个来源。要强调的是，这两个等式里面都包含了一个随机噪声，因此$^1_t 、^2_t $都是随机向量。同时，他们的分布都符合高斯分布。它们的均值和方差分别是：</p>
-<p><span class="math display">\[
-\begin{split} &amp;\mu_1=x_t^-\\ &amp;\sigma_1^2=P_t^-\\ &amp;\mu_2=H_t^{-1}\bar{z}_t\\ &amp;\sigma_2^2=H_t^{-1}R_t(H_t^{-1})^T\\  \end{split}\\\]</span></p>
-<p>现在有了两个关于状态向量的概率分布，那接下来的事情就简单了。因为这两个状态向量的来源我们可以认为是独立的，因此他们的联合概率分布是各自概率分布的乘积。重点是，高斯分布的乘积依旧是高斯分布！！！！新的高斯分布的均值和方差有如下表达形式：</p>
-<figure>
-<img src="./imgs/joint_gaussian.png" alt="" /><figcaption>joint gaussian</figcaption>
-</figure>
-<p>用上面的式子代入，可以得到联合概率分布的均值和方差： <strong>均值</strong> <span class="math display">\[ \begin{split} \mu_{fused}&amp;=\frac{\mu_1\sigma_2^2+\mu_2\sigma_1^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=\mu_1+\frac{(\mu_2-\mu_1)\sigma_1^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=x_t^-+\frac{(H_t^{-1}\bar{z}_t-x_t^-)P_t^-}{P_t^-+H_t^{-1}R_t(H_t^{-1})^T}\\ &amp;=x_t^-+\frac{P_t^-H_t^T}{H_tP_t^-H_t^T+R_t}(\bar{z}_t-H_tx_t^-)\\ &amp;=x_t^-+K_t(\bar{z}_t-H_tx_t^-) \end{split}\\\]</span></p>
-<p><strong>方差</strong></p>
-<p><span class="math display">\[
-\begin{split} \sigma_{fused}^2 &amp;=\frac{\sigma_1^2\sigma_2^2}{\sigma_1^2+\sigma_2^2}\\ &amp;=\sigma_1^2-\frac{\sigma_1^4}{\sigma_1^2+\sigma_2^2}\\ &amp;=P_t^--\frac{P_t^-H_t^TH_tP_t^-}{H_tP_t^-H_t^T+R_t}\\ &amp;=P_t^--K_tH_tP_t^- \end{split}\\\]</span></p>
-<p>这个<span class="math inline">\(\sigma_{fused}^2\)</span>就是更新后的系统状态误差的协方差矩阵，也就是得到下面的式子</p>
-<p><span class="math display">\[ P^+_{t}=P^-_t-K_tH_tP^-_t\tag{8}\]</span></p>
-<h1 id="六总结">六、总结</h1>
-<p><strong>预测方程</strong> <span class="math display">\[ \hat{\textbf{x}}^-_t = \textbf{A}_t\hat{\textbf{x}}^+_{t-1} + \textbf{B}_t\textbf{u}(t)\tag{2}\]</span> <span class="math display">\[P^-_t=A_tP^+_{t-1}A^T_t+Q_t\tag{7}\]</span></p>
-<p><strong>更新方程</strong> <span class="math display">\[ \hat{\textbf{x}}^+_t=\hat{\textbf{x}}^-_t+K_t(z_t-H_t\hat{\textbf{x}}^-_t)\tag{5}\]</span> <span class="math display">\[ K_t=\frac{P^-_tH_t^T}{H_tP^-_tH_t^T+R_t}\tag{6} \]</span> <span class="math display">\[ P^+_{t}=P^-_t-K_tH_tP^-_t\tag{8} \]</span></p>
-<hr />
-<h1 id="转载须知">转载须知</h1>
-<ol type="1">
-<li>请于文章标题注明转载</li>
-<li>请于文章起始位置注明原始链接</li>
-<li>请在推文文末的【阅读原文】链接上原始链接</li>
-<li>感谢~</li>
-</ol>
 
       
     </div>

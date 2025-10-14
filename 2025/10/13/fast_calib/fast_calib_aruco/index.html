@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zeal-up.github.io","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.15.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  本项目介绍  FAST-Calib已经开源了代码，其基于ROS实现。为了方便使用，本项目将FAST-Calib的ROS依赖去除，可以直接在非ROS环境下进行编译使用，直接保存标定结果及各种可视化数据。方便各位在业务或者实验室项目中使用。 对FAST-Calib算法的各个步骤进行详细说明，介绍一些实际使">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FAST-Calib-03 图像处理部分">
+<meta property="og:url" content="https://zeal-up.github.io/2025/10/13/fast_calib/fast_calib_aruco/index.html">
+<meta property="og:site_name" content="Zeal&#39;s Blog">
+<meta property="og:description" content="⭐ Zeal&#39;s Blog 🛠 Zeal&#39;s 知乎专栏 🌀 Zeal&#39;s Github  本项目介绍  FAST-Calib已经开源了代码，其基于ROS实现。为了方便使用，本项目将FAST-Calib的ROS依赖去除，可以直接在非ROS环境下进行编译使用，直接保存标定结果及各种可视化数据。方便各位在业务或者实验室项目中使用。 对FAST-Calib算法的各个步骤进行详细说明，介绍一些实际使">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://zeal-up.github.io/2025/10/13/fast_calib/fast_calib_aruco/imgs/calibration_target.jpg">
+<meta property="og:image" content="https://zeal-up.github.io/2025/10/13/fast_calib/fast_calib_aruco/imgs/aruco_coordinate.png">
+<meta property="og:image" content="https://zeal-up.github.io/2025/10/13/fast_calib/fast_calib_aruco/imgs/aruco_detect_result.png">
+<meta property="article:published_time" content="2025-10-13T06:11:24.000Z">
+<meta property="article:modified_time" content="2025-10-14T07:05:29.617Z">
+<meta property="article:author" content="Zeal">
+<meta property="article:tag" content="calibration">
+<meta property="article:tag" content="fast-calib">
+<meta property="article:tag" content="LiDAR-Camera Calibration">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zeal-up.github.io/2025/10/13/fast_calib/fast_calib_aruco/imgs/calibration_target.jpg">
+
+
+<link rel="canonical" href="https://zeal-up.github.io/2025/10/13/fast_calib/fast_calib_aruco/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://zeal-up.github.io/2025/10/13/fast_calib/fast_calib_aruco/","path":"2025/10/13/fast_calib/fast_calib_aruco/","title":"FAST-Calib-03 图像处理部分"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>FAST-Calib-03 图像处理部分 | Zeal's Blog</title>
+  
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-SE75EDBKX6","only_pageview":true}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js"></script>
+  <script async src="https://hm.baidu.com/hm.js?41fc030db57d5570dd22f78997dc4a7e"></script>
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+  <a target="_blank" rel="noopener" href="https://github.com/zeal-up" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Zeal's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">好好学习～天天向上～</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+  </ul>
+</nav>
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E9%A1%B9%E7%9B%AE%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">本项目介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#aruco%E7%A0%81%E6%A3%80%E6%B5%8B"><span class="nav-number">2.</span> <span class="nav-text">ArUco码检测</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#fast-calib%E4%B8%AD%E7%9A%84aruco%E7%A0%81%E5%9D%90%E6%A0%87%E7%B3%BB%E5%AE%9A%E4%B9%89"><span class="nav-number">3.</span> <span class="nav-text">FAST-Calib中的ArUco码坐标系定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%80%9A%E8%BF%87aruco%E7%A0%81%E6%A3%80%E6%B5%8B%E4%BC%B0%E8%AE%A1%E6%A0%87%E5%AE%9A%E6%9D%BF%E4%BD%8D%E5%A7%BF"><span class="nav-number">4.</span> <span class="nav-text">通过ArUco码检测估计标定板位姿</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zeal</p>
+  <div class="site-description" itemprop="description">学习记录及分享</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://zeal-up.github.io/2025/10/13/fast_calib/fast_calib_aruco/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zeal">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zeal's Blog">
+      <meta itemprop="description" content="学习记录及分享">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="FAST-Calib-03 图像处理部分 | Zeal's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          FAST-Calib-03 图像处理部分
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-10-13 14:11:24" itemprop="dateCreated datePublished" datetime="2025-10-13T14:11:24+08:00">2025-10-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-10-14 15:05:29" itemprop="dateModified" datetime="2025-10-14T15:05:29+08:00">2025-10-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/cv/" itemprop="url" rel="index"><span itemprop="name">cv</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/cv/calibration/" itemprop="url" rel="index"><span itemprop="name">calibration</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/cv/calibration/LiDAR-Camera/" itemprop="url" rel="index"><span itemprop="name">LiDAR-Camera</span></a>
+        </span>
+    </span>
+
+  
+    <span id="/2025/10/13/fast_calib/fast_calib_aruco/" class="post-meta-item leancloud_visitors" data-flag-title="FAST-Calib-03 图像处理部分" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="leancloud-visitors-count"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Changyan：</span>
+    
+    <a title="FAST-Calib-03 图像处理部分" href="/2025/10/13/fast_calib/fast_calib_aruco/#SOHUCS" itemprop="discussionUrl">
+      <span id="sourceId::16b67313da97aadc7a450e5613bdc90f" class="cy_cmt_count" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <!-- * ⭐ [Zeal's Blog](https://zeal-up.github.io/categories/)
+* 🛠 [Zeal's 知乎专栏](https://www.zhihu.com/people/kai-shi-dong-liao-ge)
+* 🌀 [Zeal's Github](https://github.com/zeal-up?tab=repositories) -->
+<div style="display: flex; justify-content: space-around; align-items: center; width: 100%; margin: 20px 0;">
+<p><a href="https://zeal-up.github.io/categories/" style="text-decoration: none; flex: 1; text-align: center;">⭐ Zeal's Blog</a> <a target="_blank" rel="noopener" href="https://www.zhihu.com/people/kai-shi-dong-liao-ge" style="text-decoration: none; flex: 1; text-align: center;">🛠 Zeal's 知乎专栏</a> <a target="_blank" rel="noopener" href="https://github.com/zeal-up?tab=repositories" style="text-decoration: none; flex: 1; text-align: center;">🌀 Zeal's Github</a></p>
+</div>
+<h2 id="本项目介绍">本项目介绍</h2>
+<ol type="1">
+<li>FAST-Calib已经开源了代码，其基于ROS实现。为了方便使用，本项目将FAST-Calib的ROS依赖去除，可以直接在非ROS环境下进行编译使用，直接保存标定结果及各种可视化数据。方便各位在业务或者实验室项目中使用。</li>
+<li>对FAST-Calib算法的各个步骤进行详细说明，介绍一些实际使用中可能遇到的问题。对论文中没有说明的步骤和要求进行补充。主要也是对自己学习FAST-Calib的一个总结。</li>
+<li>希望能在FAST-Calib基础上，进一步优化算法，提高自动化。</li>
+</ol>
+<p>在上一篇文章中，已经介绍了如何在激光雷达的点云中提取出标定板4个圆孔的中心点的3d坐标。本文将介绍如何通过ArUCo码检测，通过图像计算出标定板4个圆孔在相机坐标系下的3d坐标。</p>
+<h2 id="aruco码检测">ArUco码检测</h2>
+<p>重新回顾我们的标定板，其上贴有4个ArUco码，如下图所示：</p>
+<figure>
+<img src="./imgs/calibration_target.jpg" alt="" /><figcaption>标定板样式</figcaption>
+</figure>
+<p>ArUco码是一些预定义的二维码图案，可以通过图像检测出4个角点，通过角点加上PnP算法估计出ArUco码的位姿。 通过标定板4个角落的ArUco码的位姿，我们可以计算出标定板在相机坐标系下的位姿。由于标定板的尺寸都是已知的，所以也可以直接计算出标定板四个圆孔中心点在相机坐标系下的3d坐标。</p>
+<p>对于ArUco码的检测教程，可以参考这篇文章：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/1961081216502588875">ArUco码检测基本教程</a></p>
+<p>这里有几个基础概念需要预先知悉：</p>
+<ol type="1">
+<li>ArUco码的字典：ArUco码的字典提前定义好了一些ArUco码的图案，通过指定字典和id，就可以得到确定的一个ArUco码。</li>
+<li>往上有些文章说通过ArUco码中数据位表示为二进制（比如<a target="_blank" rel="noopener" href="https://blog.csdn.net/sinat_16643223/article/details/114261770">这篇文章</a>），可以计算的到id，但实际上，在OpenCV的aruco库中，并不严格遵循这种规则</li>
+</ol>
+<blockquote>
+<blockquote>
+<p>One may think that the marker id is the number obtained from converting the binary codification to a decimal base number. However, this is not possible since for high marker sizes the number of bits is too high and managing such huge numbers is not practical. Instead, a marker id is simply the marker index within the dictionary it belongs to. For instance, the first 5 markers in a dictionary have the ids: 0, 1, 2, 3 and 4.</p>
+</blockquote>
+</blockquote>
+<p>上面这段话来自OpenCV的官方文档：<a target="_blank" rel="noopener" href="https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html">Detection of ArUco Markers</a></p>
+<ol start="3" type="1">
+<li>一个ArUco码可以估计这个码图案在相机坐标系下的位姿。码的中心点和坐标系的方向取决于怎么定义码的原点。可以将码的中心点定义为原点，也可以将码的某个角点定义为原点。同理，坐标系的方向也取决与预先定义的方式。</li>
+<li>在OpenCV中，除了可以估计单个ArUco码的位姿，也可以对包含多个ArUco码的平面，同时利用多个ArUco码，更准确地估计出这个平面的位姿。</li>
+</ol>
+<h2 id="fast-calib中的aruco码坐标系定义">FAST-Calib中的ArUco码坐标系定义</h2>
+<p>在FAST-Calib中，ArUco码的坐标系定义如下：</p>
+<ol type="1">
+<li>ArUco码的中心点为原点</li>
+<li>ArUco码的x轴指向码的右侧</li>
+<li>ArUco码的y轴指向码的上方</li>
+<li>ArUco码的z轴指向码的正面</li>
+</ol>
+<p>所以，最后检测ArUco码的位姿，画到图像上呈现下面这种样子：</p>
+<figure>
+<img src="./imgs/aruco_coordinate.png" alt="" /><figcaption>ArUco码坐标系</figcaption>
+</figure>
+<p>标定板的坐标系也是类似。</p>
+<h2 id="通过aruco码检测估计标定板位姿">通过ArUco码检测估计标定板位姿</h2>
+<p>在FAST-Calib中，通过ArUco码检测估计标定板位姿的步骤如下：</p>
+<ol type="1">
+<li>设定ArUco码字典。FAST-Cablib中适应的字典类型是DICT_6x6_250，也就是6x6的ArUco码，一共有250个id。</li>
+<li>调用cv::aruco::detectMarkers(image, dictionary, corners_output, ids, parameters)检测板子上的4个ArUco码。返回值corners_output是4个ArUco码的角点坐标，ids是4个ArUco码的id。</li>
+<li>调用cv::aruco::estimatePoseSingleMarkers(corners_output, marker_size, cam_K, cam_distort, rvecs, tvecs)估计4个ArUco码的位姿。返回值rvecs和tvecs分别是4个ArUco码的旋转向量和平移向量。</li>
+<li>计算四个位姿的平均值，得到标定板在相机坐标系下的<strong>初始位姿</strong>。</li>
+<li>设置板子上4个ArUco码的id。（在FAST-Calib中，从左上角开始顺时针的id是：1，2，4，3） - boardIds</li>
+<li>通过板子的尺寸，计算板子4个ArUco码的四个角点，在板子坐标系下的坐标。 - boardCorners</li>
+<li>创建一个cv::aruco::Board对象，将boardCorners和boardIds传入。 - board</li>
+<li>调用cv::aruco::estimatePoseBoard(corners_output, ids, board, cam_K, cam_distort, rvec, tvec)估计标定板在相机坐标系下的位姿。返回值rvec和tvec分别是标定板在相机坐标系下的旋转向量和平移向量。</li>
+<li>计算4个圆孔中心在标定板坐标系下的坐标，通过估计出的标定板位姿，将4个圆孔中心在标定板坐标系下的坐标转换到相机坐标系下</li>
+<li>额外的检查步骤：算法里还增加了一个正方形检查步骤，避免之前的步骤误检出其他标定板。但是从逻辑上看这部分似乎不太需要。</li>
+</ol>
+<p><strong>检测结果</strong></p>
+<figure>
+<img src="./imgs/aruco_detect_result.png" alt="" /><figcaption>ArUco检测结果</figcaption>
+</figure>
+<p>上图中，标定板中间的坐标系是检测出的标定板位姿。4个角落的ArUco码检测结果也画出来。计算出的圆孔中心点通过投影之后也画了出来</p>
+<h2 id="总结">总结</h2>
+<p>这部分实际上是一个很经典的通过ArUco码检测位姿的过程，并没有什么创新的部分。经过这部分的检测之后，我们就可以得到标定板的4个圆孔中心在相机坐标系下的3d坐标！！与上一篇，在点云数据上检测出来的圆孔中心点坐标，就可以进行后续步骤，通过3d匹配点对求解变换矩阵。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>Zeal
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://zeal-up.github.io/2025/10/13/fast_calib/fast_calib_aruco/" title="FAST-Calib-03 图像处理部分">https://zeal-up.github.io/2025/10/13/fast_calib/fast_calib_aruco/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/calibration/" rel="tag"># calibration</a>
+              <a href="/tags/fast-calib/" rel="tag"># fast-calib</a>
+              <a href="/tags/LiDAR-Camera-Calibration/" rel="tag"># LiDAR-Camera Calibration</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/10/11/fast_calib/fast_calib_pcd_extraction/" rel="prev" title="FAST-Calib-02 点云处理部分">
+                  <i class="fa fa-chevron-left"></i> FAST-Calib-02 点云处理部分
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/10/14/fast_calib/fast_calib_solve/" rel="next" title="FAST-Calib-04 外参求解部分">
+                  FAST-Calib-04 外参求解部分 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments" id="SOHUCS" sid="16b67313da97aadc7a450e5613bdc90f"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zeal</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+
+
+  <script class="next-config" data-name="leancloud_visitors" type="application/json">{"enable":true,"app_id":"covS4Q3Q0SaMRjqI2VomagVm-gzGzoHsz","app_key":"iK7kdlu4InjORoPr3oksi1IM","server_url":"https://covs4q3q.lc-cn-n1-shared.com","security":false}</script>
+  <script src="/js/third-party/statistics/lean-analytics.js"></script>
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<script class="next-config" data-name="changyan" type="application/json">{"enable":true,"appid":"cywzGuJ0w","appkey":"7c4a236bb42c7db38424a76bf68ccf99","count":true}</script>
+<script src="/js/third-party/comments/changyan.js"></script>
+
+</body>
+</html>
